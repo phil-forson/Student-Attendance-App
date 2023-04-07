@@ -1,0 +1,47 @@
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { CompositeScreenProps } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+
+export type RootStackParamList = {
+  Root: undefined;
+  SignIn: undefined;
+  LogIn: undefined;
+  NotFound: undefined;
+  ForgotPassword: undefined;
+  VerifyCode: undefined;
+  ResetPassword: undefined;
+};
+
+export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
+  NativeStackScreenProps<RootStackParamList, Screen>;
+
+export type UserStackParamList = {
+  Body: undefined;
+  Sidebar: undefined
+};
+
+export type UserStackScreenProps<Screen extends keyof UserStackParamList> =
+  NativeStackScreenProps<UserStackParamList, Screen>;
+
+export type UserTabParamList = {
+  Home: undefined,
+  Profile: undefined,
+  Courses: undefined
+}
+
+export type UserTabScreenProps<Screen extends keyof UserTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<UserTabParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type UserDrawerParamList = {
+  Home: undefined,
+  Profile: undefined,
+  Settings: undefined
+}
+
+export interface ICourseDetails {
+  id: string,
+  courseName: string,
+  ownerName: string
+}
