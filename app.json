@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "StudentAttendanceApp",
+    "slug": "StudentAttendanceApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "com.philforson.studentattendanceapp",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#000",
+      "image": "./assets/logo.png"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "com.philforson.studentattendanceapp",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.philforson.studentattendanceapp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "693778c7-55d6-4f26-879b-081fa71708b0"
+      }
+    },
+    "owner": "phil-forson"
+  }
+}
