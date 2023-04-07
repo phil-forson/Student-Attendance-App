@@ -41,7 +41,6 @@ export default function RootNavigator() {
         name="LogIn"
         component={LogInScreen}
         options={({ navigation }: RootStackScreenProps<"LogIn">) => ({
-          header: () => <Header name="Log In" />,
           headerLeft: () => null,
           headerTransparent: true,
           animation: "flip",
@@ -51,7 +50,6 @@ export default function RootNavigator() {
         name="ForgotPassword"
         component={ForgotPasswordScreen}
         options={({ navigation }: RootStackScreenProps<"ForgotPassword">) => ({
-          header: () => <Header name="Forgot Password" />,
           headerLeft: () => null,
           headerTransparent: true,
           animation: "flip",
@@ -61,7 +59,6 @@ export default function RootNavigator() {
         name="VerifyCode"
         component={VerifyCodeScreen}
         options={({ navigation }: RootStackScreenProps<"VerifyCode">) => ({
-          header: () => <Header name="Verify Code" />,
           headerLeft: () => null,
           headerTransparent: true,
           animation: "flip",
@@ -71,7 +68,6 @@ export default function RootNavigator() {
         name="ResetPassword"
         component={ResetPasswordScreen}
         options={({ navigation }: RootStackScreenProps<"ResetPassword">) => ({
-          header: () => <Header name="Reset Password" />,
           headerLeft: () => null,
           headerTransparent: true,
           animation: "flip",

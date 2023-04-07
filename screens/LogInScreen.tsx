@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme, StyleSheet, Alert } from "react-native";
 import { Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { InputField } from "../components/InputField";
-import { Text, TouchableOpacity, View } from "../components/Themed";
+import {
+  InvTouchableOpacity,
+  Text,
+  TouchableOpacity,
+  View,
+} from "../components/Themed";
 import { AntDesign } from "@expo/vector-icons";
 import { RootStackScreenProps } from "../types";
 import { KeyboardAvoidingView } from "react-native";
@@ -56,10 +61,20 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       } else {
         Alert.alert("There was a problem with your request");
       }
-      console.log(error)
-      console.log(APIKEY)
     }
   };
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => {
+        return (
+          <InvTouchableOpacity>
+            <AntDesign name="left" size={60} />
+            <Text>left</Text>
+          </InvTouchableOpacity>
+        );
+      },
+    });
+  }, []);
   return (
     <SafeAreaView
       style={[
@@ -79,7 +94,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
             styles.bold,
             {
               fontSize: 20,
-              color: "#008be3"
+              color: "#008be3",
             },
           ]}
         >
@@ -147,7 +162,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
               flexDirection: "row",
               backgroundColor: !(matchPwd && validEmail)
                 ? "#147ec0"
-                : "#008be3"
+                : "#008be3",
             },
           ]}
           disabled={!(matchPwd && validEmail)}

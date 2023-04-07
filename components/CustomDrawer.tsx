@@ -104,12 +104,12 @@ const CustomDrawer = (props: any) => {
             onPress={() =>
               Alert.alert("Sign Out", "Do you want to continue to sign out?", [
                 {
-                  text: "Yes",
-                  onPress: handleSignOut,
-                },
-                {
                   text: "No",
                   onPress: () => setSignout(false),
+                },
+                {
+                  text: "Yes",
+                  onPress: handleSignOut,
                 },
               ])
             }

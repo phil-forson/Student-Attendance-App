@@ -20,6 +20,7 @@ import {
   AntDesign,
   MaterialIcons,
   Ionicons,
+  MaterialCommunityIcons
 } from "@expo/vector-icons";
 import CardSeparator from "../components/CardSeparator";
 import CourseCard from "../components/CourseCard";
@@ -153,7 +154,7 @@ export const HomeScreen = ({ navigation }: any) => {
               height: "auto",
               paddingHorizontal: 20,
               paddingTop: 10,
-              paddingBottom: Platform.OS === 'ios' ? 80: 20,
+              paddingBottom: Platform.OS === 'ios' ? 60: 20,
             },
           ]}
         >
@@ -162,15 +163,15 @@ export const HomeScreen = ({ navigation }: any) => {
               {
                 flexDirection: "row",
                 height: 50,
-                borderBottomWidth: 0.7,
-                borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+                // borderBottomWidth: 0.7,
+                // borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
                 alignItems: "center",
               },
             ]}
             onPress={() => joinCourse()}
           >
-            <MaterialIcons
-              name="library-add"
+            <AntDesign
+              name="addusergroup"
               size={20}
               color={theme === "dark" ? "white" : "#424242"}
             />
@@ -190,18 +191,15 @@ export const HomeScreen = ({ navigation }: any) => {
               {
                 flexDirection: "row",
                 height: 50,
-                borderBottomWidth: 0.7,
-                borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+                // borderBottomWidth: 0.7,
+                // borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
                 alignItems: "center",
               },
             ]}
             onPress={() => createCourse()}
           >
-            <Ionicons
-              name="ios-create"
-              size={20}
-              color={theme === "dark" ? "white" : "#424242"}
-            />
+             <MaterialCommunityIcons name="plus" size={24} color="white" />
+
             <Text
               style={{
                 marginLeft: 15,

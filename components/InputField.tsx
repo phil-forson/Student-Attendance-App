@@ -65,7 +65,7 @@ export const InputField = ({
               ? valid
                 ? "#C7C7CD"
                 : valid === undefined
-                ? "#00083eb"
+                ? "#c7c7cd"
                 : "red"
               : "#C7C7CD"
             : "#C7C7CD",
