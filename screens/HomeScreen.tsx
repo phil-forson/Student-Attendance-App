@@ -58,8 +58,13 @@ export const HomeScreen = ({ navigation }: any) => {
 
   const joinCourse = () => {
     setModalVisible(false);
-    setTimeout(() => navigation.navigate('Options'), 800);
+    setTimeout(() => navigation.navigate('JoinCourse'), 800);
   };
+
+  const createCourse = () => {
+    setModalVisible(false)
+    setTimeout(() => navigation.navigate("CreateCourse"), 800)
+  }
 
   return (
     <>
@@ -148,7 +153,7 @@ export const HomeScreen = ({ navigation }: any) => {
               height: "auto",
               paddingHorizontal: 20,
               paddingTop: 10,
-              paddingBottom: 80,
+              paddingBottom: Platform.OS === 'ios' ? 80: 20,
             },
           ]}
         >
@@ -190,6 +195,7 @@ export const HomeScreen = ({ navigation }: any) => {
                 alignItems: "center",
               },
             ]}
+            onPress={() => createCourse()}
           >
             <Ionicons
               name="ios-create"
@@ -210,14 +216,7 @@ export const HomeScreen = ({ navigation }: any) => {
         </View>
       </Modal>
       }
-      {isJoinCourseVisible && (
-        <JoinCourseModal
-          isModalVisible={isJoinCourseVisible}
-          setModalVisible={setIsJoinCourseVisible}
-          courseCode={code}
-          setCourseCode={setCode}
-        />
-      )}
+
     </>
   );
 };

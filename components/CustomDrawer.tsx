@@ -23,7 +23,6 @@ const CustomDrawer = (props: any) => {
   const theme = useColorScheme();
   return (
     <View
-      lightColor="transparent"
       darkColor="#121212"
       style={{
         flex: 1,
@@ -34,7 +33,6 @@ const CustomDrawer = (props: any) => {
         style={[styles.view, styles.marginVertical, {}]}
       >
         <View
-          darkColor="#24252e"
           style={[
             {
               paddingHorizontal: 20,
@@ -44,7 +42,6 @@ const CustomDrawer = (props: any) => {
           ]}
         >
           <View
-            darkColor="#24252e"
             style={{
               flexDirection: "row",
               marginBottom: 10,
@@ -52,7 +49,7 @@ const CustomDrawer = (props: any) => {
               // justifyContent: "center",
             }}
           >
-            <View darkColor="#24252e">
+            <View>
               <Image
                 source={require("../assets/profileimg.png")}
                 style={{
@@ -62,13 +59,13 @@ const CustomDrawer = (props: any) => {
               />
             </View>
           </View>
-          <View darkColor="#24252e">
+          <View >
             <Text
-              lightColor=""
-              darkColor="#fff"
+
               style={{
                 fontWeight: "400",
                 fontSize: 13,
+                color: '#008be3'
               }}
             >
               @{user?.email}
@@ -76,9 +73,7 @@ const CustomDrawer = (props: any) => {
           </View>
         </View>
         <View
-          darkColor="#24252e"
           style={[
-            styles.marginTop,
             {
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
@@ -89,9 +84,9 @@ const CustomDrawer = (props: any) => {
           <DrawerItemList {...props} />
         </View>
         <View
-          darkColor="#24252e"
           style={[
             {
+              paddingTop: 5,
               paddingBottom: 20,
               paddingHorizontal: 20,
               justifyContent: 'center',
@@ -101,8 +96,8 @@ const CustomDrawer = (props: any) => {
           ]}
         >
           <TouchableOpacity
+          darkColor="#121212"
             lightColor="#fff"
-            darkColor="#24252e"
             style={{
               flexDirection: "row",
             }}
@@ -120,7 +115,7 @@ const CustomDrawer = (props: any) => {
             }
           >
             <AntDesign name="logout" size={20} color="red" />
-            <Text style={{ marginLeft: 30, color: "red", fontSize: 15 }}>
+            <Text style={{ marginLeft: 30, fontSize: 15 }}>
               Sign Out
             </Text>
           </TouchableOpacity>

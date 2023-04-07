@@ -27,7 +27,7 @@ export default function CourseCard({ data }: { data: ICourseDetails }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#314cc5",
+    backgroundColor: "#008be3",
     height: 150,
     borderRadius: 10,
     flex: 1,

@@ -22,6 +22,7 @@ import { AntDesign, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-i
 import SettingsScreen from "../screens/SettingsScreen";
 import JoinCourse from "../screens/JoinCourse";
 import { InvTouchableOpacity, TouchableOpacity } from "../components/Themed";
+import CreateCourse from "../screens/CreateCourse";
 
 const Stack = createNativeStackNavigator<UserStackParamList>();
 
@@ -45,7 +46,7 @@ export default function UserStack() {
         })}
       />
       <Stack.Group screenOptions={{presentation: 'modal'}}>
-        <Stack.Screen name="Options" component={JoinCourse} options={( { navigation }: UserStackScreenProps<'Options'>) => ({
+        <Stack.Screen name="JoinCourse" component={JoinCourse} options={( { navigation }: UserStackScreenProps<'JoinCourse'>) => ({
           headerLeft: () => {
             return (
               <InvTouchableOpacity onPress={() => navigation.goBack()}>
@@ -58,9 +59,24 @@ export default function UserStack() {
               fontSize: 16,
               
             },
-            
-
+          
         })}/>
+        <Stack.Screen name="CreateCourse" component={CreateCourse} options={( { navigation }: UserStackScreenProps<'CreateCourse'>) => ({
+          headerLeft: () => {
+            return (
+              <InvTouchableOpacity onPress={() => navigation.goBack()}>
+                <MaterialCommunityIcons name="window-close" size={25} color={theme !== (null || undefined) ? Colors[theme !== null ? theme : 'light'].text : 'white'}/>
+              </InvTouchableOpacity>
+            )
+            },
+            title: 'Create Course',
+            headerTitleStyle: {
+              fontSize: 16,
+              
+            },
+          
+        })}/>
+
       </Stack.Group>
     </Stack.Navigator>
   );
@@ -124,7 +140,6 @@ function DrawerNavigator() {
     <Drawer.Navigator
       screenOptions={{
         headerShown: false,
-        drawerStyle: { backgroundColor: "transparent" },
       }}
       drawerContent={(props) => <CustomDrawer {...props} />}
     >
@@ -135,7 +150,7 @@ function DrawerNavigator() {
           drawerIcon: () => (
             <MaterialIcons
               name="book"
-              color={theme === "dark" ? "#737171" : "#000"}
+              color="#008be3"
               size={20}
             />
           ),
@@ -153,7 +168,7 @@ function DrawerNavigator() {
           drawerIcon: () => (
             <AntDesign
               name="hourglass"
-              color={theme === "dark" ? "#737171" : "#737171"}
+              color="#008be3"
               size={20}
             />
           ),
@@ -170,7 +185,7 @@ function DrawerNavigator() {
           drawerIcon: () => (
             <AntDesign
               name="setting"
-              color={theme === "dark" ? "#737171" : "#000"}
+              color="#008be3"
               size={20}
             />
           ),

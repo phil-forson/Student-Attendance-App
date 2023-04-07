@@ -79,6 +79,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
             styles.bold,
             {
               fontSize: 20,
+              color: "#008be3"
             },
           ]}
         >
@@ -145,10 +146,8 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
               alignItems: "center",
               flexDirection: "row",
               backgroundColor: !(matchPwd && validEmail)
-                ? "#878383"
-                : theme === "light"
-                ? "#000"
-                : "#fff",
+                ? "#147ec0"
+                : "#008be3"
             },
           ]}
           disabled={!(matchPwd && validEmail)}

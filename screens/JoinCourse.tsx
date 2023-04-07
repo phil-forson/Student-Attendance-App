@@ -1,36 +1,87 @@
 import { InputField } from "../components/InputField";
-import { View, Text } from "../components/Themed";
-import React, { useState } from "react";
+import { View, Text, TouchableOpacity, InvTouchableOpacity } from "../components/Themed";
+import React, { useEffect, useState , useLayoutEffect} from "react";
 import { StyleSheet } from "react-native";
+import useColorScheme from "../hooks/useColorScheme";
 
-export default function JoinCourse() {
+export default function JoinCourse({ navigation }: any) {
+  const theme = useColorScheme();
   const [courseCode, setCourseCode] = useState("");
+
+  const handleCodeChange = (code: string) => {
+    console.log(code);
+    setCourseCode(code);
+    console.log("working");
+    console.log(courseCode)
+  };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => {
+        return (
+          <TouchableOpacity
+            lightColor="#fff"
+            darkColor="#121212"
+            onPress={joinCourse}
+            style={{}}
+            disabled={courseCode.length === 0}
+          >
+            <Text
+              style={{
+                color: courseCode.length == 0 ? "#023f65" : "#008be3",
+                fontSize: 16,
+              }}
+            >
+              Join
+            </Text>
+          </TouchableOpacity>
+        );
+      },
+    });
+  }, [courseCode]);
+
+  const joinCourse = () => {
+    console.log(courseCode);
+  };
   return (
     <View style={styles.container}>
       <View>
         <Text style={styles.bigFont}>
-          Enter the code for the course group you'd like to join. The code is
-          available to the creator of the group.{" "}
+          Enter the code for the course group you'd like to join.
         </Text>
         <View style={styles.inputContainer}>
           <InputField
             keyboardType="default"
             secure={false}
-            placeholder="Class Code"
+            placeholder="Code"
             placeholderTextColor="gray"
-            valid={true}
             value={courseCode}
-            setValue={setCourseCode}
+            setValue={handleCodeChange}
           />
         </View>
-        <Text style={styles.instructionsHeader}>Instructions</Text>
-        <Text style={styles.instructions}>
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+            marginBottom: 10,
+            paddingHorizontal: 20,
+          }}
+        >
+          <Text
+            style={[
+              styles.instructionsHeader,
+              {
+                borderBottomWidth: 1,
+                borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+              },
+            ]}
+          >
+            Instructions
+          </Text>
+        </View>
+        <Text style={styles.info}>
           Ask your lecturer for the course code which would be available to him
           and then you can enter it here.
-        </Text>
-        <Text style={styles.info}>
-          The course code contains about 6-8 digits including numbers and
-          alphabets
         </Text>
       </View>
     </View>
@@ -40,27 +91,31 @@ export default function JoinCourse() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+
     paddingVertical: 30,
   },
   inputContainer: {
     marginVertical: 15,
+    paddingHorizontal: 20,
   },
   bigFont: {
-    fontSize: 17,
+    fontSize: 15,
+    paddingHorizontal: 20,
   },
   instructions: {
     // color: 'blue',
     fontSize: 15,
+    paddingHorizontal: 20,
   },
   instructionsHeader: {
     marginTop: 10,
     fontWeight: "500",
     paddingVertical: 5,
     fontSize: 16,
+    color: "#0083eb",
   },
   info: {
-    marginTop: 20,
     fontWeight: "500",
+    paddingHorizontal: 20,
   },
 });
