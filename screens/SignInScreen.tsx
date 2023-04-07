@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { auth } from "../config/firebase";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"; 
+import { APIKEY } from "@env";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -58,6 +59,8 @@ export const SignInScreen = ({
     }
     catch(e){
         Alert.alert('There was a problem creating your account')
+        console.log(e)
+        console.log(APIKEY)
     }
   }
 
@@ -69,7 +72,7 @@ export const SignInScreen = ({
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#fff" : "#000",
+          backgroundColor: theme === "light" ? "#fff" : "#121212",
         },
       ]}
     >

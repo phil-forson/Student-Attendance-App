@@ -17,7 +17,9 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
 
 export type UserStackParamList = {
   Body: undefined;
-  Sidebar: undefined
+  JoinCourse: undefined;
+  CreateCourse: undefined;
+  Options: undefined
 };
 
 export type UserStackScreenProps<Screen extends keyof UserStackParamList> =

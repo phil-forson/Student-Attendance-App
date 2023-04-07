@@ -10,6 +10,7 @@ import { RootStackScreenProps } from "../types";
 import { KeyboardAvoidingView } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { APIKEY } from "@env";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -55,6 +56,8 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       } else {
         Alert.alert("There was a problem with your request");
       }
+      console.log(error)
+      console.log(APIKEY)
     }
   };
   return (

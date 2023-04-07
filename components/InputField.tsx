@@ -6,14 +6,14 @@ import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
 
 export type Props = {
-  placeholderTextColor: string;
+  placeholderTextColor?: string;
   placeholder: string;
   secure: boolean;
   keyboardType: KeyboardTypeOptions;
   value: string;
   setValue: any;
   valid: boolean;
-  instructions: string;
+  instructions?: string;
   icon?: keyof typeof AntDesign.glyphMap;
 };
 
@@ -45,7 +45,7 @@ export const InputField = ({
       <TextInput
         style={{
           height: 40,
-          paddingLeft: 30,
+          paddingLeft: icon ? 30: 0,
           paddingRight: 50,
           borderWidth: 0,
           borderBottomWidth: 1,
@@ -117,7 +117,7 @@ export const InputField = ({
             
         </View>
       )}
-      {textChanged && !valid && (
+      {textChanged && !valid && instructions && (
         <Text
           lightColor="red"
           darkColor="red"
