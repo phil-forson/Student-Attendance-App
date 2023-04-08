@@ -2,6 +2,7 @@ import { InputField } from "../components/InputField";
 import { View, Text, TouchableOpacity } from "../components/Themed";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
+import { UserStackScreenProps } from "../types";
 
 export default function CreateCourse({ navigation }: any) {
   const [courseTitle, setCourseTitle] = useState("");
@@ -47,6 +48,7 @@ export default function CreateCourse({ navigation }: any) {
 
   const createCourse = () => {
     console.log(classLocation);
+    navigation.navigate('Home')
   };
   return (
     <View style={styles.container}>

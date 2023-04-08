@@ -19,7 +19,7 @@ export type UserStackParamList = {
   Body: undefined;
   JoinCourse: undefined;
   CreateCourse: undefined;
-  Options: undefined
+  CourseDetails: undefined;
 };
 
 export type UserStackScreenProps<Screen extends keyof UserStackParamList> =
@@ -45,5 +45,5 @@ export type UserDrawerParamList = {
 export interface ICourseDetails {
   id: string,
   courseName: string,
-  ownerName: string
+  lecturerName: string
 }

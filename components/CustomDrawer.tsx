@@ -5,12 +5,16 @@ import { Alert, Image, StyleSheet } from "react-native";
 import useAuth from "../hooks/useAuth";
 import {
   DrawerContentScrollView,
+  DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { auth } from "../config/firebase";
 import { useTheme } from "@react-navigation/native";
 import useColorScheme from "../hooks/useColorScheme";
+import { DATA } from "../screens/HomeScreen";
+import { ICourseDetails } from "../types";
+import Colors from "../constants/Colors";
 
 const CustomDrawer = (props: any) => {
   const { user } = useAuth();
@@ -59,13 +63,12 @@ const CustomDrawer = (props: any) => {
               />
             </View>
           </View>
-          <View >
+          <View>
             <Text
-
               style={{
                 fontWeight: "400",
                 fontSize: 13,
-                color: '#008be3'
+                color: "#008be3",
               }}
             >
               @{user?.email}
@@ -77,11 +80,56 @@ const CustomDrawer = (props: any) => {
             {
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
-              paddingVertical: 10,
+              paddingTop: 10,
+              borderBottomWidth: 0.7,
+              borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
             },
           ]}
         >
           <DrawerItemList {...props} />
+        </View>
+        <View
+          style={{
+            borderBottomWidth: 0.7,
+            borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+          }}
+        >
+          {/* <Text
+            style={{
+              marginTop: 7,
+              marginLeft: 10,
+              fontSize: 13,
+              color: theme === "dark" ? "#eee" : "#737171",
+            }}
+          >
+            Enrolled Courses
+          </Text> */}
+          {DATA.map((course: ICourseDetails) => {
+            return (
+              <DrawerItem
+                label={() => {
+                  return (
+                    <View style={{ flexDirection: "row" }}>
+                      <AntDesign name="book" size={20} color="#078142" />
+                      <Text
+                        style={{
+                          marginLeft: 30,
+                          fontSize: 14,
+                          fontWeight: '500',
+                          color: theme === "dark" ? "#eee" : "#737171",
+                        }}
+                      >
+                        {course.courseName}
+                      </Text>
+                    </View>
+                  );
+                }}
+                onPress={() =>
+                  props.navigation.navigate("CourseDetails", course)
+                }
+              />
+            );
+          })}
         </View>
         <View
           style={[
@@ -89,14 +137,14 @@ const CustomDrawer = (props: any) => {
               paddingTop: 5,
               paddingBottom: 20,
               paddingHorizontal: 20,
-              justifyContent: 'center',
+              justifyContent: "center",
               borderBottomLeftRadius: 10,
-              borderBottomRightRadius: 10
+              borderBottomRightRadius: 10,
             },
           ]}
         >
           <TouchableOpacity
-          darkColor="#121212"
+            darkColor="#121212"
             lightColor="#fff"
             style={{
               flexDirection: "row",
@@ -115,9 +163,7 @@ const CustomDrawer = (props: any) => {
             }
           >
             <AntDesign name="logout" size={20} color="red" />
-            <Text style={{ marginLeft: 30, fontSize: 15 }}>
-              Sign Out
-            </Text>
+            <Text style={{ marginLeft: 30, fontSize: 15 }}>Sign Out</Text>
           </TouchableOpacity>
         </View>
       </DrawerContentScrollView>

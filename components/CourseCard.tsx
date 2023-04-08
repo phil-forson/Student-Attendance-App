@@ -1,18 +1,18 @@
 import { StyleSheet } from "react-native";
 import React from "react";
 import { ICourseDetails } from "../types";
-import { Text, View } from "./Themed";
+import { InvTouchableOpacity, Text, View } from "./Themed";
 import useColorScheme from "../hooks/useColorScheme";
 
-export default function CourseCard({ data }: { data: ICourseDetails }) {
+export default function CourseCard({ data, navigation }: { data: ICourseDetails, navigation: any }) {
   const theme = useColorScheme();
   return (
-    <View style={[styles.container]}>
+    <InvTouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('CourseDetails', data)}>
       <View style={[styles.outside, styles.transparent]}>
         <Text style={[styles.courseName]}>{data.courseName}</Text>
       </View>
       <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.ownerName]}>{data.ownerName}</Text>
+        <Text style={[styles.ownerName]}>{data.lecturerName}</Text>
       </View>
       <View style={{ position: "relative", backgroundColor: "transparent" }}>
         <View style={[styles.bigCircle]}>
@@ -21,7 +21,7 @@ export default function CourseCard({ data }: { data: ICourseDetails }) {
           </View>
         </View>
       </View>
-    </View>
+    </InvTouchableOpacity>
   );
 }
 

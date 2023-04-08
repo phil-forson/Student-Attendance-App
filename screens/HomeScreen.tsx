@@ -29,28 +29,28 @@ import Modal from "react-native-modal";
 import JoinCourseModal from "../components/JoinCourseModal";
 
 var width = Dimensions.get("window").width;
+export const DATA = [
+  {
+    id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
+    courseName: "DCIT 305",
+    lecturerName: "Big Man",
+  },
+  {
+    id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
+    courseName: "CSCD 112",
+    lecturerName: "Old Neg",
+  },
+  {
+    id: "58694a0f-3da1-471f-bd96-145571e29d72",
+    courseName: "Math 305",
+    lecturerName: "Mr Sir",
+  },
+];
 
 export const HomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const theme = useColorScheme();
 
-  const DATA = [
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-      courseName: "DCIT 305",
-      ownerName: "Big Man",
-    },
-    {
-      id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-      courseName: "CSCD 112",
-      ownerName: "Old Neg",
-    },
-    {
-      id: "58694a0f-3da1-471f-bd96-145571e29d72",
-      courseName: "Math 305",
-      ownerName: "Mr Sir",
-    },
-  ];
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
@@ -97,16 +97,10 @@ export const HomeScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <View></View>
         </View>
-        {/* <View style={[styles.center]}>
-        <Text style={{ textAlign: "center" }}>
-          You have not joined any courses. Tap on the button below to create or join a
-          course
-        </Text>
-      </View> */}
         <FlatList
           style={[styles.courseContainer]}
           data={DATA}
-          renderItem={({ item }) => <CourseCard data={item} />}
+          renderItem={({ item }) => <CourseCard data={item} navigation={navigation} />}
           keyExtractor={(course) => course.id}
           ItemSeparatorComponent={() => <CardSeparator />}
         />
@@ -124,7 +118,7 @@ export const HomeScreen = ({ navigation }: any) => {
           darkColor="#fff"
           onPress={() => setModalVisible(true)}
         >
-          <AntDesign name="plus" color={"#007bff"} size={18} />
+          <AntDesign name="plus" color={"#007bff"} size={18} style={{fontWeight: 'bold'}} />
         </TouchableOpacity>
       </SafeAreaView>
       { isModalVisible && 
@@ -163,8 +157,6 @@ export const HomeScreen = ({ navigation }: any) => {
               {
                 flexDirection: "row",
                 height: 50,
-                // borderBottomWidth: 0.7,
-                // borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
                 alignItems: "center",
               },
             ]}
@@ -191,8 +183,6 @@ export const HomeScreen = ({ navigation }: any) => {
               {
                 flexDirection: "row",
                 height: 50,
-                // borderBottomWidth: 0.7,
-                // borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
                 alignItems: "center",
               },
             ]}

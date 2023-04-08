@@ -105,10 +105,10 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
               flexDirection: "row",
               paddingHorizontal: 20,
               justifyContent: "center",
+              backgroundColor: '#ed3f3f'
             },
           ]}
-          lightColor="#ed3f3f"
-          darkColor="#ed3f3f"
+
           onPress={() => navigation.navigate("SignIn")}
         >
           <Text

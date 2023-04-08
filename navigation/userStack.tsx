@@ -1,7 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useColorScheme } from "react-native";
-import { HomeScreen } from "../screens/HomeScreen";
+import { DATA, HomeScreen } from "../screens/HomeScreen";
 import {
+  ICourseDetails,
   UserDrawerParamList,
   UserStackParamList,
   UserStackScreenProps,
@@ -18,16 +19,21 @@ import Header from "../components/Header";
 import UserHeader from "../components/UserHeader";
 import { Button } from "react-native-elements";
 import CustomDrawer from "../components/CustomDrawer";
-import { AntDesign, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import SettingsScreen from "../screens/SettingsScreen";
 import JoinCourse from "../screens/JoinCourse";
 import { InvTouchableOpacity, TouchableOpacity } from "../components/Themed";
 import CreateCourse from "../screens/CreateCourse";
+import CourseDetails from "../screens/CourseDetails";
 
 const Stack = createNativeStackNavigator<UserStackParamList>();
 
 export default function UserStack() {
-  const theme = useColorScheme()
+  const theme = useColorScheme();
   return (
     <Stack.Navigator
       screenOptions={{
@@ -45,39 +51,59 @@ export default function UserStack() {
           header: () => null,
         })}
       />
-      <Stack.Group screenOptions={{presentation: 'modal'}}>
-        <Stack.Screen name="JoinCourse" component={JoinCourse} options={( { navigation }: UserStackScreenProps<'JoinCourse'>) => ({
-          headerLeft: () => {
-            return (
-              <InvTouchableOpacity onPress={() => navigation.goBack()}>
-                <MaterialCommunityIcons name="window-close" size={25} color={theme !== (null || undefined) ? Colors[theme !== null ? theme : 'light'].text : 'white'}/>
-              </InvTouchableOpacity>
-            )
+      <Stack.Group screenOptions={{ presentation: "modal" }}>
+        <Stack.Screen
+          name="JoinCourse"
+          component={JoinCourse}
+          options={({ navigation }: UserStackScreenProps<"JoinCourse">) => ({
+            headerLeft: () => {
+              return (
+                <InvTouchableOpacity onPress={() => navigation.goBack()}>
+                  <MaterialCommunityIcons
+                    name="window-close"
+                    size={25}
+                    color={
+                      theme !== (null || undefined)
+                        ? Colors[theme !== null ? theme : "light"].text
+                        : "white"
+                    }
+                  />
+                </InvTouchableOpacity>
+              );
             },
-            title: 'Join Course',
+            title: "Join Course",
             headerTitleStyle: {
               fontSize: 16,
-              
             },
-          
-        })}/>
-        <Stack.Screen name="CreateCourse" component={CreateCourse} options={( { navigation }: UserStackScreenProps<'CreateCourse'>) => ({
-          headerLeft: () => {
-            return (
-              <InvTouchableOpacity onPress={() => navigation.goBack()}>
-                <MaterialCommunityIcons name="window-close" size={25} color={theme !== (null || undefined) ? Colors[theme !== null ? theme : 'light'].text : 'white'}/>
-              </InvTouchableOpacity>
-            )
+          })}
+        />
+        <Stack.Screen
+          name="CreateCourse"
+          component={CreateCourse}
+          options={({ navigation }: UserStackScreenProps<"CreateCourse">) => ({
+            headerLeft: () => {
+              return (
+                <InvTouchableOpacity onPress={() => navigation.goBack()}>
+                  <MaterialCommunityIcons
+                    name="window-close"
+                    size={25}
+                    color={
+                      theme !== (null || undefined)
+                        ? Colors[theme !== null ? theme : "light"].text
+                        : "white"
+                    }
+                  />
+                </InvTouchableOpacity>
+              );
             },
-            title: 'Create Course',
+            title: "Create Course",
             headerTitleStyle: {
               fontSize: 16,
-              
             },
-          
-        })}/>
-
+          })}
+        />
       </Stack.Group>
+      <Stack.Screen name="CourseDetails" component={CourseDetails} options={{ header: () => null,}}/>
     </Stack.Navigator>
   );
 }
@@ -148,11 +174,7 @@ function DrawerNavigator() {
         component={HomeScreen}
         options={{
           drawerIcon: () => (
-            <MaterialIcons
-              name="book"
-              color="#008be3"
-              size={20}
-            />
+            <MaterialIcons name="book" color="#008be3" size={20} />
           ),
           drawerLabel: "My Courses",
           drawerLabelStyle: {
@@ -166,11 +188,7 @@ function DrawerNavigator() {
         component={ProfileScreen}
         options={{
           drawerIcon: () => (
-            <AntDesign
-              name="hourglass"
-              color="#008be3"
-              size={20}
-            />
+            <AntDesign name="hourglass" color="#008be3" size={20} />
           ),
           drawerLabel: "Upcoming classes",
           drawerLabelStyle: {
@@ -183,11 +201,7 @@ function DrawerNavigator() {
         component={SettingsScreen}
         options={{
           drawerIcon: () => (
-            <AntDesign
-              name="setting"
-              color="#008be3"
-              size={20}
-            />
+            <AntDesign name="setting" color="#008be3" size={20} />
           ),
           drawerLabel: "Settings",
           drawerLabelStyle: {
