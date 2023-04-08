@@ -4,10 +4,12 @@ import { ICourseDetails } from '../types';
 import useColorScheme from '../hooks/useColorScheme';
 import { FontAwesome5 } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 export default function CourseDetails({ navigation, route}: any) {
     const course: ICourseDetails = route.params;
     const theme = useColorScheme()
+    const nav = useNavigation<'Drawer'>()
   return (
     <SafeAreaView>
                 <View
@@ -18,7 +20,7 @@ export default function CourseDetails({ navigation, route}: any) {
           ]}
         >
           <InvTouchableOpacity
-            onPress={() => navigation.openDrawer()}
+            onPress={() => navigation.navigate("Body")}
           >
             <FontAwesome5
               name="bars"

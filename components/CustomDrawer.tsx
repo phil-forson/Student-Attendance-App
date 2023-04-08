@@ -113,7 +113,7 @@ const CustomDrawer = (props: any) => {
                       <AntDesign name="book" size={20} color="#078142" />
                       <Text
                         style={{
-                          marginLeft: 30,
+                          marginLeft: 33,
                           fontSize: 14,
                           fontWeight: '500',
                           color: theme === "dark" ? "#eee" : "#737171",
@@ -134,7 +134,7 @@ const CustomDrawer = (props: any) => {
         <View
           style={[
             {
-              paddingTop: 5,
+              paddingTop: 15,
               paddingBottom: 20,
               paddingHorizontal: 20,
               justifyContent: "center",
@@ -163,7 +163,7 @@ const CustomDrawer = (props: any) => {
             }
           >
             <AntDesign name="logout" size={20} color="red" />
-            <Text style={{ marginLeft: 30, fontSize: 15 }}>Sign Out</Text>
+            <Text style={{ marginLeft: 33, fontSize: 15 }}>Sign Out</Text>
           </TouchableOpacity>
         </View>
       </DrawerContentScrollView>
