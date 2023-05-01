@@ -2,6 +2,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useColorScheme } from "react-native";
 import { DATA, HomeScreen } from "../screens/HomeScreen";
 import {
+  CourseTabParamList,
+  CourseTabScreenProps,
   ICourseDetails,
   UserDrawerParamList,
   UserStackParamList,
@@ -23,12 +25,14 @@ import {
   AntDesign,
   MaterialIcons,
   MaterialCommunityIcons,
+  Ionicons
 } from "@expo/vector-icons";
 import SettingsScreen from "../screens/SettingsScreen";
 import JoinCourse from "../screens/JoinCourse";
 import { InvTouchableOpacity, TouchableOpacity } from "../components/Themed";
 import CreateCourse from "../screens/CreateCourse";
 import CourseDetails from "../screens/CourseDetails";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 
 const Stack = createNativeStackNavigator<UserStackParamList>();
 
@@ -103,48 +107,42 @@ export default function UserStack() {
           })}
         />
       </Stack.Group>
-      <Stack.Screen name="CourseDetails" component={CourseDetails} options={{ header: () => null,}}/>
+      <Stack.Screen
+        name="CourseDetails"
+        component={BottomTabNavigator}
+        options={{ header: () => null }}
+      />
     </Stack.Navigator>
   );
 }
 
-const BottomTab = createBottomTabNavigator<UserTabParamList>();
+const BottomTab = createBottomTabNavigator<CourseTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
 
   return (
     <BottomTab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Classes"
       screenOptions={{
         tabBarActiveTintColor:
           colorScheme === "light" ? Colors.light.tint : Colors.dark.tint,
       }}
     >
       <BottomTab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={({ navigation }: UserTabScreenProps<"Home">) => ({
+        name="Classes"
+        component={CourseDetails}
+        options={({ navigation }: CourseTabScreenProps<"Classes">) => ({
           header: () => null,
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="book-outline" color={color} />,
         })}
       />
       <BottomTab.Screen
-        name="Courses"
+        name="Members"
         component={ProfileScreen}
         options={{
           header: () => null,
-          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
-        }}
-      />
-      <BottomTab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="user-circle" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="people-outline" color={color} />,
         }}
       />
     </BottomTab.Navigator>
@@ -152,10 +150,21 @@ function BottomTabNavigator() {
 }
 
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
+  name: React.ComponentProps<typeof Ionicons>["name"];
   color: string;
 }) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+  return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
+}
+
+const TopTab = createMaterialTopTabNavigator();
+
+function TopTabNavigator(){
+  return (
+    <TopTab.Navigator>
+      <TopTab.Screen name="Past Classes" component={ProfileScreen}/>
+      <TopTab.Screen name="Upcoming Classes" component={SettingsScreen} />
+    </TopTab.Navigator>
+  )
 }
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
@@ -168,6 +177,7 @@ function DrawerNavigator() {
         headerShown: false,
       }}
       drawerContent={(props) => <CustomDrawer {...props} />}
+      useLegacyImplementation={false}
     >
       <Drawer.Screen
         name="Home"

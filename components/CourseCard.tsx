@@ -7,7 +7,10 @@ import useColorScheme from "../hooks/useColorScheme";
 export default function CourseCard({ data, navigation }: { data: ICourseDetails, navigation: any }) {
   const theme = useColorScheme();
   return (
-    <InvTouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('CourseDetails', data)}>
+    <InvTouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('CourseDetails', {
+      screen: 'Classes',
+      params: data
+    } )}>
       <View style={[styles.outside, styles.transparent]}>
         <Text style={[styles.courseName]}>{data.courseName}</Text>
       </View>

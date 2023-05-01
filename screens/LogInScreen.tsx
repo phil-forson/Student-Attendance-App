@@ -93,7 +93,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
             styles.bold,
             {
               fontSize: 20,
-              color: "#008be3",
+              // color: "#008be3",
             },
           ]}
         >

@@ -7,13 +7,14 @@ import {
   Platform,
 } from "react-native";
 import { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
   InvTouchableOpacity,
   Text,
   TouchableOpacity,
   View,
+  
 } from "../components/Themed";
+import { SafeAreaView } from "react-native-safe-area-context";
 import useAuth from "../hooks/useAuth";
 import {
   FontAwesome5,
@@ -32,7 +33,7 @@ var width = Dimensions.get("window").width;
 export const DATA = [
   {
     id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-    courseName: "DCIT 305",
+    courseName: "DCIT 305 lorem this is a new course so if you select it it is new",
     lecturerName: "Big Man",
   },
   {
@@ -73,9 +74,10 @@ export const HomeScreen = ({ navigation }: any) => {
         style={[
           styles.container,
           {
-            backgroundColor: theme === "light" ? "#fff" : "#121212",
-          },
+            backgroundColor: theme === 'light' ? '#eee' : "#121212"
+          }
         ]}
+      
       >
         <View
           style={[
@@ -84,17 +86,16 @@ export const HomeScreen = ({ navigation }: any) => {
             },
           ]}
         >
-          <TouchableOpacity
-            darkColor="#121212"
-            lightColor="#fff"
+          <InvTouchableOpacity
             onPress={() => navigation.openDrawer()}
+            darkColor="#121212"
           >
             <FontAwesome5
               name="bars"
               color={theme === "dark" ? "white" : "black"}
               size={25}
             />
-          </TouchableOpacity>
+          </InvTouchableOpacity>
           <View></View>
         </View>
         <FlatList
@@ -105,7 +106,7 @@ export const HomeScreen = ({ navigation }: any) => {
           ItemSeparatorComponent={() => <CardSeparator />}
         />
 
-        <TouchableOpacity
+        <InvTouchableOpacity
           style={[
             styles.bottom,
             styles.circle,
@@ -114,12 +115,11 @@ export const HomeScreen = ({ navigation }: any) => {
               shadowColor: theme === "dark" ? "#0a2e3d" : "#000",
             },
           ]}
-          lightColor="#fff"
-          darkColor="#fff"
           onPress={() => setModalVisible(true)}
+          darkColor="#0c0c0c"
         >
           <AntDesign name="plus" color={"#007bff"} size={18} style={{fontWeight: 'bold'}} />
-        </TouchableOpacity>
+        </InvTouchableOpacity>
       </SafeAreaView>
       { isModalVisible && 
       <Modal
@@ -188,7 +188,7 @@ export const HomeScreen = ({ navigation }: any) => {
             ]}
             onPress={() => createCourse()}
           >
-             <MaterialCommunityIcons name="plus" size={24} color="white" />
+             <MaterialCommunityIcons name="plus" size={24} color={theme === "dark" ? "white" : "#424242"} />
 
             <Text
               style={{

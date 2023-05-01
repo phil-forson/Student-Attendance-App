@@ -94,23 +94,15 @@ const CustomDrawer = (props: any) => {
             borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
           }}
         >
-          {/* <Text
-            style={{
-              marginTop: 7,
-              marginLeft: 10,
-              fontSize: 13,
-              color: theme === "dark" ? "#eee" : "#737171",
-            }}
-          >
-            Enrolled Courses
-          </Text> */}
-          {DATA.map((course: ICourseDetails) => {
+
+          {DATA.map((course: ICourseDetails, index: number) => {
             return (
               <DrawerItem
+              key={index}
                 label={() => {
                   return (
                     <View style={{ flexDirection: "row" }}>
-                      <AntDesign name="book" size={20} color="#078142" />
+                      <AntDesign name="book" size={20} color={theme === "dark" ? "#eee" : "#737171"} />
                       <Text
                         style={{
                           marginLeft: 33,

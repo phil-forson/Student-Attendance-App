@@ -31,8 +31,19 @@ export type UserTabParamList = {
   Courses: undefined
 }
 
+
 export type UserTabScreenProps<Screen extends keyof UserTabParamList> = CompositeScreenProps<
-  BottomTabScreenProps<UserTabParamList, Screen>,
+BottomTabScreenProps<UserTabParamList, Screen>,
+NativeStackScreenProps<RootStackParamList>
+>;
+
+export type CourseTabParamList = {
+  Classes: any,
+  Members: undefined
+}
+
+export type CourseTabScreenProps<Screen extends keyof CourseTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<CourseTabParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
