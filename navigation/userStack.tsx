@@ -33,6 +33,8 @@ import { InvTouchableOpacity, TouchableOpacity } from "../components/Themed";
 import CreateCourse from "../screens/CreateCourse";
 import CourseDetails from "../screens/CourseDetails";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import ClassHeader from "../components/ClassHeader";
+import MyTabBar from "../components/MyTabBar";
 
 const Stack = createNativeStackNavigator<UserStackParamList>();
 
@@ -160,7 +162,12 @@ const TopTab = createMaterialTopTabNavigator();
 
 function TopTabNavigator(){
   return (
-    <TopTab.Navigator>
+    <TopTab.Navigator 
+    style={{
+      marginTop: 200,
+      backfaceVisibility: "hidden",
+      backgroundColor: 'transparent'
+    }}>
       <TopTab.Screen name="Past Classes" component={ProfileScreen}/>
       <TopTab.Screen name="Upcoming Classes" component={SettingsScreen} />
     </TopTab.Navigator>
