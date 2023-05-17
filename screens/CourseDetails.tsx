@@ -52,7 +52,6 @@ export default function CourseDetails({ navigation, route }: any) {
         },
       ]}
     >
-      <ScrollView>
         <View>
           <InvTouchableOpacity onPress={() => navigation.goBack()}>
             <AntDesign
@@ -62,6 +61,7 @@ export default function CourseDetails({ navigation, route }: any) {
             />
           </InvTouchableOpacity>
         </View>
+      <ScrollView>
         <View
           lightColor="#fff"
           darkColor="#0c0c0c"
@@ -111,7 +111,7 @@ export default function CourseDetails({ navigation, route }: any) {
             </View>
           </View>
         </View>
-        <View style={[styles.extraMarginTop]}>
+        <View style={[{ marginTop: 50}]}>
           <View
             style={[{ flexDirection: "row", justifyContent: "space-between" }]}
           >
