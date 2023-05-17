@@ -12,7 +12,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  
 } from "../components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useAuth from "../hooks/useAuth";
@@ -21,7 +20,7 @@ import {
   AntDesign,
   MaterialIcons,
   Ionicons,
-  MaterialCommunityIcons
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import CardSeparator from "../components/CardSeparator";
 import CourseCard from "../components/CourseCard";
@@ -33,7 +32,8 @@ var width = Dimensions.get("window").width;
 export const DATA = [
   {
     id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-    courseName: "DCIT 305 lorem this is a new course so if you select it it is new",
+    courseName:
+      "DCIT 305 lorem this is a new course so if you select it it is new",
     lecturerName: "Big Man",
   },
   {
@@ -42,16 +42,20 @@ export const DATA = [
     lecturerName: "Old Neg",
   },
   {
-    id: "58694a0f-3da1-471f-bd96-145571e29d72",
-    courseName: "Math 305",
-    lecturerName: "Mr Sir",
+    id: "58694a0f-3da1-471f-bd96-145571e12d71",
+    courseName: "DCIT 418",
+    lecturerName: "Mr Soli",
+  },
+  {
+    id: "58694a0f-3da1-471f-bd96-145571e33d70",
+    courseName: "DCIT 422",
+    lecturerName: "Mr Ammah",
   },
 ];
 
 export const HomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const theme = useColorScheme();
-
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
@@ -60,13 +64,13 @@ export const HomeScreen = ({ navigation }: any) => {
 
   const joinCourse = () => {
     setModalVisible(false);
-    setTimeout(() => navigation.navigate('JoinCourse'), 800);
+    setTimeout(() => navigation.navigate("JoinCourse"), 800);
   };
 
   const createCourse = () => {
-    setModalVisible(false)
-    setTimeout(() => navigation.navigate("CreateCourse"), 800)
-  }
+    setModalVisible(false);
+    setTimeout(() => navigation.navigate("CreateCourse"), 800);
+  };
 
   return (
     <>
@@ -74,10 +78,9 @@ export const HomeScreen = ({ navigation }: any) => {
         style={[
           styles.container,
           {
-            backgroundColor: theme === 'light' ? '#eee' : "#121212"
-          }
+            backgroundColor: theme === "light" ? "#eee" : "#121212",
+          },
         ]}
-      
       >
         <View
           style={[
@@ -101,7 +104,9 @@ export const HomeScreen = ({ navigation }: any) => {
         <FlatList
           style={[styles.courseContainer]}
           data={DATA}
-          renderItem={({ item }) => <CourseCard data={item} navigation={navigation} />}
+          renderItem={({ item }) => (
+            <CourseCard course={item} navigation={navigation} />
+          )}
           keyExtractor={(course) => course.id}
           ItemSeparatorComponent={() => <CardSeparator />}
         />
@@ -118,93 +123,101 @@ export const HomeScreen = ({ navigation }: any) => {
           onPress={() => setModalVisible(true)}
           darkColor="#0c0c0c"
         >
-          <AntDesign name="plus" color={"#007bff"} size={18} style={{fontWeight: 'bold'}} />
+          <AntDesign
+            name="plus"
+            color={"#007bff"}
+            size={18}
+            style={{ fontWeight: "bold" }}
+          />
         </InvTouchableOpacity>
       </SafeAreaView>
-      { isModalVisible && 
-      <Modal
-        isVisible={isModalVisible}
-        hasBackdrop={true}
-        backdropColor={theme === "dark" ? "#000" : "#121212"}
-        backdropOpacity={0.5}
-        onBackdropPress={() => setModalVisible(false)}
-        style={[
-          {
-            padding: 0,
-            margin: 0,
-          },
-        ]}
-      >
-        <View
+      {isModalVisible && (
+        <Modal
+          isVisible={isModalVisible}
+          hasBackdrop={true}
+          backdropColor={theme === "dark" ? "#000" : "#121212"}
+          backdropOpacity={0.5}
+          onBackdropPress={() => setModalVisible(false)}
           style={[
             {
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              overflow: "hidden",
-              height: "auto",
-              paddingHorizontal: 20,
-              paddingTop: 10,
-              paddingBottom: Platform.OS === 'ios' ? 60: 20,
+              padding: 0,
+              margin: 0,
             },
           ]}
         >
-          <InvTouchableOpacity
+          <View
             style={[
               {
-                flexDirection: "row",
-                height: 50,
-                alignItems: "center",
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                overflow: "hidden",
+                height: "auto",
+                paddingHorizontal: 20,
+                paddingTop: 10,
+                paddingBottom: Platform.OS === "ios" ? 60 : 20,
               },
             ]}
-            onPress={() => joinCourse()}
           >
-            <AntDesign
-              name="addusergroup"
-              size={20}
-              color={theme === "dark" ? "white" : "#424242"}
-            />
-            <Text
-              style={{
-                marginLeft: 15,
-                fontSize: 15,
-                fontWeight: "600",
-                color: theme === "dark" ? "#fff" : "#424242",
-              }}
+            <InvTouchableOpacity
+              style={[
+                {
+                  flexDirection: "row",
+                  height: 50,
+                  alignItems: "center",
+                },
+              ]}
+              onPress={() => joinCourse()}
             >
-              Join Course
-            </Text>
-          </InvTouchableOpacity>
-          <InvTouchableOpacity
-            style={[
-              {
-                flexDirection: "row",
-                height: 50,
-                alignItems: "center",
-              },
-            ]}
-            onPress={() => createCourse()}
-          >
-             <MaterialCommunityIcons name="plus" size={24} color={theme === "dark" ? "white" : "#424242"} />
-
-            <Text
-              style={{
-                marginLeft: 15,
-                fontSize: 15,
-                fontWeight: "600",
-                color: theme === "dark" ? "#fff" : "#424242",
-              }}
+              <AntDesign
+                name="addusergroup"
+                size={20}
+                color={theme === "dark" ? "white" : "#424242"}
+              />
+              <Text
+                style={{
+                  marginLeft: 15,
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: theme === "dark" ? "#fff" : "#424242",
+                }}
+              >
+                Join Course
+              </Text>
+            </InvTouchableOpacity>
+            <InvTouchableOpacity
+              style={[
+                {
+                  flexDirection: "row",
+                  height: 50,
+                  alignItems: "center",
+                },
+              ]}
+              onPress={() => createCourse()}
             >
-              Create Course
-            </Text>
-          </InvTouchableOpacity>
-        </View>
-      </Modal>
-      }
+              <MaterialCommunityIcons
+                name="plus"
+                size={24}
+                color={theme === "dark" ? "white" : "#424242"}
+              />
 
+              <Text
+                style={{
+                  marginLeft: 15,
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: theme === "dark" ? "#fff" : "#424242",
+                }}
+              >
+                Create Course
+              </Text>
+            </InvTouchableOpacity>
+          </View>
+        </Modal>
+      )}
     </>
   );
 };

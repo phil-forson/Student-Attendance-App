@@ -4,18 +4,18 @@ import { ICourseDetails } from "../types";
 import { InvTouchableOpacity, Text, View } from "./Themed";
 import useColorScheme from "../hooks/useColorScheme";
 
-export default function CourseCard({ data, navigation }: { data: ICourseDetails, navigation: any }) {
+export default function CourseCard({ course, navigation }: { course: ICourseDetails, navigation: any }) {
   const theme = useColorScheme();
   return (
     <InvTouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('CourseDetails', {
       screen: 'Classes',
-      params: data
+      params: course
     } )}>
       <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.courseName]}>{data.courseName}</Text>
+        <Text style={[styles.courseName]}>{course.courseName}</Text>
       </View>
       <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.ownerName]}>{data.lecturerName}</Text>
+        <Text style={[styles.ownerName]}>{course.lecturerName}</Text>
       </View>
       <View style={{ position: "relative", backgroundColor: "transparent" }}>
         <View style={[styles.bigCircle]}>

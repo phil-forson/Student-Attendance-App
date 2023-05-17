@@ -67,7 +67,7 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#fff" : "#121212",
+          backgroundColor: theme === "light" ? "#eee" : "#121212",
         },
       ]}
     >
@@ -184,7 +184,7 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
           Already have an account?
         </Text>
         <TouchableOpacity
-          lightColor="#fff"
+          lightColor="#eee"
           darkColor="#121212"
           style={{ marginLeft: 10 }}
           onPress={() => navigation.navigate("LogIn")}

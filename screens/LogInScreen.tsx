@@ -79,7 +79,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#fff" : "#121212",
+          backgroundColor: theme === "light" ? "#eee" : "#121212",
         },
       ]}
     >
@@ -131,7 +131,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
         style={styles.bottom}
       >
         <TouchableOpacity
-          lightColor="#fff"
+          lightColor="#eee"
           darkColor="#121212"
           style={{
             height: 40,

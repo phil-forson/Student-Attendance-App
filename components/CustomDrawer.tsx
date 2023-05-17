@@ -82,7 +82,7 @@ const CustomDrawer = (props: any) => {
               borderTopRightRadius: 10,
               paddingTop: 10,
               borderBottomWidth: 0.7,
-              borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+              borderBottomColor: theme === "dark" ? "#232323" : "#737171",
             },
           ]}
         >
@@ -91,23 +91,26 @@ const CustomDrawer = (props: any) => {
         <View
           style={{
             borderBottomWidth: 0.7,
-            borderBottomColor: theme === "dark" ? "#232323" : "#f4efef",
+            borderBottomColor: theme === "dark" ? "#232323" : "#737171",
           }}
         >
-
           {DATA.map((course: ICourseDetails, index: number) => {
             return (
               <DrawerItem
-              key={index}
+                key={index}
                 label={() => {
                   return (
                     <View style={{ flexDirection: "row" }}>
-                      <AntDesign name="book" size={20} color={theme === "dark" ? "#eee" : "#737171"} />
+                      <AntDesign
+                        name="book"
+                        size={20}
+                        color={theme === "dark" ? "#eee" : "#737171"}
+                      />
                       <Text
                         style={{
                           marginLeft: 33,
                           fontSize: 14,
-                          fontWeight: '500',
+                          fontWeight: "500",
                           color: theme === "dark" ? "#eee" : "#737171",
                         }}
                       >
@@ -117,7 +120,10 @@ const CustomDrawer = (props: any) => {
                   );
                 }}
                 onPress={() =>
-                  props.navigation.navigate("CourseDetails", course)
+                  props.navigation.navigate("CourseDetails", {
+                    screen: "Classes",
+                    params: course,
+                  })
                 }
               />
             );
@@ -137,7 +143,7 @@ const CustomDrawer = (props: any) => {
         >
           <TouchableOpacity
             darkColor="#121212"
-            lightColor="#fff"
+            lightColor="#eee"
             style={{
               flexDirection: "row",
             }}

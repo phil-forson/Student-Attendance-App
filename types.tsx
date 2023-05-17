@@ -58,3 +58,9 @@ export interface ICourseDetails {
   courseName: string,
   lecturerName: string
 }
+
+export interface IClassDetails {
+  id: string,
+  className: string,
+  duration: string
+}
