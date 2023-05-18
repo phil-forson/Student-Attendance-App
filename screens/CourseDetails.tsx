@@ -136,6 +136,7 @@ export default function CourseDetails({ navigation, route }: any) {
         </View>
       </ScrollView>
       <InvTouchableOpacity
+      onPress={() => navigation.navigate('CreateClass')}
         style={[
           styles.bottom,
           styles.circle,
@@ -196,7 +197,6 @@ const styles = StyleSheet.create({
   bottom: {
     justifyContent: "flex-end",
     alignSelf: "flex-end",
-    marginBottom: 0,
   },
   circle: {
     borderRadius: 50,

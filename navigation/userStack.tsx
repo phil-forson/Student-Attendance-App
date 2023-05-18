@@ -25,7 +25,7 @@ import {
   AntDesign,
   MaterialIcons,
   MaterialCommunityIcons,
-  Ionicons
+  Ionicons,
 } from "@expo/vector-icons";
 import SettingsScreen from "../screens/SettingsScreen";
 import JoinCourse from "../screens/JoinCourse";
@@ -35,6 +35,7 @@ import CourseDetails from "../screens/CourseDetails";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import ClassHeader from "../components/ClassHeader";
 import MyTabBar from "../components/MyTabBar";
+import CreateClass from "../screens/CreateClass";
 
 const Stack = createNativeStackNavigator<UserStackParamList>();
 
@@ -108,6 +109,31 @@ export default function UserStack() {
             },
           })}
         />
+        <Stack.Screen
+          name="CreateClass"
+          component={CreateClass}
+          options={({ navigation }: UserStackScreenProps<"CreateClass">) => ({
+            headerLeft: () => {
+              return (
+                <InvTouchableOpacity onPress={() => navigation.goBack()}>
+                  <MaterialCommunityIcons
+                    name="window-close"
+                    size={25}
+                    color={
+                      theme !== (null || undefined)
+                        ? Colors[theme !== null ? theme : "light"].text
+                        : "white"
+                    }
+                  />
+                </InvTouchableOpacity>
+              );
+            },
+            title: "Create Course",
+            headerTitleStyle: {
+              fontSize: 16,
+            },
+          })}
+        />
       </Stack.Group>
       <Stack.Screen
         name="CourseDetails"
@@ -136,7 +162,9 @@ function BottomTabNavigator() {
         component={CourseDetails}
         options={({ navigation }: CourseTabScreenProps<"Classes">) => ({
           header: () => null,
-          tabBarIcon: ({ color }) => <TabBarIcon name="book-outline" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="book-outline" color={color} />
+          ),
         })}
       />
       <BottomTab.Screen
@@ -144,7 +172,9 @@ function BottomTabNavigator() {
         component={ProfileScreen}
         options={{
           header: () => null,
-          tabBarIcon: ({ color }) => <TabBarIcon name="people-outline" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="people-outline" color={color} />
+          ),
         }}
       />
     </BottomTab.Navigator>
@@ -160,18 +190,19 @@ function TabBarIcon(props: {
 
 const TopTab = createMaterialTopTabNavigator();
 
-function TopTabNavigator(){
+function TopTabNavigator() {
   return (
-    <TopTab.Navigator 
-    style={{
-      marginTop: 200,
-      backfaceVisibility: "hidden",
-      backgroundColor: 'transparent'
-    }}>
-      <TopTab.Screen name="Past Classes" component={ProfileScreen}/>
+    <TopTab.Navigator
+      style={{
+        marginTop: 200,
+        backfaceVisibility: "hidden",
+        backgroundColor: "transparent",
+      }}
+    >
+      <TopTab.Screen name="Past Classes" component={ProfileScreen} />
       <TopTab.Screen name="Upcoming Classes" component={SettingsScreen} />
     </TopTab.Navigator>
-  )
+  );
 }
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();

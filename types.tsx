@@ -19,6 +19,7 @@ export type UserStackParamList = {
   Body: undefined;
   JoinCourse: undefined;
   CreateCourse: undefined;
+  CreateClass: undefined;
   CourseDetails: undefined;
 };
 
