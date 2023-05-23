@@ -89,7 +89,6 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
         </Text>
         <Text
           style={[styles.center, { paddingVertical: 10 }]}
-          lightColor=""
           darkColor="#c4c4c4"
         >
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda
