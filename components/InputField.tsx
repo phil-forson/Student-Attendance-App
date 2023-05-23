@@ -14,6 +14,8 @@ export type Props = {
   valid?: boolean;
   instructions?: string;
   icon?: keyof typeof AntDesign.glyphMap;
+  editable?:boolean
+  onClick?: () => void
 };
 
 export const InputField = ({
@@ -26,6 +28,8 @@ export const InputField = ({
   valid,
   instructions,
   icon,
+  editable=true,
+  onClick
 }: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isBlur, setIsBlur] = useState(false);
@@ -90,6 +94,8 @@ export const InputField = ({
           setValue(text);
           setTextChanged(true);
         }}
+        editable={editable}
+        onPressIn={onClick}
       />
       {secure && (
         <View style={styles.iconContainer}>
