@@ -27,6 +27,7 @@ import CourseCard from "../components/CourseCard";
 import Constants from "expo-constants";
 import Modal from "react-native-modal";
 import JoinCourseModal from "../components/JoinCourseModal";
+import React from "react";
 
 var width = Dimensions.get("window").width;
 export const DATA = [

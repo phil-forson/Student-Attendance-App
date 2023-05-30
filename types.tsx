@@ -16,7 +16,7 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, Screen>;
 
 export type UserStackParamList = {
-  Body: undefined;
+  Home: undefined;
   JoinCourse: undefined;
   CreateCourse: undefined;
   CreateClass: undefined;
@@ -49,7 +49,7 @@ export type CourseTabScreenProps<Screen extends keyof CourseTabParamList> = Comp
 >;
 
 export type UserDrawerParamList = {
-  Home: undefined,
+  Root: undefined,
   Profile: undefined,
   Settings: undefined
 }

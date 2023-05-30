@@ -3,7 +3,7 @@ import {
   DefaultTheme,
   NavigationContainer,
 } from "@react-navigation/native";
-import { useEffect } from "react";
+import React,{ useEffect } from "react";
 import { ColorSchemeName } from "react-native/types";
 import useAuth from "../hooks/useAuth";
 import LinkingConfiguration from "./LinkingConfiguration";
@@ -15,12 +15,9 @@ export default function Navigation({
 }: {
   colorScheme: ColorSchemeName;
 }) {
-    const { user } = useAuth()
 
-    useEffect(() => {
-        console.log('this is the user')
-        console.log(user)
-    }, [])
+    const { user } = useAuth();
+
   return (
     <NavigationContainer
       linking={LinkingConfiguration}

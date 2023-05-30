@@ -4,6 +4,7 @@ import { Text, TouchableOpacity, View } from "../components/Themed";
 import useAuth from "../hooks/useAuth";
 import { AntDesign } from '@expo/vector-icons'
 import { auth } from "../config/firebase";
+import React from "react";
 
 export const ProfileScreen = () => {
   const { user } = useAuth();

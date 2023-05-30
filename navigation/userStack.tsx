@@ -1,3 +1,4 @@
+import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useColorScheme } from "react-native";
 import { DATA, HomeScreen } from "../screens/HomeScreen";
@@ -37,10 +38,112 @@ import ClassHeader from "../components/ClassHeader";
 import MyTabBar from "../components/MyTabBar";
 import CreateClass from "../screens/CreateClass";
 
-const Stack = createNativeStackNavigator<UserStackParamList>();
+const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
 export default function UserStack() {
   const theme = useColorScheme();
+
+  return (
+    <Drawer.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+      drawerContent={(props) => <CustomDrawer {...props} />}
+      useLegacyImplementation={false}
+    >
+      <Drawer.Screen
+        name="Root"
+        component={StackNavigator}
+        options={{
+          drawerIcon: () => (
+            <MaterialIcons name="book" color="#008be3" size={20} />
+          ),
+          drawerLabel: "My Courses",
+          drawerLabelStyle: {
+            color: theme === "dark" ? "#eee" : "#737171",
+          },
+          header: () => <UserHeader />,
+        }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          drawerIcon: () => (
+            <AntDesign name="hourglass" color="#008be3" size={20} />
+          ),
+          drawerLabel: "Upcoming classes",
+          drawerLabelStyle: {
+            color: theme === "dark" ? "#eee" : "#737171",
+          },
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          drawerIcon: () => (
+            <AntDesign name="setting" color="#008be3" size={20} />
+          ),
+          drawerLabel: "Settings",
+          drawerLabelStyle: {
+            color: theme === "dark" ? "#eee" : "#737171",
+          },
+        }}
+      />
+    </Drawer.Navigator>
+  );
+}
+
+const BottomTab = createBottomTabNavigator<CourseTabParamList>();
+
+function BottomTabNavigator() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <BottomTab.Navigator
+      initialRouteName="Classes"
+      screenOptions={{
+        tabBarActiveTintColor:
+          colorScheme === "light" ? Colors.light.tint : Colors.dark.tint,
+      }}
+    >
+      <BottomTab.Screen
+        name="Classes"
+        component={CourseDetails}
+        options={({ navigation }: CourseTabScreenProps<"Classes">) => ({
+          header: () => null,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="book-outline" color={color} />
+          ),
+        })}
+      />
+      <BottomTab.Screen
+        name="Members"
+        component={ProfileScreen}
+        options={{
+          header: () => null,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="people-outline" color={color} />
+          ),
+        }}
+      />
+    </BottomTab.Navigator>
+  );
+}
+
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof Ionicons>["name"];
+  color: string;
+}) {
+  return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
+}
+
+const Stack = createNativeStackNavigator<UserStackParamList>();
+
+function StackNavigator() {
+  const theme = useColorScheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -50,11 +153,12 @@ export default function UserStack() {
           return <Button />;
         },
       }}
+      initialRouteName="Home"
     >
       <Stack.Screen
-        name="Body"
-        component={DrawerNavigator}
-        options={(navigation: UserStackScreenProps<"Body">) => ({
+        name="Home"
+        component={HomeScreen}
+        options={(navigation: UserStackScreenProps<"Home">) => ({
           header: () => null,
         })}
       />
@@ -141,122 +245,5 @@ export default function UserStack() {
         options={{ header: () => null }}
       />
     </Stack.Navigator>
-  );
-}
-
-const BottomTab = createBottomTabNavigator<CourseTabParamList>();
-
-function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <BottomTab.Navigator
-      initialRouteName="Classes"
-      screenOptions={{
-        tabBarActiveTintColor:
-          colorScheme === "light" ? Colors.light.tint : Colors.dark.tint,
-      }}
-    >
-      <BottomTab.Screen
-        name="Classes"
-        component={CourseDetails}
-        options={({ navigation }: CourseTabScreenProps<"Classes">) => ({
-          header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="book-outline" color={color} />
-          ),
-        })}
-      />
-      <BottomTab.Screen
-        name="Members"
-        component={ProfileScreen}
-        options={{
-          header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="people-outline" color={color} />
-          ),
-        }}
-      />
-    </BottomTab.Navigator>
-  );
-}
-
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof Ionicons>["name"];
-  color: string;
-}) {
-  return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
-}
-
-const TopTab = createMaterialTopTabNavigator();
-
-function TopTabNavigator() {
-  return (
-    <TopTab.Navigator
-      style={{
-        marginTop: 200,
-        backfaceVisibility: "hidden",
-        backgroundColor: "transparent",
-      }}
-    >
-      <TopTab.Screen name="Past Classes" component={ProfileScreen} />
-      <TopTab.Screen name="Upcoming Classes" component={SettingsScreen} />
-    </TopTab.Navigator>
-  );
-}
-
-const Drawer = createDrawerNavigator<UserDrawerParamList>();
-
-function DrawerNavigator() {
-  const theme = useColorScheme();
-  return (
-    <Drawer.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-      drawerContent={(props) => <CustomDrawer {...props} />}
-      useLegacyImplementation={false}
-    >
-      <Drawer.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          drawerIcon: () => (
-            <MaterialIcons name="book" color="#008be3" size={20} />
-          ),
-          drawerLabel: "My Courses",
-          drawerLabelStyle: {
-            color: theme === "dark" ? "#eee" : "#737171",
-          },
-          header: () => <UserHeader />,
-        }}
-      />
-      <Drawer.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          drawerIcon: () => (
-            <AntDesign name="hourglass" color="#008be3" size={20} />
-          ),
-          drawerLabel: "Upcoming classes",
-          drawerLabelStyle: {
-            color: theme === "dark" ? "#eee" : "#737171",
-          },
-        }}
-      />
-      <Drawer.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          drawerIcon: () => (
-            <AntDesign name="setting" color="#008be3" size={20} />
-          ),
-          drawerLabel: "Settings",
-          drawerLabelStyle: {
-            color: theme === "dark" ? "#eee" : "#737171",
-          },
-        }}
-      />
-    </Drawer.Navigator>
   );
 }

@@ -53,9 +53,9 @@ export default function CourseDetails({ navigation, route }: any) {
       ]}
     >
         <View>
-          <InvTouchableOpacity onPress={() => navigation.goBack()}>
-            <AntDesign
-              name="arrowleft"
+          <InvTouchableOpacity onPress={() => navigation.openDrawer()}>
+          <FontAwesome5
+              name="bars"
               color={theme === "dark" ? "white" : "black"}
               size={25}
             />

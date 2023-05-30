@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from "react";
 import Header from "../components/Header";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import LandingScreen from "../screens/LandingScreen";

@@ -14,8 +14,8 @@ export type Props = {
   valid?: boolean;
   instructions?: string;
   icon?: keyof typeof AntDesign.glyphMap;
-  editable?:boolean
-  onClick?: () => void
+  editable?: boolean;
+  onClick?: () => void;
 };
 
 export const InputField = ({
@@ -28,8 +28,8 @@ export const InputField = ({
   valid,
   instructions,
   icon,
-  editable=true,
-  onClick
+  editable = true,
+  onClick,
 }: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isBlur, setIsBlur] = useState(false);
@@ -60,8 +60,9 @@ export const InputField = ({
           borderColor: isFocused
             ? textChanged
               ? valid
-                ? "#0083eb" :
-                valid === undefined ? '#0083eb'
+                ? "#0083eb"
+                : valid === undefined
+                ? "#0083eb"
                 : "red"
               : "#0083eb"
             : isBlur
@@ -84,6 +85,9 @@ export const InputField = ({
         onFocus={() => {
           setIsFocused(true);
           setIsBlur(false);
+          if(onClick){
+            onClick()
+          }
         }}
         onBlur={() => {
           setIsFocused(false);

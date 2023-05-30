@@ -23,7 +23,7 @@
     "expo-auth-session": "~4.0.3",
     "expo-constants": "~14.2.1",
     "expo-crypto": "~12.2.1",
-    "expo-dev-client": "~2.1.6",
+    "expo-dev-client": "~2.2.1",
     "expo-google-app-auth": "~8.3.0",
     "expo-linking": "~4.0.1",
     "expo-splash-screen": "~0.18.1",

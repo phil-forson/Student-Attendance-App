@@ -120,9 +120,12 @@ const CustomDrawer = (props: any) => {
                   );
                 }}
                 onPress={() =>
-                  props.navigation.navigate("CourseDetails", {
-                    screen: "Classes",
-                    params: course,
+                  props.navigation.navigate("Root", {
+                    screen: "CourseDetails",
+                    params: {
+                      screen: "Classes",
+                      params: course,
+                    },
                   })
                 }
               />

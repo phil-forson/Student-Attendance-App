@@ -20,6 +20,7 @@ export default function CreateClass({ navigation }: any) {
   const [classDate, setClassDate] = useState(new Date(Date.now()));
   const [classTime, setClassTime] = useState(new Date(Date.now()));
   const [showDate, setShowDate] = useState(false);
+  const [showTime, setShowTime] = useState(false);
 
   const [platform, setPlatform] = useState("");
 
@@ -27,25 +28,33 @@ export default function CreateClass({ navigation }: any) {
     const currentDate = selectedDate;
     setClassDate(currentDate ?? new Date(Date.now()));
   };
-
-  const toggleShowDate = () => {
-    setShowDate(!showDate);
+  const onChangeTime = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    const currentTime = selectedTime;
+    setClassTime(currentTime ?? new Date(Date.now()));
+    setShowTime(false);
   };
-  // const openDateTime = () => {
-  //   if(Platform.OS === "android"){
-  //     setPlatform("android")
-  //     DateTimePickerAndroid.open({
-  //         value: classDate,
-  //         onChange,
-  //         mode: "date",
-  //         is24Hour: true,
-  //       })
-  //   }
-  //   else if(Platform.OS === 'ios'){
-  //     setPlatform("ios")
-  //   }
 
-  // };
+  const showDateComponent = () => {
+    setShowDate(true);
+  };
+
+  const showTimeComponent = () => setShowTime(true);
+
+  const openDate = () => {
+    if(Platform.OS === "android"){
+      setShowDate(false)
+      DateTimePickerAndroid.open({
+          value: classDate,
+          onChange: onChangeDate,
+          mode: "date",
+          is24Hour: true,
+        })
+    }
+    else if(Platform.OS === 'ios'){
+      setShowDate(true)
+    }
+
+  };
 
   const width = Dimensions.get("screen").width - 40;
 
@@ -125,14 +134,17 @@ export default function CreateClass({ navigation }: any) {
             value={classDate.toLocaleDateString()}
             setValue={onChangeDate}
             editable={false}
-            onClick={toggleShowDate}
+            onClick={() => openDate()}
           />
         </View>
         {showDate && Platform.OS === "ios" && (
-          <DatePickerIOSComponent
-            mode="datetime"
-            onDateChange={(newDate: Date) => console.log(newDate)}
-          />
+          <DateTimePicker
+          testID="dateTimePicker"
+          value={classDate}
+          mode={"date"}
+          is24Hour={true}
+          onChange={onChangeDate}
+        />
         )}
       </View>
     </View>

@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useCachedResources from "./hooks/useCachedResources";
 import Navigation from "./navigation";
 import "expo-dev-client";
+import React from "react";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
