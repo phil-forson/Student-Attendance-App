@@ -247,3 +247,5 @@ function StackNavigator() {
     </Stack.Navigator>
   );
 }
+
+
