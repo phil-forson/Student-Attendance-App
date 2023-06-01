@@ -1,14 +1,26 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "../components/Themed";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, useColorScheme } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 import { RootStackScreenProps } from "../types";
 import { StatusBar } from "expo-status-bar";
 import { InputField } from "../components/InputField";
 import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
-import { auth } from "../config/firebase";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"; 
+import { auth, db } from "../config/firebase";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { APIKEY } from "@env";
+import React from "react";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import useAuth from "../hooks/useAuth";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -24,10 +36,10 @@ export const SignInScreen = ({
 
   const [pwd, setPwd] = useState<string>("");
   const [matchPwd, setMatchPwd] = useState<boolean>(false);
-
+  
   const [pwd2, setPwd2] = useState<string>("");
   const [matchPwd2, setMatchPwd2] = useState<boolean>(false);
-
+  
   const handleEmail = (email: string) => {
     setValidEmail(EMAIL_REGEX.test(email));
     setEmail(email);
@@ -45,7 +57,7 @@ export const SignInScreen = ({
 
   const handleSubmit = () => {
     if (validEmail && matchPwd && matchPwd2) {
-        createAccount()
+      createAccount();
     } else {
       Alert.alert("Invalid", "Invalid Details!");
     }
@@ -53,19 +65,32 @@ export const SignInScreen = ({
 
   const createAccount = async () => {
     try {
-        await createUserWithEmailAndPassword(auth, email, pwd).then((value) => {
-        
-        })
-    }
-    catch(e){
-        Alert.alert('There was a problem creating your account')
-        console.log(e)
-        console.log(APIKEY)
-    }
-  }
+      await createUserWithEmailAndPassword(auth, email, pwd).then(
+        async (response) => {
+          const user = response.user
+          const queryRef = query(
+            collection(db, "users"),
+            where("uid", "==", user?.uid)
+          );
 
-  useEffect(() => {
-  }, [])
+          const querySnapshot = await getDocs(queryRef);
+
+          if (querySnapshot.size === 0) {
+            // create a new user
+            await addDoc(collection(db, "users"), {
+              uid: user?.uid,
+              enrolledCourses: [],
+            });
+          }
+        }
+      );
+    } catch (e) {
+      Alert.alert("There was a problem creating your account");
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {}, []);
 
   return (
     <SafeAreaView
@@ -131,25 +156,43 @@ export const SignInScreen = ({
           icon="Safety"
         />
       </View>
-      <KeyboardAvoidingView behavior="padding" style={styles.bottom}>
-        <TouchableOpacity 
-        style={[{
-            width: 'auto',
-            marginVertical: 15,
-            height: 40,
-            borderRadius: 8,
-            justifyContent: "center",
-            alignItems: 'center',
-            flexDirection: 'row',
-            marginLeft: 200,
-            backgroundColor: !(matchPwd && matchPwd2 && validEmail) ? '#878383': theme === 'light' ? '#000' : '#fff'
-          }]}
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.bottom}>
+        <TouchableOpacity
+          style={[
+            {
+              width: "auto",
+              marginVertical: 15,
+              height: 40,
+              borderRadius: 8,
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "row",
+              marginLeft: 200,
+              backgroundColor: !(matchPwd && matchPwd2 && validEmail)
+                ? "#878383"
+                : theme === "light"
+                ? "#000"
+                : "#fff",
+            },
+          ]}
           disabled={!(validEmail && matchPwd && matchPwd2)}
-          onPress={handleSubmit}>
-            <Text lightColor="#fff" darkColor="#000" style={{
-                fontWeight: 'bold'
-            }}>Sign Up</Text>
-            <AntDesign name="arrowright" size={20}  color={theme === 'light' ? "white": 'black'} style={{marginLeft: 10 }} />
+          onPress={handleSubmit}
+        >
+          <Text
+            lightColor="#fff"
+            darkColor="#000"
+            style={{
+              fontWeight: "bold",
+            }}
+          >
+            Sign Up
+          </Text>
+          <AntDesign
+            name="arrowright"
+            size={20}
+            color={theme === "light" ? "white" : "black"}
+            style={{ marginLeft: 10 }}
+          />
         </TouchableOpacity>
       </KeyboardAvoidingView>
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
@@ -171,11 +214,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   signUp: {
-    width: 10
+    width: 10,
   },
   bottom: {
     marginBottom: 0,
     flex: 1,
-    justifyContent: 'flex-end'
-  }
+    justifyContent: "flex-end",
+  },
 });
