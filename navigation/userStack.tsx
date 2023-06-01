@@ -55,14 +55,7 @@ export default function UserStack() {
         name="Root"
         component={StackNavigator}
         options={{
-          drawerIcon: () => (
-            <MaterialIcons name="book" color="#008be3" size={20} />
-          ),
-          drawerLabel: "My Courses",
-          drawerLabelStyle: {
-            color: theme === "dark" ? "#eee" : "#737171",
-          },
-          header: () => <UserHeader />,
+          drawerLabel: () => null
         }}
       />
       <Drawer.Screen

@@ -21,6 +21,7 @@ import { APIKEY } from "@env";
 import React from "react";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import useAuth from "../hooks/useAuth";
+import { FirebaseError } from "firebase/app";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -34,15 +35,33 @@ export const SignInScreen = ({
   const [email, setEmail] = useState<string>("");
   const [validEmail, setValidEmail] = useState<boolean>(false);
 
+  const [firstName, setFirstName] = useState<string>("");
+  const [validFirstName, setValidFirstName] = useState<boolean>(false);
+
+  const [lastName, setLastName] = useState<string>("");
+  const [validLastName, setValidLastName] = useState<boolean>(false);
+
   const [pwd, setPwd] = useState<string>("");
   const [matchPwd, setMatchPwd] = useState<boolean>(false);
-  
+
   const [pwd2, setPwd2] = useState<string>("");
   const [matchPwd2, setMatchPwd2] = useState<boolean>(false);
-  
+
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleEmail = (email: string) => {
     setValidEmail(EMAIL_REGEX.test(email));
     setEmail(email);
+  };
+
+  const handleFirstName = (firstName: string) => {
+    setValidFirstName(firstName.length > 0);
+    setFirstName(firstName);
+  };
+
+  const handleLastName = (lastName: string) => {
+    setValidLastName(lastName.length > 0);
+    setLastName(lastName);
   };
 
   const handlePwd = (pwd: string) => {
@@ -56,6 +75,7 @@ export const SignInScreen = ({
   };
 
   const handleSubmit = () => {
+    setIsLoading(true)
     if (validEmail && matchPwd && matchPwd2) {
       createAccount();
     } else {
@@ -67,7 +87,7 @@ export const SignInScreen = ({
     try {
       await createUserWithEmailAndPassword(auth, email, pwd).then(
         async (response) => {
-          const user = response.user
+          const user = response.user;
           const queryRef = query(
             collection(db, "users"),
             where("uid", "==", user?.uid)
@@ -79,15 +99,28 @@ export const SignInScreen = ({
             // create a new user
             await addDoc(collection(db, "users"), {
               uid: user?.uid,
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
               enrolledCourses: [],
-            });
+            }).finally(() => setIsLoading(false));
           }
         }
       );
-    } catch (e) {
-      Alert.alert("There was a problem creating your account");
-      console.log(e);
+    } catch (error: any) {
+      setIsLoading(false)
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/wrong-password"
+      ) {
+        Alert.alert("Your email or password was incorrect");
+      } else if (error.code === "auth/email-already-in-use") {
+        Alert.alert("An account with this email already exists");
+      } else {
+        Alert.alert("There was a problem with your request");
+      }
     }
+    
   };
 
   useEffect(() => {}, []);
@@ -116,6 +149,32 @@ export const SignInScreen = ({
         >
           Enter Your Details
         </Text>
+      </View>
+      <View style={styles.my}>
+        <InputField
+          placeholder="First Name"
+          secure={false}
+          keyboardType="default"
+          placeholderTextColor="#C7C7C7"
+          value={firstName}
+          setValue={handleFirstName}
+          valid={validFirstName}
+          instructions="First name can't be empty"
+          icon="user"
+        />
+      </View>
+      <View style={styles.my}>
+        <InputField
+          placeholder="Last Name"
+          secure={false}
+          keyboardType="default"
+          placeholderTextColor="#C7C7C7"
+          value={lastName}
+          setValue={handleLastName}
+          valid={validLastName}
+          instructions="Last name can't be empty"
+          icon="contacts"
+        />
       </View>
       <View style={styles.my}>
         <InputField
@@ -156,7 +215,10 @@ export const SignInScreen = ({
           icon="Safety"
         />
       </View>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.bottom}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.bottom}
+      >
         <TouchableOpacity
           style={[
             {
@@ -168,14 +230,13 @@ export const SignInScreen = ({
               alignItems: "center",
               flexDirection: "row",
               marginLeft: 200,
-              backgroundColor: !(matchPwd && matchPwd2 && validEmail)
-                ? "#878383"
-                : theme === "light"
-                ? "#000"
-                : "#fff",
+              backgroundColor: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2)
+                ? "#147ec0"
+                : "#008be3",
+              opacity: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) ? 0.32 : 1,
             },
           ]}
-          disabled={!(validEmail && matchPwd && matchPwd2)}
+          disabled={!(matchPwd && validEmail && validFirstName && validLastName && matchPwd2)}
           onPress={handleSubmit}
         >
           <Text

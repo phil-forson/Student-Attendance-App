@@ -8,7 +8,7 @@ import {
   DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { auth } from "../config/firebase";
 import { useTheme } from "@react-navigation/native";
 import useColorScheme from "../hooks/useColorScheme";
@@ -86,6 +86,33 @@ const CustomDrawer = (props: any) => {
             },
           ]}
         >
+          <DrawerItem
+            label={() => {
+              return (
+                <View style={{ flexDirection: "row" }}>
+                  <AntDesign
+                    name="book"
+                    size={20}
+                    color={theme === "dark" ? "#eee" : "#737171"}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 33,
+                      fontSize: 14,
+                      fontWeight: "500",
+                      color: theme === "dark" ? "#eee" : "#737171",
+                    }}
+                  >
+                    My Courses
+                  </Text>
+                </View>
+              );
+            }}
+            onPress={() =>
+              props.navigation.navigate("Root", { screen: "Home" })
+            }
+            activeTintColor={theme === "dark" ? "#fbfcfd": "#2f95dc"}
+          />
           <DrawerItemList {...props} />
         </View>
         <View

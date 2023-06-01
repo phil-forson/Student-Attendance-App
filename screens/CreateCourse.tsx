@@ -9,7 +9,6 @@ import useAuth from "../hooks/useAuth";
 
 export default function CreateCourse({ navigation }: any) {
   const [courseTitle, setCourseTitle] = useState("");
-  const [courseLecturerName, setCourseLecturerName] = useState("");
   const [classLocation, setClassLocation] = useState("");
 
   const { user } = useAuth()
@@ -23,13 +22,13 @@ export default function CreateCourse({ navigation }: any) {
             darkColor="#121212"
             onPress={() => createCourse()}
             style={{}}
-            disabled={!(courseTitle.length && courseLecturerName.length && classLocation.length) }
+            disabled={!(courseTitle.length && classLocation.length) }
           >
             <Text
               style={{
-                color: !(courseTitle.length && courseLecturerName.length && classLocation.length)? "#023f65" : "#008be3",
+                color: !(courseTitle.length && classLocation.length)? "#023f65" : "#008be3",
                 fontSize: 16,
-                opacity: !(courseTitle.length && courseLecturerName.length && classLocation.length)? 0.32 : 1
+                opacity: !(courseTitle.length && classLocation.length)? 0.32 : 1
               }}
             >
               Create
@@ -38,27 +37,28 @@ export default function CreateCourse({ navigation }: any) {
         );
       },
     });
-  }, [courseTitle, courseLecturerName, classLocation]);
+
+  }, [courseTitle, classLocation]);
 
   const handleCourseTitleChange = (title: string) => {
     setCourseTitle(title);
   };
 
-  const handleCourseLecturerName = (name: string) => {
-    setCourseLecturerName(name);
-  };
 
   const handleClassLoc = (loc: string) => {
     setClassLocation(loc);
   };
 
   const createCourse = () => {
+    if(!(courseTitle.length && classLocation.length)){
+      return;
+    }
     try {
       const classesCollectionRef = collection(db, 'classes');
 
       const newCourse = addDoc(classesCollectionRef, {
         courseTitle: courseTitle,
-        lecturerName: courseLecturerName,
+        lecturerName: user?.displayName,
         location: classLocation
       })
 
