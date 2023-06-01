@@ -68,7 +68,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       headerLeft: () => {
         return (
           <InvTouchableOpacity onPress={() => navigation.goBack()} style={{paddingHorizontal: 5, paddingVertical: 5}}>
-            <AntDesign name="left" size={20} color={theme==='dark' ? 'white': 'dark'}/>
+            <AntDesign name="left" size={20} color={theme==='dark' ? 'white': 'black'}/>
           </InvTouchableOpacity>
         );
       },

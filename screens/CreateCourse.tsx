@@ -1,13 +1,18 @@
 import { InputField } from "../components/InputField";
 import { View, Text, TouchableOpacity } from "../components/Themed";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, Platform, KeyboardAvoidingView, Alert } from "react-native";
 import { UserStackScreenProps } from "../types";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../config/firebase";
+import useAuth from "../hooks/useAuth";
 
 export default function CreateCourse({ navigation }: any) {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseLecturerName, setCourseLecturerName] = useState("");
   const [classLocation, setClassLocation] = useState("");
+
+  const { user } = useAuth()
 
   useEffect(() => {
     navigation.setOptions({
@@ -24,6 +29,7 @@ export default function CreateCourse({ navigation }: any) {
               style={{
                 color: !(courseTitle.length && courseLecturerName.length && classLocation.length)? "#023f65" : "#008be3",
                 fontSize: 16,
+                opacity: !(courseTitle.length && courseLecturerName.length && classLocation.length)? 0.32 : 1
               }}
             >
               Create
@@ -47,8 +53,21 @@ export default function CreateCourse({ navigation }: any) {
   };
 
   const createCourse = () => {
-    console.log(classLocation);
-    navigation.navigate('Home')
+    try {
+      const classesCollectionRef = collection(db, 'classes');
+
+      const newCourse = addDoc(classesCollectionRef, {
+        courseTitle: courseTitle,
+        lecturerName: courseLecturerName,
+        location: classLocation
+      })
+
+
+    }
+    catch(e){
+      Alert.alert("Something unexpected happened. Try again later.")
+    }
+    // navigation.navigate('Home')
   };
   return (
     <View style={styles.container}>
@@ -63,16 +82,6 @@ export default function CreateCourse({ navigation }: any) {
           placeholderTextColor="gray"
           value={courseTitle}
           setValue={handleCourseTitleChange}
-        />
-      </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
-        <InputField
-          keyboardType="default"
-          secure={false}
-          placeholder="Lecturer's Name"
-          placeholderTextColor="gray"
-          value={courseLecturerName}
-          setValue={handleCourseLecturerName}
         />
       </View>
       <View style={[styles.inputContainer, styles.marginVertical]}>

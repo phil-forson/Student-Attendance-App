@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { InputField } from "../components/InputField";
 import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
+import React from "react";
 
 
 const PWD_REGEX =

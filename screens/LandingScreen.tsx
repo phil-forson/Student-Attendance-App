@@ -117,7 +117,7 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
           >
             Sign Up
           </Text>
-          <AntDesign name="arrowright" size={20} color="white" style={{}} />
+          <AntDesign name="arrowright" size={20} color="white" />
         </TouchableOpacity>
         <View style={styles.orContainer}>
           <View
