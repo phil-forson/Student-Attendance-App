@@ -5,6 +5,7 @@ import {
   Image,
   Dimensions,
   Platform,
+  Alert,
 } from "react-native";
 import { useState } from "react";
 import {
@@ -27,7 +28,17 @@ import CourseCard from "../components/CourseCard";
 import Constants from "expo-constants";
 import Modal from "react-native-modal";
 import JoinCourseModal from "../components/JoinCourseModal";
-import React from "react";
+import React, { useEffect } from "react";
+import { useEvent } from "react-native-reanimated";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../config/firebase";
 
 var width = Dimensions.get("window").width;
 export const DATA = [
@@ -62,6 +73,7 @@ export const HomeScreen = ({ navigation }: any) => {
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
     useState<boolean>(false);
   const [code, setCode] = useState("");
+  const [firstName, setFirstName] = useState("");
 
   const joinCourse = () => {
     setModalVisible(false);
@@ -72,6 +84,34 @@ export const HomeScreen = ({ navigation }: any) => {
     setModalVisible(false);
     setTimeout(() => navigation.navigate("CreateCourse"), 800);
   };
+
+  useEffect(() => {
+    const getUserData = async () => {
+      if (user) {
+        const userId = user.uid;
+
+        try {
+          const queryRef = query(
+            collection(db, "users"),
+            where("uid", "==", user?.uid)
+          );
+
+          const querySnapshot = await getDocs(queryRef);
+
+          if (querySnapshot.size > 0) {
+            const userData = querySnapshot.docs[0].data();
+            const firstName = userData.firstName;
+            setFirstName(firstName)
+            console.log("User first name:", firstName);
+          }
+        } catch (error) {
+          Alert.alert("Something unexpected happened. Try again later");
+        }
+      }
+    };
+
+    getUserData();
+  }, []);
 
   return (
     <>
@@ -87,6 +127,7 @@ export const HomeScreen = ({ navigation }: any) => {
           style={[
             {
               justifyContent: "space-between",
+              flexDirection: "row",
             },
           ]}
         >
@@ -100,7 +141,9 @@ export const HomeScreen = ({ navigation }: any) => {
               size={25}
             />
           </InvTouchableOpacity>
-          <View></View>
+          <View>
+            <Text style={[{ fontSize: 15 }]}>Hello {firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}</Text>
+          </View>
         </View>
         <FlatList
           style={[styles.courseContainer]}

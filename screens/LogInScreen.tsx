@@ -29,6 +29,8 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
   const [pwd, setPwd] = useState<string>("");
   const [matchPwd, setMatchPwd] = useState<boolean>(false);
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleEmail = (email: string) => {
     setValidEmail(EMAIL_REGEX.test(email));
     setEmail(email);
@@ -41,6 +43,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
 
   const handleSubmit = () => {
     if (validEmail && matchPwd) {
+      setIsLoading(true)
       logIn();
     } else {
       Alert.alert("Invalid", "Invalid Details!");
@@ -49,7 +52,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
 
   const logIn = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, pwd);
+      await signInWithEmailAndPassword(auth, email, pwd).finally(() => setIsLoading(false));
     } catch (error: any) {
       if (
         error.code === "auth/invalid-email" ||
@@ -61,6 +64,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       } else {
         Alert.alert("There was a problem with your request");
       }
+      setIsLoading(false)
     }
   };
   useEffect(() => {

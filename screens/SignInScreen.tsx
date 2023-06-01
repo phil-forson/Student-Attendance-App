@@ -47,7 +47,7 @@ export const SignInScreen = ({
   const [pwd2, setPwd2] = useState<string>("");
   const [matchPwd2, setMatchPwd2] = useState<boolean>(false);
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEmail = (email: string) => {
     setValidEmail(EMAIL_REGEX.test(email));
@@ -75,7 +75,7 @@ export const SignInScreen = ({
   };
 
   const handleSubmit = () => {
-    setIsLoading(true)
+    setIsLoading(true);
     if (validEmail && matchPwd && matchPwd2) {
       createAccount();
     } else {
@@ -108,7 +108,7 @@ export const SignInScreen = ({
         }
       );
     } catch (error: any) {
-      setIsLoading(false)
+      setIsLoading(false);
       if (
         error.code === "auth/invalid-email" ||
         error.code === "auth/wrong-password"
@@ -120,7 +120,6 @@ export const SignInScreen = ({
         Alert.alert("There was a problem with your request");
       }
     }
-    
   };
 
   useEffect(() => {}, []);
@@ -136,7 +135,7 @@ export const SignInScreen = ({
     >
       <View
         style={{
-          marginTop: 100,
+          marginTop: 50,
         }}
       >
         <Text
@@ -215,10 +214,11 @@ export const SignInScreen = ({
           icon="Safety"
         />
       </View>
-      <KeyboardAvoidingView
+      {/* <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.bottom}
-      >
+      > */}
+      <View style={[styles.bottom]}>
         <TouchableOpacity
           style={[
             {
@@ -229,14 +229,35 @@ export const SignInScreen = ({
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
-              marginLeft: 200,
-              backgroundColor: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2)
+              backgroundColor: !(
+                matchPwd &&
+                validEmail &&
+                validFirstName &&
+                validLastName &&
+                matchPwd2
+              ) || isLoading
                 ? "#147ec0"
                 : "#008be3",
-              opacity: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) ? 0.32 : 1,
+              opacity: !(
+                matchPwd &&
+                validEmail &&
+                validFirstName &&
+                validLastName &&
+                matchPwd2
+              ) || isLoading
+                ? 0.32
+                : 1,
             },
           ]}
-          disabled={!(matchPwd && validEmail && validFirstName && validLastName && matchPwd2)}
+          disabled={
+            !(
+              matchPwd &&
+              validEmail &&
+              validFirstName &&
+              validLastName &&
+              matchPwd2
+            ) || (isLoading)
+          }
           onPress={handleSubmit}
         >
           <Text
@@ -255,7 +276,8 @@ export const SignInScreen = ({
             style={{ marginLeft: 10 }}
           />
         </TouchableOpacity>
-      </KeyboardAvoidingView>
+      </View>
+      {/* </KeyboardAvoidingView> */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </SafeAreaView>
   );
@@ -274,9 +296,7 @@ const styles = StyleSheet.create({
   my: {
     marginVertical: 10,
   },
-  signUp: {
-    width: 10,
-  },
+
   bottom: {
     marginBottom: 0,
     flex: 1,
