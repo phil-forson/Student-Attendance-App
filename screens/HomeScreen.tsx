@@ -39,6 +39,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
+import useUser from "../hooks/useUser";
 
 var width = Dimensions.get("window").width;
 export const DATA = [
@@ -74,6 +75,7 @@ export const HomeScreen = ({ navigation }: any) => {
     useState<boolean>(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const joinCourse = () => {
     setModalVisible(false);
@@ -97,21 +99,31 @@ export const HomeScreen = ({ navigation }: any) => {
           );
 
           const querySnapshot = await getDocs(queryRef);
+          console.log("query Snapshot ", querySnapshot);
 
           if (querySnapshot.size > 0) {
             const userData = querySnapshot.docs[0].data();
-            const firstName = userData.firstName;
-            setFirstName(firstName)
-            console.log("User first name:", firstName);
+            setFirstName(userData.firstName);
+            console.log("set");
           }
         } catch (error) {
-          Alert.alert("Something unexpected happened. Try again later");
+        } finally {
+          setIsLoading(false);
         }
       }
     };
 
     getUserData();
   }, []);
+
+  if (isLoading) {
+    // Render a loading state or placeholder
+    return (
+      <View style={styles.center}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -142,7 +154,14 @@ export const HomeScreen = ({ navigation }: any) => {
             />
           </InvTouchableOpacity>
           <View>
-            <Text style={[{ fontSize: 15 }]}>Hello {firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}</Text>
+            {firstName.length > 0 && (
+              <Text style={[{ fontSize: 15 }]}>
+                Hello{" "}
+                {firstName &&
+                  firstName.charAt(0).toUpperCase() +
+                    firstName.slice(1).toLowerCase()}
+              </Text>
+            )}
           </View>
         </View>
         <FlatList

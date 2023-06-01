@@ -1,17 +1,24 @@
 import { InputField } from "../components/InputField";
 import { View, Text, TouchableOpacity } from "../components/Themed";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Platform, KeyboardAvoidingView, Alert } from "react-native";
-import { UserStackScreenProps } from "../types";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  StyleSheet,
+  Platform,
+  KeyboardAvoidingView,
+  Alert,
+} from "react-native";
+import { UserData, UserStackScreenProps } from "../types";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../config/firebase";
 import useAuth from "../hooks/useAuth";
 
 export default function CreateCourse({ navigation }: any) {
   const [courseTitle, setCourseTitle] = useState("");
   const [classLocation, setClassLocation] = useState("");
+  const [userData, setUserData] = useState<UserData>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   useEffect(() => {
     navigation.setOptions({
@@ -22,13 +29,20 @@ export default function CreateCourse({ navigation }: any) {
             darkColor="#121212"
             onPress={() => createCourse()}
             style={{}}
-            disabled={!(courseTitle.length && classLocation.length) }
+            disabled={
+              !(courseTitle.length && classLocation.length) || isLoading
+            }
           >
             <Text
               style={{
-                color: !(courseTitle.length && classLocation.length)? "#023f65" : "#008be3",
+                color: !(courseTitle.length && classLocation.length)
+                  ? "#023f65"
+                  : "#008be3",
                 fontSize: 16,
-                opacity: !(courseTitle.length && classLocation.length)? 0.32 : 1
+                opacity:
+                  !(courseTitle.length && classLocation.length) || isLoading
+                    ? 0.32
+                    : 1,
               }}
             >
               Create
@@ -37,38 +51,67 @@ export default function CreateCourse({ navigation }: any) {
         );
       },
     });
-
   }, [courseTitle, classLocation]);
 
   const handleCourseTitleChange = (title: string) => {
     setCourseTitle(title);
   };
 
-
   const handleClassLoc = (loc: string) => {
     setClassLocation(loc);
   };
 
-  const createCourse = () => {
-    if(!(courseTitle.length && classLocation.length)){
+  const createCourse = async () => {
+    setIsLoading(true);
+    if (!(courseTitle.length && classLocation.length)) {
       return;
     }
     try {
-      const classesCollectionRef = collection(db, 'classes');
+      const classesCollectionRef = collection(db, "classes");
 
-      const newCourse = addDoc(classesCollectionRef, {
+      await addDoc(classesCollectionRef, {
         courseTitle: courseTitle,
-        lecturerName: user?.displayName,
-        location: classLocation
-      })
-
-
+        lecturerName: userData?.firstName + " " + userData?.lastName,
+        location: classLocation,
+      }).then((response) => {
+        console.log(response);
+        navigation.navigate("Home");
+      });
+    } catch (e) {
+      Alert.alert("Something unexpected happened. Try again later.");
+    } finally {
+      setIsLoading(false);
     }
-    catch(e){
-      Alert.alert("Something unexpected happened. Try again later.")
-    }
-    // navigation.navigate('Home')
   };
+
+  useEffect(() => {
+    const getUserData = async () => {
+      if (user) {
+        const userId = user.uid;
+
+        try {
+          const queryRef = query(
+            collection(db, "users"),
+            where("uid", "==", user?.uid)
+          );
+
+          const querySnapshot = await getDocs(queryRef);
+          console.log("query Snapshot ", querySnapshot);
+
+          if (querySnapshot.size > 0) {
+            const userData = querySnapshot.docs[0].data();
+            setUserData(userData);
+            console.log("set");
+          }
+        } catch (error) {
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    getUserData();
+  }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.header}>

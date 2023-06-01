@@ -65,3 +65,11 @@ export interface IClassDetails {
   className: string,
   duration: string
 }
+
+export interface UserData {
+  uid?: string,
+  firstName?: string,
+  lastName?: string,
+  email?: string,
+  enrolledCourses?: Array<any>
+}

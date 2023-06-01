@@ -163,12 +163,13 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
-              backgroundColor: !(matchPwd && validEmail)
+              backgroundColor: !(matchPwd && validEmail) || isLoading
                 ? "#147ec0"
                 : "#008be3",
+              opacity: !(matchPwd && validEmail) || isLoading ? 0.32 : 1
             },
           ]}
-          disabled={!(matchPwd && validEmail)}
+          disabled={!(matchPwd && validEmail) || isLoading}
           onPress={handleSubmit}
         >
           <Text
