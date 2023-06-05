@@ -10,8 +10,10 @@ import {
   useWindowDimensions,
   Platform,
   FlatList,
+  Alert,
+  Share,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
 
@@ -43,6 +45,22 @@ export default function CourseDetails({ navigation, route }: any) {
     setClassTab(value);
   };
 
+  const shareCourseLink = () => {
+    Share.share({
+      message: course.courseLinkCode, // The course link you want to share
+    })
+      .then((result) => {
+        if (result.action === Share.sharedAction) {
+          Alert.alert("Link shared successfully");
+        } else if (result.action === Share.dismissedAction) {
+          Alert.alert("Link sharing dismissed");
+        }
+      })
+      .catch((error) => {
+        console.error("Error sharing link:", error);
+      });
+  };
+
   return (
     <SafeAreaView
       style={[
@@ -52,15 +70,22 @@ export default function CourseDetails({ navigation, route }: any) {
         },
       ]}
     >
-        <View>
-          <InvTouchableOpacity onPress={() => navigation.openDrawer()}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <InvTouchableOpacity onPress={() => navigation.openDrawer()}>
           <FontAwesome5
-              name="bars"
-              color={theme === "dark" ? "white" : "black"}
-              size={25}
-            />
-          </InvTouchableOpacity>
-        </View>
+            name="bars"
+            color={theme === "dark" ? "white" : "black"}
+            size={25}
+          />
+        </InvTouchableOpacity>
+        <InvTouchableOpacity onPress={() => shareCourseLink()}>
+          <EvilIcons
+            name="share-apple"
+            size={30}
+            color={theme === "dark" ? "white" : "black"}
+          />
+        </InvTouchableOpacity>
+      </View>
       <ScrollView>
         <View
           lightColor="#fff"
@@ -111,7 +136,7 @@ export default function CourseDetails({ navigation, route }: any) {
             </View>
           </View>
         </View>
-        <View style={[{ marginTop: 50}]}>
+        <View style={[{ marginTop: 50 }]}>
           <View
             style={[{ flexDirection: "row", justifyContent: "space-between" }]}
           >
@@ -136,7 +161,7 @@ export default function CourseDetails({ navigation, route }: any) {
         </View>
       </ScrollView>
       <InvTouchableOpacity
-      onPress={() => navigation.navigate('CreateClass')}
+        onPress={() => navigation.navigate("CreateClass")}
         style={[
           styles.bottom,
           styles.circle,

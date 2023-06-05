@@ -210,7 +210,7 @@ export const HomeScreen = ({ navigation }: any) => {
           renderItem={({ item }) => (
             <CourseCard course={item} navigation={navigation} />
           )}
-          keyExtractor={(course: any) => course.uid}
+          keyExtractor={(course: any) => course.uuid}
           ItemSeparatorComponent={() => <CardSeparator />}
         />
 
