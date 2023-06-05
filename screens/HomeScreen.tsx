@@ -109,18 +109,20 @@ export const HomeScreen = ({ navigation }: any) => {
           .then((enrolledCourses: any) => {
             setCourses(enrolledCourses);
             console.log('enrolled courses ', enrolledCourses);
+            setIsLoading(false)
           })
           .catch((error) => {
+            setIsLoading(false);
             console.log(error);
             Alert.alert("Error obtaining enrolled courses");
           });
       })
       .catch((error) => {
+        setIsLoading(false);
         console.log(error);
         Alert.alert("Error obtaining user data");
       })
       .finally(() => {
-        setIsLoading(false);
       });
   };
 
@@ -208,7 +210,7 @@ export const HomeScreen = ({ navigation }: any) => {
           renderItem={({ item }) => (
             <CourseCard course={item} navigation={navigation} />
           )}
-          keyExtractor={(course: any) => course.id}
+          keyExtractor={(course: any) => course.uid}
           ItemSeparatorComponent={() => <CardSeparator />}
         />
 
