@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "./Themed";
 import { Alert, Image, StyleSheet } from "react-native";
@@ -9,22 +9,60 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import { useTheme } from "@react-navigation/native";
 import useColorScheme from "../hooks/useColorScheme";
-import { DATA } from "../screens/HomeScreen";
 import { ICourseDetails } from "../types";
 import Colors from "../constants/Colors";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import useUser from "../hooks/useUser";
 
 const CustomDrawer = (props: any) => {
   const { user } = useAuth();
+  const { userDataPromise } = useUser()
   const [signOut, setSignout] = useState(false);
+  const [courses, setCourses] = useState([])
 
   const handleSignOut = () => {
     auth.signOut();
   };
 
   const theme = useColorScheme();
+
+  const fetchCourses = async () => {
+    await userDataPromise
+      .then((res: any) => {
+        const enrolledCourseIds = res.enrolledCourses;
+  
+        // Fetch the enrolled courses based on the course IDs
+        const enrolledCoursesPromises = enrolledCourseIds.map(async (courseId: string) => {
+          const courseDoc = doc(db, "courses", courseId);
+          const courseSnapshot = await getDoc(courseDoc);
+          return courseSnapshot.data();
+        });
+  
+        // Wait for all the enrolled courses to be fetched
+        Promise.all(enrolledCoursesPromises)
+          .then((enrolledCourses: any) => {
+            setCourses(enrolledCourses);
+            console.log('enrolled courses ', enrolledCourses);
+          })
+          .catch((error) => {
+            console.log(error);
+            Alert.alert("Error obtaining enrolled courses");
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+        Alert.alert("Error obtaining user data");
+      })
+      .finally(() => {
+      });
+  };
+  useEffect(() => {
+    fetchCourses()
+  }, [])
+  
   return (
     <View
       darkColor="#121212"
@@ -121,7 +159,7 @@ const CustomDrawer = (props: any) => {
             borderBottomColor: theme === "dark" ? "#232323" : "#737171",
           }}
         >
-          {DATA.map((course: ICourseDetails, index: number) => {
+          {courses.map((course: ICourseDetails, index: number) => {
             return (
               <DrawerItem
                 key={index}
@@ -141,7 +179,7 @@ const CustomDrawer = (props: any) => {
                           color: theme === "dark" ? "#eee" : "#737171",
                         }}
                       >
-                        {course.courseName}
+                        {course.courseTitle}
                       </Text>
                     </View>
                   );
