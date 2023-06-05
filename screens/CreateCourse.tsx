@@ -9,12 +9,13 @@ import {
   useColorScheme,
 } from "react-native";
 import { UserData, UserStackScreenProps } from "../types";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "../config/firebase";
 import useUser from "../hooks/useUser";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import SearchableDropdown from "react-native-searchable-dropdown";
+import uuid from 'react-native-uuid';
 
 export default function CreateCourse({ navigation }: any) {
   const { userDataPromise } = useUser();
@@ -87,6 +88,10 @@ export default function CreateCourse({ navigation }: any) {
     console.log("places changed to ", places);
   }, [places]);
 
+  const generateCourseCode = () => {
+    return uuid.v4(); // Generate a 6-character unique code using nanoid library
+  };
+
   const handleCourseTitleChange = (title: string) => {
     setCourseTitle(title);
   };
@@ -142,16 +147,41 @@ export default function CreateCourse({ navigation }: any) {
     }
     try {
       await userDataPromise.then(async (res: any) => {
-        const classesCollectionRef = collection(db, "classes");
+        const courseLinkCode = generateCourseCode();
+        const coursesCollectionRef = collection(db, "courses");
 
-        await addDoc(classesCollectionRef, {
+        await addDoc(coursesCollectionRef, {
           courseTitle: courseTitle,
+          courseCode: courseCode,
+          courseLinkCode: courseLinkCode,
+          creatorId: res?.uid,
           lecturerName: res?.firstName + " " + res?.lastName,
           location: classLocation,
         })
-          .then((response) => {
-            navigation.navigate("Home");
-            setIsLoading(false);
+          .then(async (response) => {
+            const queryRef = query(
+              collection(db, "users"),
+              where("uid", "==", res?.uid)
+            );
+            await getDocs(queryRef).then(async (userSnapshot) => {
+              console.log(userSnapshot, "usersnapshot")
+              const userCollectionRef = collection(db, 'users')
+              if (!userSnapshot.empty) {
+                const userData = userSnapshot.docs[0].data();
+                const enrolledCourses = userData.enrolledCourses || [];
+                enrolledCourses.push(response.id);
+                console.log('enrolled courses ',enrolledCourses)
+    
+                const userDocRef = doc(userCollectionRef, userSnapshot.docs[0].id);
+                await updateDoc(userDocRef, { enrolledCourses }).then((res) => {
+                  navigation.navigate("Home");
+                  setIsLoading(false);
+                }).catch((e) => {
+                  setIsLoading(false)
+                  Alert.alert("Something unexpected happened, try again later")
+                });
+              }
+            })
           })
           .catch((e) => {
             Alert.alert("Something unexpected happened, try again later");

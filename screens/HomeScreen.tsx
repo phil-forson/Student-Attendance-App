@@ -69,13 +69,14 @@ export const DATA = [
 
 export const HomeScreen = ({ navigation }: any) => {
   const theme = useColorScheme();
-  const { userDataPromise } = useUser()
+  const { userDataPromise } = useUser();
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
     useState<boolean>(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [courses, setCourses] = useState([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -89,22 +90,46 @@ export const HomeScreen = ({ navigation }: any) => {
     setTimeout(() => navigation.navigate("CreateCourse"), 800);
   };
 
-
   const getUserData = async () => {
-    setIsLoading(true)
-    await userDataPromise.then((res: any) => {
-      setFirstName(res.firstName)
-    }).catch((error) => {
-      console.log(error)
-      Alert.alert("Error obtaining user data")
-    })
-    .finally(() => {
-      setIsLoading(false)
-    })
+    setIsLoading(true);
+    await userDataPromise
+      .then((res: any) => {
+        setFirstName(res.firstName);
+      })
+      .catch((error) => {
+        console.log(error);
+        Alert.alert("Error obtaining user data");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
-  }
+  const fetchCourses = async () => {
+    try {
+      const coursesCollectionRef = collection(db, "classes");
+      const querySnapshot = await getDocs(coursesCollectionRef);
+
+      const courses: any = [];
+      querySnapshot.docs.forEach((doc) => {
+        const course = doc.data();
+        console.log("cours ", course);
+        courses.push(course);
+      });
+      setCourses(courses)
+
+      // Handle the retrieved courses
+      console.log(courses);
+
+      // Handle the retrieved courses
+      console.log(courses);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
   useEffect(() => {
-      getUserData()
+    getUserData();
+    fetchCourses();
   }, []);
 
   useEffect(
@@ -160,11 +185,11 @@ export const HomeScreen = ({ navigation }: any) => {
         </View>
         <FlatList
           style={[styles.courseContainer]}
-          data={DATA}
+          data={courses}
           renderItem={({ item }) => (
             <CourseCard course={item} navigation={navigation} />
           )}
-          keyExtractor={(course) => course.id}
+          keyExtractor={(course: any) => course.id}
           ItemSeparatorComponent={() => <CardSeparator />}
         />
 
