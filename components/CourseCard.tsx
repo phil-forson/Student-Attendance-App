@@ -12,7 +12,7 @@ export default function CourseCard({ course, navigation }: { course: ICourseDeta
       params: course
     } )}>
       <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.courseName]}>{course.courseName}</Text>
+        <Text style={[styles.courseName]}>{course.courseTitle}</Text>
       </View>
       <View style={[styles.outside, styles.transparent]}>
         <Text style={[styles.ownerName]}>{course.lecturerName}</Text>

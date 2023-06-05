@@ -95,6 +95,25 @@ export const HomeScreen = ({ navigation }: any) => {
     await userDataPromise
       .then((res: any) => {
         setFirstName(res.firstName);
+        const enrolledCourseIds = res.enrolledCourses;
+  
+        // Fetch the enrolled courses based on the course IDs
+        const enrolledCoursesPromises = enrolledCourseIds.map(async (courseId: string) => {
+          const courseDoc = doc(db, "courses", courseId);
+          const courseSnapshot = await getDoc(courseDoc);
+          return courseSnapshot.data();
+        });
+  
+        // Wait for all the enrolled courses to be fetched
+        Promise.all(enrolledCoursesPromises)
+          .then((enrolledCourses: any) => {
+            setCourses(enrolledCourses);
+            console.log('enrolled courses ', enrolledCourses);
+          })
+          .catch((error) => {
+            console.log(error);
+            Alert.alert("Error obtaining enrolled courses");
+          });
       })
       .catch((error) => {
         console.log(error);
@@ -116,7 +135,7 @@ export const HomeScreen = ({ navigation }: any) => {
         console.log("cours ", course);
         courses.push(course);
       });
-      setCourses(courses)
+      setCourses(courses);
 
       // Handle the retrieved courses
       console.log(courses);

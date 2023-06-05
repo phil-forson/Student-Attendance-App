@@ -27,49 +27,53 @@ export type UserStackScreenProps<Screen extends keyof UserStackParamList> =
   NativeStackScreenProps<UserStackParamList, Screen>;
 
 export type UserTabParamList = {
-  Home: undefined,
-  Profile: undefined,
-  Courses: undefined
-}
+  Home: undefined;
+  Profile: undefined;
+  Courses: undefined;
+};
 
-
-export type UserTabScreenProps<Screen extends keyof UserTabParamList> = CompositeScreenProps<
-BottomTabScreenProps<UserTabParamList, Screen>,
-NativeStackScreenProps<RootStackParamList>
->;
+export type UserTabScreenProps<Screen extends keyof UserTabParamList> =
+  CompositeScreenProps<
+    BottomTabScreenProps<UserTabParamList, Screen>,
+    NativeStackScreenProps<RootStackParamList>
+  >;
 
 export type CourseTabParamList = {
-  Classes: any,
-  Members: undefined
-}
+  Classes: any;
+  Members: undefined;
+};
 
-export type CourseTabScreenProps<Screen extends keyof CourseTabParamList> = CompositeScreenProps<
-  BottomTabScreenProps<CourseTabParamList, Screen>,
-  NativeStackScreenProps<RootStackParamList>
->;
+export type CourseTabScreenProps<Screen extends keyof CourseTabParamList> =
+  CompositeScreenProps<
+    BottomTabScreenProps<CourseTabParamList, Screen>,
+    NativeStackScreenProps<RootStackParamList>
+  >;
 
 export type UserDrawerParamList = {
-  Root: undefined,
-  Profile: undefined,
-  Settings: undefined
-}
+  Root: undefined;
+  Profile: undefined;
+  Settings: undefined;
+};
 
 export interface ICourseDetails {
-  id: string,
-  courseName: string,
-  lecturerName: string
+  id: string;
+  courseTitle: string;
+  lecturerName: string;
+  courseLinkCode: string;
+  creatorId: string;
+  location: any;
 }
 
 export interface IClassDetails {
-  id: string,
-  className: string,
-  duration: string
+  id: string;
+  className: string;
+  duration: string;
 }
 
 export interface UserData {
-  uid?: string,
-  firstName?: string,
-  lastName?: string,
-  email?: string,
-  enrolledCourses?: Array<any>
+  uid?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  enrolledCourses?: Array<any>;
 }

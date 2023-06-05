@@ -69,7 +69,7 @@ export default function CourseDetails({ navigation, route }: any) {
         >
           <View lightColor="#fff" darkColor="#0c0c0c">
             <Text style={[styles.bold]}>
-              {course.courseName.slice(0, 10) + "..."}
+              {course.courseTitle.slice(0, 10) + "..."}
             </Text>
           </View>
           <View lightColor="#fff" darkColor="#0c0c0c">
