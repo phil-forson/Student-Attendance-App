@@ -3,6 +3,7 @@ import { StyleSheet, useColorScheme } from "react-native";
 import { KeyboardTypeOptions } from "react-native/types";
 import { Text, TextInput, View } from "./Themed";
 import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import React from "react";
 
 export type Props = {
   placeholderTextColor?: string;
@@ -92,6 +93,7 @@ export const InputField = ({
         onBlur={() => {
           setIsFocused(false);
           setIsBlur(true);
+          console.log('blurred')
         }}
         value={value}
         onChangeText={(text) => {

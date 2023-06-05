@@ -7,6 +7,7 @@ import { InputField } from "../components/InputField"
 import { Text, TouchableOpacity, View } from "../components/Themed"
 import { AntDesign } from "@expo/vector-icons";
 import { RootStackScreenProps } from "../types"
+import React from 'react'
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 

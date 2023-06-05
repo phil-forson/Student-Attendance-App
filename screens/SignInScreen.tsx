@@ -129,7 +129,7 @@ export const SignInScreen = ({
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#fff" : "#121212",
+          backgroundColor: theme === "light" ? "#eee" : "#121212",
         },
       ]}
     >
@@ -192,7 +192,7 @@ export const SignInScreen = ({
         <InputField
           placeholder="Password"
           secure={true}
-          keyboardType="email-address"
+          keyboardType="default"
           placeholderTextColor="#C7C7C7"
           value={pwd}
           setValue={handlePwd}

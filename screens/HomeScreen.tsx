@@ -38,8 +38,9 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import useUser from "../hooks/useUser";
+import { UserData } from "../types";
 
 var width = Dimensions.get("window").width;
 export const DATA = [
@@ -67,15 +68,16 @@ export const DATA = [
 ];
 
 export const HomeScreen = ({ navigation }: any) => {
-  const { user } = useAuth();
   const theme = useColorScheme();
+  const { userDataPromise } = useUser()
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
     useState<boolean>(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const joinCourse = () => {
     setModalVisible(false);
@@ -87,34 +89,28 @@ export const HomeScreen = ({ navigation }: any) => {
     setTimeout(() => navigation.navigate("CreateCourse"), 800);
   };
 
+
+  const getUserData = async () => {
+    setIsLoading(true)
+    await userDataPromise.then((res: any) => {
+      setFirstName(res.firstName)
+    }).catch((error) => {
+      console.log(error)
+      Alert.alert("Error obtaining user data")
+    })
+    .finally(() => {
+      setIsLoading(false)
+    })
+
+  }
   useEffect(() => {
-    const getUserData = async () => {
-      if (user) {
-        const userId = user.uid;
-
-        try {
-          const queryRef = query(
-            collection(db, "users"),
-            where("uid", "==", user?.uid)
-          );
-
-          const querySnapshot = await getDocs(queryRef);
-          console.log("query Snapshot ", querySnapshot);
-
-          if (querySnapshot.size > 0) {
-            const userData = querySnapshot.docs[0].data();
-            setFirstName(userData.firstName);
-            console.log("set");
-          }
-        } catch (error) {
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    getUserData();
+      getUserData()
   }, []);
+
+  useEffect(
+    () => console.log("isloading changed to: ", isLoading),
+    [isLoading]
+  );
 
   if (isLoading) {
     // Render a loading state or placeholder
@@ -154,14 +150,12 @@ export const HomeScreen = ({ navigation }: any) => {
             />
           </InvTouchableOpacity>
           <View>
-            {firstName.length > 0 && (
-              <Text style={[{ fontSize: 15 }]}>
-                Hello{" "}
-                {firstName &&
-                  firstName.charAt(0).toUpperCase() +
-                    firstName.slice(1).toLowerCase()}
-              </Text>
-            )}
+            <Text style={[{ fontSize: 15 }]}>
+              Hello{" "}
+              {firstName &&
+                firstName.charAt(0).toUpperCase() +
+                  firstName.slice(1).toLowerCase()}
+            </Text>
           </View>
         </View>
         <FlatList

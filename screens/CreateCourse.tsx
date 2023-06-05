@@ -4,21 +4,32 @@ import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Platform,
-  KeyboardAvoidingView,
+  FlatList,
   Alert,
+  useColorScheme,
 } from "react-native";
 import { UserData, UserStackScreenProps } from "../types";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../config/firebase";
-import useAuth from "../hooks/useAuth";
+import useUser from "../hooks/useUser";
+import axios from "axios";
+import { Dropdown } from "react-native-element-dropdown";
+import SearchableDropdown from "react-native-searchable-dropdown";
 
 export default function CreateCourse({ navigation }: any) {
-  const [courseTitle, setCourseTitle] = useState("");
-  const [classLocation, setClassLocation] = useState("");
-  const [userData, setUserData] = useState<UserData>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const { userDataPromise } = useUser();
+  const theme = useColorScheme();
 
-  const { user } = useAuth();
+  const [courseTitle, setCourseTitle] = useState("");
+  const [classLocation, setClassLocation] = useState({});
+  const [classLocationSearch, setClassLocationSearch] = useState("");
+  const [classLocationData, setClassLocationData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPlacesLoading, setIsPlacesLoading] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
+  const [courseCode, setCourseCode] = useState("");
+  const [places, setPlaces] = useState([]);
+  const [isItemSelected, setIsItemSelected] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -30,17 +41,36 @@ export default function CreateCourse({ navigation }: any) {
             onPress={() => createCourse()}
             style={{}}
             disabled={
-              !(courseTitle.length && classLocation.length) || isLoading
+              !(
+                courseTitle.length &&
+                classLocationSearch.length &&
+                courseCode.length
+              ) ||
+              isLoading ||
+              !isItemSelected
             }
           >
             <Text
               style={{
-                color: !(courseTitle.length && classLocation.length)
-                  ? "#023f65"
-                  : "#008be3",
+                color:
+                  !(
+                    courseTitle.length &&
+                    classLocationSearch.length &&
+                    courseCode.length
+                  ) ||
+                  isLoading ||
+                  !isItemSelected
+                    ? "#0874b8"
+                    : "#008be3",
                 fontSize: 16,
                 opacity:
-                  !(courseTitle.length && classLocation.length) || isLoading
+                  !(
+                    courseTitle.length &&
+                    classLocationSearch.length &&
+                    courseCode.length
+                  ) ||
+                  isLoading ||
+                  !isItemSelected
                     ? 0.32
                     : 1,
               }}
@@ -51,67 +81,93 @@ export default function CreateCourse({ navigation }: any) {
         );
       },
     });
-  }, [courseTitle, classLocation]);
+  }, [courseTitle, classLocation, courseCode, isLoading, isItemSelected]);
+
+  useEffect(() => {
+    console.log("places changed to ", places);
+  }, [places]);
 
   const handleCourseTitleChange = (title: string) => {
     setCourseTitle(title);
   };
 
-  const handleClassLoc = (loc: string) => {
-    setClassLocation(loc);
+  const handleCourseCodeChange = (title: string) => {
+    setCourseCode(title);
   };
 
-  const createCourse = async () => {
-    setIsLoading(true);
-    if (!(courseTitle.length && classLocation.length)) {
-      return;
-    }
+  const handleClassLocChange = async (loc: string) => {
+    setIsItemSelected(false);
+    setClassLocationSearch(loc);
+    setIsPlacesLoading(true);
+    const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${loc}&countrycodes=GH`;
     try {
-      const classesCollectionRef = collection(db, "classes");
-
-      await addDoc(classesCollectionRef, {
-        courseTitle: courseTitle,
-        lecturerName: userData?.firstName + " " + userData?.lastName,
-        location: classLocation,
-      }).then((response) => {
-        console.log(response);
-        navigation.navigate("Home");
-      });
-    } catch (e) {
-      Alert.alert("Something unexpected happened. Try again later.");
-    } finally {
-      setIsLoading(false);
+      console.log("trying");
+      await axios
+        .get(apiUrl)
+        .then((response) => {
+          const data = response.data;
+          console.log("data ", data);
+          const placesData = data.map((location: any) => ({
+            id: location.place_id,
+            name: location.display_name,
+            boundingBox: location.boundingbox,
+          }));
+          setPlaces(placesData);
+          setIsPlacesLoading(false);
+        })
+        .catch((e) => console.log("places error ", e));
+    } catch (error) {
+      setIsPlacesLoading(false);
+      // Handle error
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    const getUserData = async () => {
-      if (user) {
-        const userId = user.uid;
+    console.log("is places loading changed to ", isPlacesLoading);
+  }, [isPlacesLoading]);
 
-        try {
-          const queryRef = query(
-            collection(db, "users"),
-            where("uid", "==", user?.uid)
-          );
+  useEffect(() => {
+    console.log(" item selection changed to ", isItemSelected);
+  }, [isItemSelected]);
 
-          const querySnapshot = await getDocs(queryRef);
-          console.log("query Snapshot ", querySnapshot);
+  const createCourse = async () => {
+    setIsLoading(true);
+    if (
+      !(courseTitle.length && classLocationSearch.length) ||
+      !isItemSelected
+    ) {
+      setIsLoading(false);
+      return;
+    }
+    try {
+      await userDataPromise.then(async (res: any) => {
+        const classesCollectionRef = collection(db, "classes");
 
-          if (querySnapshot.size > 0) {
-            const userData = querySnapshot.docs[0].data();
-            setUserData(userData);
-            console.log("set");
-          }
-        } catch (error) {
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
+        await addDoc(classesCollectionRef, {
+          courseTitle: courseTitle,
+          lecturerName: res?.firstName + " " + res?.lastName,
+          location: classLocation,
+        })
+          .then((response) => {
+            navigation.navigate("Home");
+            setIsLoading(false);
+          })
+          .catch((e) => {
+            Alert.alert("Something unexpected happened, try again later");
+            setIsLoading(false);
+            console.log(e);
+          });
+      });
+    } catch (e) {
+      setIsLoading(false);
+      Alert.alert("Something unexpected happened. Try again later.");
+    }
+  };
 
-    getUserData();
-  }, []);
+  useEffect(() => {
+    console.log("class location changed to ", classLocation);
+  }, [classLocation]);
   return (
     <View style={styles.container}>
       <Text style={styles.header}>
@@ -127,16 +183,66 @@ export default function CreateCourse({ navigation }: any) {
           setValue={handleCourseTitleChange}
         />
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
+      <View style={styles.inputContainer}>
         <InputField
           keyboardType="default"
           secure={false}
-          placeholder="Class location"
+          placeholder="Course Code"
           placeholderTextColor="gray"
-          value={classLocation}
-          setValue={handleClassLoc}
+          value={courseCode}
+          setValue={handleCourseCodeChange}
         />
       </View>
+      <View style={[styles.inputContainer, styles.marginVertical]}>
+        <InputField
+          placeholder="Class Location"
+          placeholderTextColor="gray"
+          secure={false}
+          keyboardType="default"
+          value={classLocationSearch}
+          setValue={handleClassLocChange}
+        />
+        {!(isPlacesLoading || isItemSelected) && (
+          <FlatList
+            data={places}
+            renderItem={({ item }: any) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setClassLocation(item);
+                  setClassLocationSearch(
+                    item.name.split(",").slice(0, 2).join(",")
+                  );
+                  setIsItemSelected(true);
+                }}
+                style={[
+                  {
+                    backgroundColor: theme === "light" ? "#eee" : "#121212",
+                    padding: 10,
+                  },
+                ]}
+              >
+                <Text>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item: any) => item.id.toString()}
+          />
+        )}
+        {isPlacesLoading && (
+          <View
+            style={[
+              {
+                height: 80,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 8,
+              },
+            ]}
+          >
+            <Text>Loading...</Text>
+          </View>
+        )}
+      </View>
+      <View style={[styles.inputContainer, styles.marginVertical]}></View>
     </View>
   );
 }
@@ -156,5 +262,56 @@ const styles = StyleSheet.create({
   },
   marginVertical: {
     marginVertical: 0,
+  },
+  dropdown: {
+    height: 50,
+    borderColor: "gray",
+    borderBottomWidth: 0.5,
+    marginBottom: 10,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: "absolute",
+    backgroundColor: "red",
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: "gray",
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+    color: "white",
+  },
+  itemContainerStyle: {
+    borderWidth: 1,
+    color: "white",
+  },
+  containerStyle: {
+    backgroundColor: "#000",
+  },
+  itemTextStyle: {
+    color: "white",
+    padding: 4,
+  },
+  option: {
+    padding: 10,
+    borderBottomWidth: 1,
+    color: "#000",
+    borderBottomColor: "gray",
   },
 });
