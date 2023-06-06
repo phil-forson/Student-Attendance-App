@@ -111,6 +111,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           }
         );
 
+        console.log('courses promises ', enrolledCoursesPromises)
         // Wait for all the enrolled courses to be fetched
         Promise.all(enrolledCoursesPromises)
           .then((enrolledCourses: any) => {

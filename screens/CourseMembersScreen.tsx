@@ -1,11 +1,24 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
-import { SafeAreaView, StyleSheet, Platform, FlatList } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Platform,
+  FlatList,
+  Alert,
+} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import useColorScheme from "../hooks/useColorScheme";
 import { FontAwesome5 } from "@expo/vector-icons";
 import UserListCard from "../components/UserListCard";
 import { CourseContext } from "../contexts/CourseContext";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import CardSeparator from "../components/CardSeparator";
 import { useIsFocused } from "@react-navigation/native";
@@ -47,30 +60,60 @@ export default function CourseMembersScreen({ navigation, route }: any) {
   };
 
   const getMembers = async () => {
-    console.log('getting members...')
+    console.log("getting members...");
     setIsLoading(true);
     try {
-      const usersRef = query(
-        collection(db, "users"),
-        where("uid", "in", course.enrolledUsers)
-      );
+      // const usersRef = query(
+      //   collection(db, "users"),
+      //   where("uid", "in", course.enrolledUsers)
+      // );
 
-      const querySnapshot = await getDocs(usersRef);
+      // const querySnapshot = await getDocs(usersRef);
 
-      console.log("query snapshot ", querySnapshot);
+      const enrolledUsersIds = course.enrolledStudents;
 
-      const users = querySnapshot.docs.map((doc) => doc.data());
-      console.log("users ", users);
-      setMembersData(users);
-      setIsLoading(false);
+      const enrolledUsersPromises = enrolledUsersIds.map(async (userId: string) => {
+        const usersRef = query(collection(db,'users'), where('uid', '==', userId));
+        const querySnapshot = await getDocs(usersRef)
+  
+        if (querySnapshot.empty) {
+          // Handle case where user is not found
+          return null;
+        }
+  
+        const userData = querySnapshot.docs[0].data();
+        return userData;
+      });
+      console.log('enrolled ids ', enrolledUsersIds)
+
+      console.log('promises ', enrolledUsersPromises)
+
+      Promise.all(enrolledUsersPromises)
+        .then((enrolledUsers: any) => {
+
+          setMembersData(enrolledUsers);
+          console.log("enrolled users ", enrolledUsers);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          setIsLoading(false);
+          console.log(error);
+          Alert.alert("Error obtaining enrolled courses");
+        });
+
+      // console.log("query snapshot ", querySnapshot);
+
+      // const users = querySnapshot.docs.map((doc) => doc.data());
+      // console.log("users ", users);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (isFocused) {
+      console.log("course ", course);
       getData();
       getMembers();
     }
@@ -139,7 +182,7 @@ export default function CourseMembersScreen({ navigation, route }: any) {
             renderItem={({ item }) => (
               <UserListCard text={item?.firstName + " " + item?.lastName} />
             )}
-            keyExtractor={(member: any) => member.uid}
+            keyExtractor={(member: any) => member?.uid}
             ItemSeparatorComponent={() => <CardSeparator />}
           />
         ) : (

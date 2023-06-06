@@ -80,6 +80,9 @@ export default function JoinCourse({ navigation }: any) {
               // Add the course to the user's enrolled courses
               console.log("course data ", snapshot.docs[0].id);
               console.log("eno", [...enrolledCourses, snapshot.docs[0].id]);
+              console.log('course ', [arrayUnion(user.uid)])
+
+
               await updateDoc(userDocRef, {
                 enrolledCourses: [...enrolledCourses, snapshot.docs[0].id],
               });
@@ -96,8 +99,9 @@ export default function JoinCourse({ navigation }: any) {
               setIsLoading(false);
               Alert.alert("Joined Successfully");
               console.log("course details ", snapshot.docs[0].data());
-              navigation.navigate("CourseDetails", {
-                course: snapshot.docs[0].data(),
+              navigation.navigate("CourseDetails",{
+                screen: 'Classes',
+                params: snapshot.docs[0].data()
               });
             })
             .catch((err) => {
