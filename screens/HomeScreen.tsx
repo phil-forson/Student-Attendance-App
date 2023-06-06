@@ -68,7 +68,8 @@ export const DATA = [
   },
 ];
 
-export const HomeScreen = ({ navigation }: any) => {
+export const HomeScreen = ({ navigation, route }: any) => {
+  const reload = route.params
   const theme = useColorScheme();
   const { userDataPromise } = useUser();
 
@@ -132,7 +133,9 @@ export const HomeScreen = ({ navigation }: any) => {
   };
 
   useEffect(() => {
+    console.log('reload ', reload)
     if (isFocused) {
+      console.log('getting user data...')
       // Call the function to fetch the courses or reload the data
       getUserData();
     }

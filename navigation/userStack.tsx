@@ -37,6 +37,8 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import ClassHeader from "../components/ClassHeader";
 import MyTabBar from "../components/MyTabBar";
 import CreateClass from "../screens/CreateClass";
+import CourseMembersScreen from "../screens/CourseMembersScreen";
+import { useNavigation } from "@react-navigation/native";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -55,7 +57,7 @@ export default function UserStack() {
         name="Root"
         component={StackNavigator}
         options={{
-          drawerLabel: () => null
+          drawerLabel: () => null,
         }}
       />
       <Drawer.Screen
@@ -88,10 +90,18 @@ export default function UserStack() {
   );
 }
 
+const handleGoToMembersScreen = () => {};
+
 const BottomTab = createBottomTabNavigator<CourseTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
+
+  const navigation = useNavigation<any>();
+
+  const navigateToMembersScreen = () => {
+    navigation.navigate("Members", { userId: 123 });
+  };
 
   return (
     <BottomTab.Navigator
@@ -113,7 +123,10 @@ function BottomTabNavigator() {
       />
       <BottomTab.Screen
         name="Members"
-        component={ProfileScreen}
+        component={CourseMembersScreen}
+        listeners={{
+          tabPress: () => navigateToMembersScreen,
+        }}
         options={{
           header: () => null,
           tabBarIcon: ({ color }) => (
@@ -225,7 +238,7 @@ function StackNavigator() {
                 </InvTouchableOpacity>
               );
             },
-            title: "Create Course",
+            title: "Create Class",
             headerTitleStyle: {
               fontSize: 16,
             },
@@ -240,5 +253,3 @@ function StackNavigator() {
     </Stack.Navigator>
   );
 }
-
-

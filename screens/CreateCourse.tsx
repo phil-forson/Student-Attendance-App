@@ -96,6 +96,8 @@ export default function CreateCourse({ navigation }: any) {
     console.log("places changed to ", places);
   }, [places]);
 
+  
+
   const generateCourseCode = () => {
     return uuid.v4(); // Generate a 6-character unique code using nanoid library
   };
@@ -136,18 +138,12 @@ export default function CreateCourse({ navigation }: any) {
     }
   };
 
-  useEffect(() => {
-    console.log("is places loading changed to ", isPlacesLoading);
-  }, [isPlacesLoading]);
 
-  useEffect(() => {
-    console.log(" item selection changed to ", isItemSelected);
-  }, [isItemSelected]);
 
   const createCourse = async () => {
     setIsLoading(true);
     if (
-      !(courseTitle.length && classLocationSearch.length) ||
+      !(courseTitle.length && courseCode.length) ||
       !isItemSelected
     ) {
       setIsLoading(false);
@@ -188,7 +184,7 @@ export default function CreateCourse({ navigation }: any) {
                   );
                   await updateDoc(userDocRef, { enrolledCourses })
                     .then((res) => {
-                      navigation.navigate("Home");
+                      navigation.navigate("Home", {reload: true});
                       setIsLoading(false);
                     })
                     .catch((e) => {

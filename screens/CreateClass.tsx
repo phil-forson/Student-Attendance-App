@@ -7,38 +7,69 @@ import {
   KeyboardAvoidingView,
   Dimensions,
   DatePickerIOSComponent,
+  FlatList
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import useColorScheme from "../hooks/useColorScheme";
+import axios from "axios";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
   const [classStartTime, setClassStartTime] = useState("");
   const [classLocation, setClassLocation] = useState("");
+  const [classLocationSearch, setClassLocationSearch] = useState("")
   const [classDate, setClassDate] = useState(new Date(Date.now()));
   const [classTime, setClassTime] = useState(new Date(Date.now()));
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
+  const [places, setPlaces] = useState([]);
+  const [isItemSelected, setIsItemSelected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
+  const [isPlacesLoading, setIsPlacesLoading] = useState(false)
 
   const [platform, setPlatform] = useState("");
+
+  const theme = useColorScheme()
 
   const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate;
     setClassDate(currentDate ?? new Date(Date.now()));
   };
-  const onChangeTime = (event: DateTimePickerEvent, selectedTime?: Date) => {
-    const currentTime = selectedTime;
-    setClassTime(currentTime ?? new Date(Date.now()));
-    setShowTime(false);
-  };
 
-  const showDateComponent = () => {
-    setShowDate(true);
-  };
+  useEffect(() => {
+    
+  }, [isItemSelected])
 
-  const showTimeComponent = () => setShowTime(true);
+  const handleClassLocChange = async (loc: string) => {
+    setIsItemSelected(false);
+    setClassLocationSearch(loc);
+    setIsPlacesLoading(true);
+    const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${loc}&countrycodes=GH`;
+    try {
+      console.log("trying");
+      await axios
+        .get(apiUrl)
+        .then((response) => {
+          const data = response.data;
+          console.log("data ", data);
+          const placesData = data.map((location: any) => ({
+            id: location.place_id,
+            name: location.display_name,
+            boundingBox: location.boundingbox,
+          }));
+          setPlaces(placesData);
+          setIsPlacesLoading(false);
+        })
+        .catch((e) => console.log("places error ", e));
+    } catch (error) {
+      setIsPlacesLoading(false);
+      // Handle error
+      console.error(error);
+    }
+  };
 
   const openDate = () => {
     if(Platform.OS === "android"){
@@ -67,11 +98,11 @@ export default function CreateClass({ navigation }: any) {
             darkColor="#121212"
             onPress={() => createClass()}
             style={{}}
-            disabled={!(classTitle.length && classLocation.length)}
+            disabled={!(classTitle.length && classLocation.length) || isLoading || !isItemSelected}
           >
             <Text
               style={{
-                color: !(classTitle.length && classLocation.length)
+                color: !(classTitle.length && classLocation.length) || isLoading || !isItemSelected
                   ? "#023f65"
                   : "#008be3",
                 fontSize: 16,
@@ -83,7 +114,7 @@ export default function CreateClass({ navigation }: any) {
         );
       },
     });
-  }, [classTitle, classLocation]);
+  }, [classTitle, classLocation, isLoading, isItemSelected]);
 
   const handleClassTitleChange = (title: string) => {
     setClassTitle(title);
@@ -118,13 +149,53 @@ export default function CreateClass({ navigation }: any) {
       </View>
       <View style={[styles.inputContainer, styles.marginVertical]}>
         <InputField
-          keyboardType="default"
-          secure={false}
-          placeholder="Class location"
+          placeholder="Class Location"
           placeholderTextColor="gray"
-          value={classLocation}
-          setValue={handleClassLoc}
+          secure={false}
+          keyboardType="default"
+          value={classLocationSearch}
+          setValue={handleClassLocChange}
         />
+        {!(isPlacesLoading || isItemSelected) && (
+          <FlatList
+            data={places}
+            renderItem={({ item }: any) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setClassLocation(item);
+                  setClassLocationSearch(
+                    item.name.split(",").slice(0, 2).join(",")
+                  );
+                  setIsItemSelected(true);
+                }}
+                style={[
+                  {
+                    backgroundColor: theme === "light" ? "#eee" : "#121212",
+                    padding: 10,
+                  },
+                ]}
+              >
+                <Text>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item: any) => item.id.toString()}
+          />
+        )}
+        {isPlacesLoading && (
+          <View
+            style={[
+              {
+                height: 80,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 8,
+              },
+            ]}
+          >
+            <Text>Loading...</Text>
+          </View>
+        )}
+      </View>
         <View style={[styles.inputContainer, styles.marginVertical]}>
           <InputField
             keyboardType="default"
@@ -146,7 +217,6 @@ export default function CreateClass({ navigation }: any) {
           onChange={onChangeDate}
         />
         )}
-      </View>
     </View>
   );
 }

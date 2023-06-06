@@ -52,7 +52,6 @@ export default function JoinCourse({ navigation }: any) {
           // Course found, implement logic to join the course
           const courseData = snapshot.docs[0].data();
           const courseDocRef = snapshot.docs[0];
-          
 
           // Check if the user is already enrolled in the course
           userDataPromise
@@ -79,7 +78,7 @@ export default function JoinCourse({ navigation }: any) {
               );
 
               // Add the course to the user's enrolled courses
-              console.log('course data ', snapshot.docs[0].id)
+              console.log("course data ", snapshot.docs[0].id);
               console.log("eno", [...enrolledCourses, snapshot.docs[0].id]);
               await updateDoc(userDocRef, {
                 enrolledCourses: [...enrolledCourses, snapshot.docs[0].id],
@@ -95,9 +94,10 @@ export default function JoinCourse({ navigation }: any) {
               });
 
               setIsLoading(false);
-              Alert.alert("Joined Successfully")
+              Alert.alert("Joined Successfully");
+              console.log("course details ", snapshot.docs[0].data());
               navigation.navigate("CourseDetails", {
-                courseId: snapshot.docs[0].id,
+                course: snapshot.docs[0].data(),
               });
             })
             .catch((err) => {

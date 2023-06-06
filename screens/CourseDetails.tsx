@@ -1,10 +1,10 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IClassDetails, ICourseDetails } from "../types";
 import useColorScheme from "../hooks/useColorScheme";
 import { FontAwesome5, AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
   useWindowDimensions,
@@ -16,6 +16,7 @@ import {
 import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
+import useUser from "../hooks/useUser";
 
 export const PASTCLASSES = [
   {
@@ -39,7 +40,13 @@ export default function CourseDetails({ navigation, route }: any) {
   const course: ICourseDetails = route.params;
   const theme = useColorScheme();
   const nav = useNavigation<"Drawer">();
+
+  const isFocused = useIsFocused();
+
+  const { userDataPromise } = useUser();
   const [classTab, setClassTab] = useState("upcoming");
+  const [canCreateClass, setCanCreateClass] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleTabSwitch = (value: string) => {
     setClassTab(value);
@@ -49,13 +56,37 @@ export default function CourseDetails({ navigation, route }: any) {
     Share.share({
       message: course.courseLinkCode, // The course link you want to share
     })
-      .then((result) => {
-        
-      })
+      .then((result) => {})
       .catch((error) => {
         Alert.alert("Error sharing link:", error);
       });
   };
+
+  useEffect(() => {
+    if (isFocused) {
+      setIsLoading(true);
+      userDataPromise
+        .then((userData: any) => {
+          setIsLoading(false);
+          setCanCreateClass(userData?.uid === course.creatorId);
+        })
+        .catch((error) => {
+          Alert.alert("Something unexpected happened");
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("can create class changed to ", canCreateClass);
+  }, [canCreateClass]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -67,14 +98,25 @@ export default function CourseDetails({ navigation, route }: any) {
       ]}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <InvTouchableOpacity onPress={() => navigation.openDrawer()}>
+        <InvTouchableOpacity
+          onPress={() => navigation.openDrawer()}
+          style={{
+            paddingVertical: 10,
+          }}
+        >
           <FontAwesome5
             name="bars"
             color={theme === "dark" ? "white" : "black"}
             size={25}
           />
         </InvTouchableOpacity>
-        <InvTouchableOpacity onPress={() => shareCourseLink()}>
+        <InvTouchableOpacity
+          onPress={() => shareCourseLink()}
+          style={{
+            paddingHorizontal: Platform.OS === "ios" ? 20 : 0,
+            paddingVertical: 10,
+          }}
+        >
           <EvilIcons
             name="share-apple"
             size={30}
@@ -156,27 +198,29 @@ export default function CourseDetails({ navigation, route }: any) {
           />
         </View>
       </ScrollView>
-      <InvTouchableOpacity
-        onPress={() => navigation.navigate("CreateClass")}
-        style={[
-          styles.bottom,
-          styles.circle,
-          styles.shadow,
-          {
-            shadowColor: theme === "dark" ? "#0a2e3d" : "#000",
-            marginBottom: Platform.OS === "ios" ? 0 : 10,
-          },
-        ]}
-        darkColor="#0c0c0c"
-        lightColor="#fff"
-      >
-        <AntDesign
-          name="plus"
-          color={"#007bff"}
-          size={18}
-          style={{ fontWeight: "bold" }}
-        />
-      </InvTouchableOpacity>
+      {canCreateClass && (
+        <InvTouchableOpacity
+          onPress={() => navigation.navigate("CreateClass")}
+          style={[
+            styles.bottom,
+            styles.circle,
+            styles.shadow,
+            {
+              shadowColor: theme === "dark" ? "#0a2e3d" : "#000",
+              marginBottom: Platform.OS === "ios" ? 0 : 10,
+            },
+          ]}
+          darkColor="#0c0c0c"
+          lightColor="#fff"
+        >
+          <AntDesign
+            name="plus"
+            color={"#007bff"}
+            size={18}
+            style={{ fontWeight: "bold" }}
+          />
+        </InvTouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
