@@ -9,13 +9,21 @@ import {
   useColorScheme,
 } from "react-native";
 import { UserData, UserStackScreenProps } from "../types";
-import { addDoc, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import useUser from "../hooks/useUser";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import SearchableDropdown from "react-native-searchable-dropdown";
-import uuid from 'react-native-uuid';
+import uuid from "react-native-uuid";
 
 export default function CreateCourse({ navigation }: any) {
   const { userDataPromise } = useUser();
@@ -146,49 +154,61 @@ export default function CreateCourse({ navigation }: any) {
       return;
     }
     try {
-      await userDataPromise.then(async (res: any) => {
-        const courseLinkCode = generateCourseCode();
-        const coursesCollectionRef = collection(db, "courses");
+      await userDataPromise
+        .then(async (res: any) => {
+          const courseLinkCode = generateCourseCode();
+          const coursesCollectionRef = collection(db, "courses");
 
-        await addDoc(coursesCollectionRef, {
-          courseTitle: courseTitle,
-          courseCode: courseCode,
-          courseLinkCode: courseLinkCode,
-          creatorId: res?.uid,
-          lecturerName: res?.firstName + " " + res?.lastName,
-          location: classLocation,
-        })
-          .then(async (response) => {
-            const queryRef = query(
-              collection(db, "users"),
-              where("uid", "==", res?.uid)
-            );
-            await getDocs(queryRef).then(async (userSnapshot) => {
-              console.log(userSnapshot, "usersnapshot")
-              const userCollectionRef = collection(db, 'users')
-              if (!userSnapshot.empty) {
-                const userData = userSnapshot.docs[0].data();
-                const enrolledCourses = userData.enrolledCourses || [];
-                enrolledCourses.push(response.id);
-                console.log('enrolled courses ',enrolledCourses)
-    
-                const userDocRef = doc(userCollectionRef, userSnapshot.docs[0].id);
-                await updateDoc(userDocRef, { enrolledCourses }).then((res) => {
-                  navigation.navigate("Home");
-                  setIsLoading(false);
-                }).catch((e) => {
-                  setIsLoading(false)
-                  Alert.alert("Something unexpected happened, try again later")
-                });
-              }
-            })
+          await addDoc(coursesCollectionRef, {
+            uid: uuid.v4(),
+            courseTitle: courseTitle,
+            courseCode: courseCode,
+            courseLinkCode: courseLinkCode,
+            creatorId: res?.uid,
+            lecturerName: res?.firstName + " " + res?.lastName,
+            enrolledStudents: [],
           })
-          .catch((e) => {
-            Alert.alert("Something unexpected happened, try again later");
-            setIsLoading(false);
-            console.log(e);
-          });
-      });
+            .then(async (response) => {
+              console.log('create course response ', response)
+              const queryRef = query(
+                collection(db, "users"),
+                where("uid", "==", res?.uid)
+              );
+              await getDocs(queryRef).then(async (userSnapshot) => {
+                console.log(userSnapshot, "usersnapshot");
+                const userCollectionRef = collection(db, "users");
+                if (!userSnapshot.empty) {
+                  const userData = userSnapshot.docs[0].data();
+                  const enrolledCourses = userData.enrolledCourses || [];
+                  enrolledCourses.push(response.id);
+
+                  const userDocRef = doc(
+                    userCollectionRef,
+                    userSnapshot.docs[0].id
+                  );
+                  await updateDoc(userDocRef, { enrolledCourses })
+                    .then((res) => {
+                      navigation.navigate("Home");
+                      setIsLoading(false);
+                    })
+                    .catch((e) => {
+                      setIsLoading(false);
+                      Alert.alert(
+                        "Something unexpected happened, try again later"
+                      );
+                    });
+                }
+              });
+            })
+            .catch((e) => {
+              Alert.alert("Something unexpected happened, try again later");
+              setIsLoading(false);
+              console.log(e);
+            });
+        })
+        .catch((e) =>
+          Alert.alert("Something unexpected happened. Try again later")
+        );
     } catch (e) {
       setIsLoading(false);
       Alert.alert("Something unexpected happened. Try again later.");

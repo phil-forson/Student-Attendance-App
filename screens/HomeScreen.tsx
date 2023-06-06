@@ -41,6 +41,7 @@ import {
 import { auth, db } from "../config/firebase";
 import useUser from "../hooks/useUser";
 import { UserData } from "../types";
+import { useIsFocused } from "@react-navigation/native";
 
 var width = Dimensions.get("window").width;
 export const DATA = [
@@ -71,6 +72,8 @@ export const HomeScreen = ({ navigation }: any) => {
   const theme = useColorScheme();
   const { userDataPromise } = useUser();
 
+  const isFocused = useIsFocused()
+
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
     useState<boolean>(false);
@@ -91,25 +94,28 @@ export const HomeScreen = ({ navigation }: any) => {
   };
 
   const getUserData = async () => {
+    console.log('on every render')
     setIsLoading(true);
     await userDataPromise
       .then((res: any) => {
         setFirstName(res.firstName);
         const enrolledCourseIds = res.enrolledCourses;
-  
+
         // Fetch the enrolled courses based on the course IDs
-        const enrolledCoursesPromises = enrolledCourseIds.map(async (courseId: string) => {
-          const courseDoc = doc(db, "courses", courseId);
-          const courseSnapshot = await getDoc(courseDoc);
-          return courseSnapshot.data();
-        });
-  
+        const enrolledCoursesPromises = enrolledCourseIds.map(
+          async (courseId: string) => {
+            const courseDoc = doc(db, "courses", courseId);
+            const courseSnapshot = await getDoc(courseDoc);
+            return courseSnapshot.data();
+          }
+        );
+
         // Wait for all the enrolled courses to be fetched
         Promise.all(enrolledCoursesPromises)
           .then((enrolledCourses: any) => {
-            setCourses(enrolledCourses);
-            console.log('enrolled courses ', enrolledCourses);
-            setIsLoading(false)
+            setCourses(enrolledCourses)
+            console.log("enrolled courses ", enrolledCourses);
+            setIsLoading(false);
           })
           .catch((error) => {
             setIsLoading(false);
@@ -122,41 +128,16 @@ export const HomeScreen = ({ navigation }: any) => {
         console.log(error);
         Alert.alert("Error obtaining user data");
       })
-      .finally(() => {
-      });
+      .finally(() => {});
   };
 
-  const fetchCourses = async () => {
-    try {
-      const coursesCollectionRef = collection(db, "classes");
-      const querySnapshot = await getDocs(coursesCollectionRef);
-
-      const courses: any = [];
-      querySnapshot.docs.forEach((doc) => {
-        const course = doc.data();
-        console.log("cours ", course);
-        courses.push(course);
-      });
-      setCourses(courses);
-
-      // Handle the retrieved courses
-      console.log(courses);
-
-      // Handle the retrieved courses
-      console.log(courses);
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-    }
-  };
   useEffect(() => {
-    getUserData();
-    fetchCourses();
-  }, []);
+    if (isFocused) {
+      // Call the function to fetch the courses or reload the data
+      getUserData();
+    }
+  }, [isFocused]);
 
-  useEffect(
-    () => console.log("isloading changed to: ", isLoading),
-    [isLoading]
-  );
 
   if (isLoading) {
     // Render a loading state or placeholder
@@ -204,15 +185,21 @@ export const HomeScreen = ({ navigation }: any) => {
             </Text>
           </View>
         </View>
-        <FlatList
-          style={[styles.courseContainer]}
-          data={courses}
-          renderItem={({ item }) => (
-            <CourseCard course={item} navigation={navigation} />
-          )}
-          keyExtractor={(course: any) => course.uuid}
-          ItemSeparatorComponent={() => <CardSeparator />}
-        />
+        {courses.length > 0 ? (
+          <FlatList
+            style={[styles.courseContainer]}
+            data={courses}
+            renderItem={({ item }) => (
+              <CourseCard course={item} navigation={navigation} />
+            )}
+            keyExtractor={(course: any) => course.courseLinkCode}
+            ItemSeparatorComponent={() => <CardSeparator />}
+          />
+        ) : (
+          <View style={[styles.center]}>
+            <Text>No courses to display</Text>
+          </View>
+        )}
 
         <InvTouchableOpacity
           style={[

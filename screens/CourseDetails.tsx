@@ -50,14 +50,10 @@ export default function CourseDetails({ navigation, route }: any) {
       message: course.courseLinkCode, // The course link you want to share
     })
       .then((result) => {
-        if (result.action === Share.sharedAction) {
-          Alert.alert("Link shared successfully");
-        } else if (result.action === Share.dismissedAction) {
-          Alert.alert("Link sharing dismissed");
-        }
+        
       })
       .catch((error) => {
-        console.error("Error sharing link:", error);
+        Alert.alert("Error sharing link:", error);
       });
   };
 

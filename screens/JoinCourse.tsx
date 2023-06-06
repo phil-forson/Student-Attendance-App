@@ -1,18 +1,117 @@
 import { InputField } from "../components/InputField";
-import { View, Text, TouchableOpacity, InvTouchableOpacity } from "../components/Themed";
-import React, { useEffect, useState , useLayoutEffect} from "react";
-import { StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  InvTouchableOpacity,
+} from "../components/Themed";
+import React, { useEffect, useState, useLayoutEffect } from "react";
+import { StyleSheet, Alert } from "react-native";
 import useColorScheme from "../hooks/useColorScheme";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { db } from "../config/firebase";
+import uuid from "react-native-uuid";
+import useUser from "../hooks/useUser";
 
 export default function JoinCourse({ navigation }: any) {
+  const { userDataPromise } = useUser();
   const theme = useColorScheme();
   const [courseCode, setCourseCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCodeChange = (code: string) => {
     console.log(code);
     setCourseCode(code);
     console.log("working");
-    console.log(courseCode)
+    console.log(courseCode);
+  };
+
+  const handleJoinCourse = () => {
+    setIsLoading(true);
+    // Retrieve course details based on the entered code from Firestore
+    const courseRef = collection(db, "courses");
+    const codeQuery = query(
+      courseRef,
+      where("courseLinkCode", "==", courseCode)
+    );
+    getDocs(codeQuery)
+      .then(async (snapshot) => {
+        if (snapshot.empty) {
+          setIsLoading(false);
+          Alert.alert("Course not found");
+        } else {
+          // Course found, implement logic to join the course
+          const courseData = snapshot.docs[0].data();
+          const courseDocRef = snapshot.docs[0];
+          
+
+          // Check if the user is already enrolled in the course
+          userDataPromise
+            .then(async (user: any) => {
+              const queryRef = query(
+                collection(db, "users"),
+                where("uid", "==", user?.uid)
+              );
+
+              const userSnapshot = await getDocs(queryRef);
+              const enrolledCourses =
+                userSnapshot.docs[0].data()?.enrolledCourses || [];
+
+              if (enrolledCourses.includes(snapshot.docs[0].id)) {
+                // User is already enrolled in the course
+                setIsLoading(false);
+                Alert.alert("User is already enrolled in the course");
+                return;
+              }
+
+              const userDocRef = doc(
+                collection(db, "users"),
+                userSnapshot.docs[0].id
+              );
+
+              // Add the course to the user's enrolled courses
+              console.log('course data ', snapshot.docs[0].id)
+              console.log("eno", [...enrolledCourses, snapshot.docs[0].id]);
+              await updateDoc(userDocRef, {
+                enrolledCourses: [...enrolledCourses, snapshot.docs[0].id],
+              });
+
+              const courseDocRef = doc(
+                collection(db, "courses"),
+                snapshot.docs[0].id
+              );
+              // Update the course's enrolled students count
+              await updateDoc(courseDocRef, {
+                enrolledStudents: arrayUnion(user.uid),
+              });
+
+              setIsLoading(false);
+              Alert.alert("Joined Successfully")
+              navigation.navigate("CourseDetails", {
+                courseId: snapshot.docs[0].id,
+              });
+            })
+            .catch((err) => {
+              setIsLoading(false);
+              Alert.alert("An error occurred while joining the coursesss");
+              console.log(err);
+            });
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.log("Error getting course:", error);
+        Alert.alert("An error occurred while joining the course");
+      });
   };
 
   useLayoutEffect(() => {
@@ -22,13 +121,17 @@ export default function JoinCourse({ navigation }: any) {
           <TouchableOpacity
             lightColor="#fff"
             darkColor="#121212"
-            onPress={joinCourse}
+            onPress={handleJoinCourse}
             style={{}}
-            disabled={courseCode.length === 0}
+            disabled={!uuid.validate(courseCode) || isLoading}
           >
             <Text
               style={{
-                color: courseCode.length == 0 ? "#023f65" : "#008be3",
+                color:
+                  !uuid.validate(courseCode) || isLoading
+                    ? "#023f65"
+                    : "#008be3",
+                opacity: !uuid.validate(courseCode) || isLoading ? 0.32 : 1,
                 fontSize: 16,
               }}
             >
@@ -38,11 +141,8 @@ export default function JoinCourse({ navigation }: any) {
         );
       },
     });
-  }, [courseCode]);
+  }, [courseCode, isLoading]);
 
-  const joinCourse = () => {
-    console.log(courseCode);
-  };
   return (
     <View style={styles.container}>
       <View>
@@ -57,6 +157,7 @@ export default function JoinCourse({ navigation }: any) {
             placeholderTextColor="gray"
             value={courseCode}
             setValue={handleCodeChange}
+            valid={uuid.validate(courseCode)}
           />
         </View>
         <View
