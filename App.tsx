@@ -5,19 +5,21 @@ import useCachedResources from "./hooks/useCachedResources";
 import Navigation from "./navigation";
 import "expo-dev-client";
 import React from "react";
+import { CourseProvider } from "./providers/CourseProvider";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
-  console.log();
 
   if (!isLoadingComplete) {
     return null;
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
+        <CourseProvider>
+          <Navigation colorScheme={colorScheme} />
+          <StatusBar />
+        </CourseProvider>
       </SafeAreaProvider>
     );
   }

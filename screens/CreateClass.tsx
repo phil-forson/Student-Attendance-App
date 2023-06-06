@@ -40,8 +40,11 @@ export default function CreateClass({ navigation }: any) {
   };
 
   useEffect(() => {
-    
-  }, [isItemSelected])
+    console.log('item selected changed to ', isItemSelected)
+    console.log(isLoading, 'isloading ')
+    console.log(!(classTitle.length && classLocationSearch.length) || isLoading || !isItemSelected)
+    console.log('class length ', classLocationSearch.length)
+  }, [isItemSelected, isLoading])
 
   const handleClassLocChange = async (loc: string) => {
     setIsItemSelected(false);
@@ -98,11 +101,11 @@ export default function CreateClass({ navigation }: any) {
             darkColor="#121212"
             onPress={() => createClass()}
             style={{}}
-            disabled={!(classTitle.length && classLocation.length) || isLoading || !isItemSelected}
+            disabled={!(classTitle.length && classLocationSearch.length) || isLoading || !isItemSelected}
           >
             <Text
               style={{
-                color: !(classTitle.length && classLocation.length) || isLoading || !isItemSelected
+                color: !(classTitle.length && classLocationSearch.length) || isLoading || !isItemSelected
                   ? "#023f65"
                   : "#008be3",
                 fontSize: 16,

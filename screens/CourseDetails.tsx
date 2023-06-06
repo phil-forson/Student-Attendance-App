@@ -1,5 +1,5 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IClassDetails, ICourseDetails } from "../types";
 import useColorScheme from "../hooks/useColorScheme";
@@ -17,6 +17,7 @@ import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
 import useUser from "../hooks/useUser";
+import { CourseContext } from "../contexts/CourseContext";
 
 export const PASTCLASSES = [
   {
@@ -38,6 +39,7 @@ export const PASTCLASSES = [
 
 export default function CourseDetails({ navigation, route }: any) {
   const course: ICourseDetails = route.params;
+  const { setCourseData } = useContext(CourseContext)
   const theme = useColorScheme();
   const nav = useNavigation<"Drawer">();
 
@@ -74,7 +76,8 @@ export default function CourseDetails({ navigation, route }: any) {
           Alert.alert("Something unexpected happened");
         });
     }
-  }, []);
+    setCourseData(course)
+  }, [route]);
 
   useEffect(() => {
     console.log("can create class changed to ", canCreateClass);
