@@ -62,6 +62,8 @@ export interface ICourseDetails {
   courseLinkCode: string;
   creatorId: string;
   location: any;
+  courseClasses: Array<any>
+  teachers: Array<any>
 }
 
 export interface IClassDetails {

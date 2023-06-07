@@ -7,7 +7,6 @@ import { FontAwesome5, AntDesign } from "@expo/vector-icons";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
-  useWindowDimensions,
   Platform,
   FlatList,
   Alert,
@@ -19,6 +18,8 @@ import ClassCard from "../components/ClassCard";
 import useUser from "../hooks/useUser";
 import { CourseContext } from "../contexts/CourseContext";
 import { ClassContext } from "../contexts/ClassContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 export const PASTCLASSES = [
   {
@@ -41,7 +42,7 @@ export const PASTCLASSES = [
 export default function CourseDetails({ navigation, route }: any) {
   const course: ICourseDetails = route.params;
   const { setCourseData } = useContext(CourseContext)
-  const { courseClasses } = useContext(ClassContext)
+  const { courseClasses, setCourseClassesData } = useContext(ClassContext)
   const theme = useColorScheme();
   const nav = useNavigation<"Drawer">();
 
@@ -66,15 +67,41 @@ export default function CourseDetails({ navigation, route }: any) {
       });
   };
 
+  const getClassesData = () => {
+    const courseClasses = route.params.courseClasses
+
+    const courseClassesPromises = courseClasses.map(
+      async (classId: string) => {
+        const classDoc = doc(db, "classes", classId);
+        const classSnapshot = await getDoc(classDoc);
+        return classSnapshot.data();
+      }
+      );
+
+      Promise.all(courseClassesPromises).then(
+        async (courseClasses: any) => {
+          console.log('enrolled courses', courseClasses )
+          setCourseClassesData(courseClasses)
+        }).then((res) => {
+          setIsLoading(false);
+
+        }).catch((error) => {
+          console.log(error)
+          setIsLoading(false)
+        })
+
+  }
+
   useEffect(() => {
     if (isFocused) {
       setIsLoading(true);
       userDataPromise
         .then((userData: any) => {
-          setIsLoading(false);
+          getClassesData()
           setCanCreateClass(userData?.uid === course.creatorId);
         })
         .catch((error) => {
+          setIsLoading(false)
           Alert.alert("Something unexpected happened");
         });
     }
