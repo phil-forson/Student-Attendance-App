@@ -6,6 +6,7 @@ import Navigation from "./navigation";
 import "expo-dev-client";
 import React from "react";
 import { CourseProvider } from "./providers/CourseProvider";
+import { ClassProvider } from "./providers/ClassProvider";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -17,8 +18,10 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <CourseProvider>
-          <Navigation colorScheme={colorScheme} />
-          <StatusBar />
+          <ClassProvider>
+            <Navigation colorScheme={colorScheme} />
+            <StatusBar />
+          </ClassProvider>
         </CourseProvider>
       </SafeAreaProvider>
     );

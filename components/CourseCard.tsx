@@ -1,21 +1,36 @@
 import { StyleSheet } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import { ICourseDetails } from "../types";
 import { InvTouchableOpacity, Text, View } from "./Themed";
 import useColorScheme from "../hooks/useColorScheme";
+import { CourseContext } from "../contexts/CourseContext";
 
-export default function CourseCard({ course, navigation }: { course: ICourseDetails, navigation: any }) {
+export default function CourseCard({
+  courseItem,
+  navigation,
+}: {
+  courseItem: ICourseDetails;
+  navigation: any;
+}) {
   const theme = useColorScheme();
+  const { course, setCourseData } = useContext(CourseContext);
   return (
-    <InvTouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('CourseDetails', {
-      screen: 'Classes',
-      params: course
-    } )}>
+    <InvTouchableOpacity
+      style={[styles.container]}
+      onPress={() => {
+        navigation.navigate("CourseDetails", {
+          screen: "Classes",
+          params: courseItem
+          
+        });
+        setCourseData(courseItem)
+      }}
+    >
       <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.courseName]}>{course.courseTitle}</Text>
+        <Text style={[styles.courseName]}>{courseItem.courseTitle}</Text>
       </View>
       <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.ownerName]}>{course.lecturerName}</Text>
+        <Text style={[styles.ownerName]}>{courseItem.lecturerName}</Text>
       </View>
       <View style={{ position: "relative", backgroundColor: "transparent" }}>
         <View style={[styles.bigCircle]}>
@@ -49,7 +64,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 40,
     borderColor: "#031b87",
-    opacity: 1.5
+    opacity: 1.5,
   },
   smallCircle: {
     borderRadius: 100,
@@ -60,7 +75,7 @@ const styles = StyleSheet.create({
     borderWidth: 25,
     borderColor: "#031b87",
     padding: 10,
-    opacity: 0.7
+    opacity: 0.7,
   },
   smallerCircle: {
     borderRadius: 100,
@@ -70,21 +85,21 @@ const styles = StyleSheet.create({
     position: "relative",
     borderWidth: 15,
     borderColor: "#0626b5",
-    opacity: 0.6
+    opacity: 0.6,
   },
   outside: {
-    zIndex: 100
-  }, 
+    zIndex: 100,
+  },
   transparent: {
-    backgroundColor: 'transparent'
+    backgroundColor: "transparent",
   },
   courseName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white'
+    fontWeight: "bold",
+    color: "white",
   },
   ownerName: {
     // marginTop: 20
-    color: 'white'
-  }
+    color: "white",
+  },
 });

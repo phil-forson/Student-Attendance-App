@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   InvTouchableOpacity,
 } from "../components/Themed";
-import React, { useEffect, useState, useLayoutEffect } from "react";
+import React, { useEffect, useState, useLayoutEffect, useContext } from "react";
 import { StyleSheet, Alert } from "react-native";
 import useColorScheme from "../hooks/useColorScheme";
 import {
@@ -21,9 +21,12 @@ import {
 import { db } from "../config/firebase";
 import uuid from "react-native-uuid";
 import useUser from "../hooks/useUser";
+import { CourseContext } from "../contexts/CourseContext";
 
 export default function JoinCourse({ navigation }: any) {
   const { userDataPromise } = useUser();
+
+  const { enrolledCourses, setEnrolledCoursesData } = useContext(CourseContext)
   const theme = useColorScheme();
   const [courseCode, setCourseCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -77,15 +80,16 @@ export default function JoinCourse({ navigation }: any) {
                 userSnapshot.docs[0].id
               );
 
+              const enrolledCoursesData = [...enrolledCourses, snapshot.docs[0].id]
               // Add the course to the user's enrolled courses
               console.log("course data ", snapshot.docs[0].id);
-              console.log("eno", [...enrolledCourses, snapshot.docs[0].id]);
+              console.log("eno", enrolledCoursesData);
               console.log('course ', [arrayUnion(user.uid)])
 
 
               await updateDoc(userDocRef, {
                 enrolledCourses: [...enrolledCourses, snapshot.docs[0].id],
-              });
+              })
 
               const courseDocRef = doc(
                 collection(db, "courses"),
@@ -94,15 +98,42 @@ export default function JoinCourse({ navigation }: any) {
               // Update the course's enrolled students count
               await updateDoc(courseDocRef, {
                 enrolledStudents: arrayUnion(user.uid),
+              }).then((res) => {
+                const enrolledCoursesPromises = enrolledCoursesData.map(
+                  async (courseId: string) => {
+                    const courseDoc = doc(db, "courses", courseId);
+                    const courseSnapshot = await getDoc(courseDoc);
+                    return courseSnapshot.data();
+                  }
+                );
+        
+                console.log('courses promises ', enrolledCoursesPromises)
+                // Wait for all the enrolled courses to be fetched
+                Promise.all(enrolledCoursesPromises)
+                  .then((enrolledCourses: any) => {
+                    setEnrolledCoursesData(enrolledCourses)
+                    console.log("enrolled courses ", enrolledCourses);
+                    setIsLoading(false);
+                  })
+                  .catch((error) => {
+                    setIsLoading(false);
+                    console.log(error);
+                    Alert.alert("Error obtaining enrolled courses");
+                  });
+
+                setIsLoading(false);
+                console.log("course details ", snapshot.docs[0].data());
+
+                setEnrolledCoursesData
+                
+                navigation.navigate("CourseDetails",{
+                  screen: 'Classes',
+                  params: snapshot.docs[0].data()
+                });
+              }).catch((error) => {
+                console.log(error)
               });
 
-              setIsLoading(false);
-              Alert.alert("Joined Successfully");
-              console.log("course details ", snapshot.docs[0].data());
-              navigation.navigate("CourseDetails",{
-                screen: 'Classes',
-                params: snapshot.docs[0].data()
-              });
             })
             .catch((err) => {
               setIsLoading(false);

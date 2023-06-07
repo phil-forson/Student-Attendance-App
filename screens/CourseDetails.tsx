@@ -18,6 +18,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
 import useUser from "../hooks/useUser";
 import { CourseContext } from "../contexts/CourseContext";
+import { ClassContext } from "../contexts/ClassContext";
 
 export const PASTCLASSES = [
   {
@@ -40,6 +41,7 @@ export const PASTCLASSES = [
 export default function CourseDetails({ navigation, route }: any) {
   const course: ICourseDetails = route.params;
   const { setCourseData } = useContext(CourseContext)
+  const { courseClasses } = useContext(ClassContext)
   const theme = useColorScheme();
   const nav = useNavigation<"Drawer">();
 
@@ -135,7 +137,7 @@ export default function CourseDetails({ navigation, route }: any) {
         >
           <View lightColor="#fff" darkColor="#0c0c0c">
             <Text style={[styles.bold]}>
-              {course.courseTitle.slice(0, 10) + "..."}
+              {course.courseTitle.length > 10 ? course.courseTitle.slice(0, 10) + "..." : course.courseTitle}
             </Text>
           </View>
           <View lightColor="#fff" darkColor="#0c0c0c">
@@ -190,9 +192,9 @@ export default function CourseDetails({ navigation, route }: any) {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={[styles.pastClassesContainer]}
-            data={PASTCLASSES}
+            data={courseClasses}
             renderItem={({ item }) => (
-              <ClassCard classSection={item} navigation={navigation} />
+              <ClassCard courseClass={item} navigation={navigation} />
             )}
             keyExtractor={(course) => course.id}
             ItemSeparatorComponent={() => (

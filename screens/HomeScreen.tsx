@@ -7,7 +7,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   InvTouchableOpacity,
   Text,
@@ -42,6 +42,7 @@ import { auth, db } from "../config/firebase";
 import useUser from "../hooks/useUser";
 import { UserData } from "../types";
 import { useIsFocused } from "@react-navigation/native";
+import { CourseContext } from "../contexts/CourseContext";
 
 var width = Dimensions.get("window").width;
 export const DATA = [
@@ -70,6 +71,8 @@ export const DATA = [
 
 export const HomeScreen = ({ navigation, route }: any) => {
   const reload = route.params
+
+  const { enrolledCourses, setEnrolledCoursesData } = useContext(CourseContext)
   const theme = useColorScheme();
   const { userDataPromise } = useUser();
 
@@ -80,7 +83,6 @@ export const HomeScreen = ({ navigation, route }: any) => {
     useState<boolean>(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [courses, setCourses] = useState([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -100,7 +102,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
     await userDataPromise
       .then((res: any) => {
         setFirstName(res.firstName);
-        const enrolledCourseIds = res.enrolledCourses;
+        const enrolledCourseIds = res.enrolledCourses || [];
+        console.log(enrolledCourseIds)
 
         // Fetch the enrolled courses based on the course IDs
         const enrolledCoursesPromises = enrolledCourseIds.map(
@@ -115,8 +118,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
         // Wait for all the enrolled courses to be fetched
         Promise.all(enrolledCoursesPromises)
           .then((enrolledCourses: any) => {
-            setCourses(enrolledCourses)
-            console.log("enrolled courses ", enrolledCourses);
+            setEnrolledCoursesData(enrolledCourses)
             setIsLoading(false);
           })
           .catch((error) => {
@@ -134,13 +136,17 @@ export const HomeScreen = ({ navigation, route }: any) => {
   };
 
   useEffect(() => {
-    console.log('reload ', reload)
-    if (isFocused) {
-      console.log('getting user data...')
+
       // Call the function to fetch the courses or reload the data
       getUserData();
+
+  }, []);
+
+  useEffect(() => {
+    if(isFocused){
+      console.log('enrolled courses ' ,enrolledCourses)
     }
-  }, [isFocused]);
+  },[isFocused])
 
 
   if (isLoading) {
@@ -189,12 +195,12 @@ export const HomeScreen = ({ navigation, route }: any) => {
             </Text>
           </View>
         </View>
-        {courses.length > 0 ? (
+        {enrolledCourses.length > 0 ? (
           <FlatList
             style={[styles.courseContainer]}
-            data={courses}
+            data={enrolledCourses}
             renderItem={({ item }) => (
-              <CourseCard course={item} navigation={navigation} />
+              <CourseCard courseItem={item} navigation={navigation} />
             )}
             keyExtractor={(course: any) => course.courseLinkCode}
             ItemSeparatorComponent={() => <CardSeparator />}

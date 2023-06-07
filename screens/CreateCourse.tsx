@@ -1,6 +1,6 @@
 import { InputField } from "../components/InputField";
 import { View, Text, TouchableOpacity } from "../components/Themed";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   Platform,
@@ -13,6 +13,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   updateDoc,
@@ -24,10 +25,13 @@ import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import SearchableDropdown from "react-native-searchable-dropdown";
 import uuid from "react-native-uuid";
+import { CourseContext } from "../contexts/CourseContext";
 
 export default function CreateCourse({ navigation }: any) {
   const { userDataPromise } = useUser();
   const theme = useColorScheme();
+
+  const { enrolledCourses, setEnrolledCoursesData } = useContext(CourseContext);
 
   const [courseTitle, setCourseTitle] = useState("");
   const [classLocation, setClassLocation] = useState({});
@@ -49,37 +53,17 @@ export default function CreateCourse({ navigation }: any) {
             darkColor="#121212"
             onPress={() => createCourse()}
             style={{}}
-            disabled={
-              !(
-                courseTitle.length &&
-                classLocationSearch.length &&
-                courseCode.length
-              ) ||
-              isLoading ||
-              !isItemSelected
-            }
+            disabled={!(courseTitle.length && courseCode.length) || isLoading}
           >
             <Text
               style={{
                 color:
-                  !(
-                    courseTitle.length &&
-                    classLocationSearch.length &&
-                    courseCode.length
-                  ) ||
-                  isLoading ||
-                  !isItemSelected
+                  !(courseTitle.length && courseCode.length) || isLoading
                     ? "#0874b8"
                     : "#008be3",
                 fontSize: 16,
                 opacity:
-                  !(
-                    courseTitle.length &&
-                    classLocationSearch.length &&
-                    courseCode.length
-                  ) ||
-                  isLoading ||
-                  !isItemSelected
+                  !(courseTitle.length && courseCode.length) || isLoading
                     ? 0.32
                     : 1,
               }}
@@ -90,13 +74,11 @@ export default function CreateCourse({ navigation }: any) {
         );
       },
     });
-  }, [courseTitle, classLocation, courseCode, isLoading, isItemSelected]);
+  }, [courseTitle, courseCode, isLoading]);
 
   useEffect(() => {
     console.log("places changed to ", places);
   }, [places]);
-
-  
 
   const generateCourseCode = () => {
     return uuid.v4(); // Generate a 6-character unique code using nanoid library
@@ -110,42 +92,41 @@ export default function CreateCourse({ navigation }: any) {
     setCourseCode(title);
   };
 
-  const handleClassLocChange = async (loc: string) => {
-    setIsItemSelected(false);
-    setClassLocationSearch(loc);
-    setIsPlacesLoading(true);
-    const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${loc}&countrycodes=GH`;
-    try {
-      console.log("trying");
-      await axios
-        .get(apiUrl)
-        .then((response) => {
-          const data = response.data;
-          console.log("data ", data);
-          const placesData = data.map((location: any) => ({
-            id: location.place_id,
-            name: location.display_name,
-            boundingBox: location.boundingbox,
-          }));
-          setPlaces(placesData);
-          setIsPlacesLoading(false);
-        })
-        .catch((e) => console.log("places error ", e));
-    } catch (error) {
-      setIsPlacesLoading(false);
-      // Handle error
-      console.error(error);
-    }
-  };
-
-
+  useEffect(() => {
+    console.log("disabled", !(courseTitle.length && courseCode.length));
+  }, [isLoading, courseCode, courseTitle]);
+  // const handleClassLocChange = async (loc: string) => {
+  //   setIsItemSelected(false);
+  //   setClassLocationSearch(loc);
+  //   setIsPlacesLoading(true);
+  //   const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${loc}&countrycodes=GH`;
+  //   try {
+  //     console.log("trying");
+  //     await axios
+  //       .get(apiUrl)
+  //       .then((response) => {
+  //         const data = response.data;
+  //         console.log("data ", data);
+  //         const placesData = data.map((location: any) => ({
+  //           id: location.place_id,
+  //           name: location.display_name,
+  //           boundingBox: location.boundingbox,
+  //         }));
+  //         setPlaces(placesData);
+  //         setIsPlacesLoading(false);
+  //       })
+  //       .catch((e) => console.log("places error ", e));
+  //   } catch (error) {
+  //     setIsPlacesLoading(false);
+  //     // Handle error
+  //     console.error(error);
+  //   }
+  // };
 
   const createCourse = async () => {
+    console.log("course creation");
     setIsLoading(true);
-    if (
-      !(courseTitle.length && courseCode.length) ||
-      !isItemSelected
-    ) {
+    if (!(courseTitle.length && courseCode.length)) {
       setIsLoading(false);
       return;
     }
@@ -163,14 +144,16 @@ export default function CreateCourse({ navigation }: any) {
             creatorId: res?.uid,
             lecturerName: res?.firstName + " " + res?.lastName,
             enrolledStudents: [],
+            teachers: []
           })
             .then(async (response) => {
-              console.log('create course response ', response)
+              console.log("create course response ", response);
               const queryRef = query(
                 collection(db, "users"),
                 where("uid", "==", res?.uid)
               );
-              await getDocs(queryRef).then(async (userSnapshot) => {
+              await getDocs(queryRef)
+              .then(async (userSnapshot) => {
                 console.log(userSnapshot, "usersnapshot");
                 const userCollectionRef = collection(db, "users");
                 if (!userSnapshot.empty) {
@@ -184,8 +167,33 @@ export default function CreateCourse({ navigation }: any) {
                   );
                   await updateDoc(userDocRef, { enrolledCourses })
                     .then((res) => {
-                      navigation.navigate("Home", {reload: true});
-                      setIsLoading(false);
+                      const enrolledCoursesPromises = enrolledCourses.map(
+                        async (courseId: string) => {
+                          const courseDoc = doc(db, "courses", courseId);
+                          const courseSnapshot = await getDoc(courseDoc);
+                          return courseSnapshot.data();
+                        }
+                        );
+                        Promise.all(enrolledCoursesPromises).then(
+                          async (enrolledCourses: any) => {
+                            console.log('enrolled courses', enrolledCourses )
+                            setEnrolledCoursesData(enrolledCourses);
+                            const courseDoc = doc(db, 'courses', response.id)
+                          await getDoc(courseDoc).then((res) => {
+
+                              navigation.navigate("CourseDetails", {
+                                screen: "Classes",
+                                params: res.data()
+                                
+                              })
+                              setIsLoading(false);
+                            }).catch((error) => {
+                              console.log(error)
+                              setIsLoading(false)
+                            })
+                          }
+                        );
+                      
                     })
                     .catch((e) => {
                       setIsLoading(false);
@@ -194,6 +202,10 @@ export default function CreateCourse({ navigation }: any) {
                       );
                     });
                 }
+              }).catch((error) => {
+                setIsLoading(false)
+                Alert.alert('Something unexpected happened')
+                console.log(error)
               });
             })
             .catch((e) => {
@@ -239,7 +251,7 @@ export default function CreateCourse({ navigation }: any) {
           setValue={handleCourseCodeChange}
         />
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
+      {/* <View style={[styles.inputContainer, styles.marginVertical]}>
         <InputField
           placeholder="Class Location"
           placeholderTextColor="gray"
@@ -288,7 +300,7 @@ export default function CreateCourse({ navigation }: any) {
           </View>
         )}
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}></View>
+      <View style={[styles.inputContainer, styles.marginVertical]}></View> */}
     </View>
   );
 }

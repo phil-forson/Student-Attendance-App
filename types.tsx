@@ -65,9 +65,11 @@ export interface ICourseDetails {
 }
 
 export interface IClassDetails {
-  id: string;
+  classId: string;
   className: string;
-  duration: string;
+  courseId: string;
+  classLocation: any;
+  classDate: Date;
 }
 
 export interface UserData {

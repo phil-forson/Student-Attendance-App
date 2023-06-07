@@ -25,7 +25,7 @@ import { useIsFocused } from "@react-navigation/native";
 
 export default function CourseMembersScreen({ navigation, route }: any) {
   const theme = useColorScheme();
-  const { course } = useContext(CourseContext);
+  const { course, setEnrolledMembersData, enrolledMembers } = useContext(CourseContext);
 
   const [creatorData, setCreatorData] = useState<any>({});
   const [membersData, setMembersData] = useState<any>([]);
@@ -40,18 +40,69 @@ export default function CourseMembersScreen({ navigation, route }: any) {
         collection(db, "users"),
         where("uid", "==", course.creatorId)
       );
-      const querySnapshot = await getDocs(userRef);
+      await getDocs(userRef).then(async (res) => {
+        if (res.empty) {
+          // No matching user found
+          return null;
+        }
 
-      if (querySnapshot.empty) {
-        // No matching user found
-        return null;
-      }
+        const user = res.docs[0].data();
+        console.log("user ", user);
+        setCreatorData(user);
+        try {
+          // const usersRef = query(
+          //   collection(db, "users"),
+          //   where("uid", "in", course.enrolledUsers)
+          // );
+    
+          // const querySnapshot = await getDocs(usersRef);
+    
+          const enrolledUsersIds = course.enrolledStudents;
+    
+          const enrolledUsersPromises = enrolledUsersIds.map(async (userId: string) => {
+            const usersRef = query(collection(db,'users'), where('uid', '==', userId));
+            const querySnapshot = await getDocs(usersRef)
+      
+            if (querySnapshot.empty) {
+              // Handle case where user is not found
+              return null;
+            }
+      
+            const userData = querySnapshot.docs[0].data();
+            return userData;
+          });
+          console.log('enrolled ids ', enrolledUsersIds)
+    
+          console.log('promises ', enrolledUsersPromises)
+    
+          Promise.all(enrolledUsersPromises)
+            .then((enrolledUsers: any) => {
+    
+              setMembersData(enrolledUsers);
+              setEnrolledMembersData(enrolledUsers)
+              console.log("enrolled users ", enrolledUsers);
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              setIsLoading(false);
+              console.log(error);
+              Alert.alert("Error obtaining enrolled courses");
+            });
+    
+          // console.log("query snapshot ", querySnapshot);
+    
+          // const users = querySnapshot.docs.map((doc) => doc.data());
+          // console.log("users ", users);
+        } catch (error) {
+          console.log(error);
+          setIsLoading(false);
+        }
+      }).catch((error) => {
+        console.log(error)
+      });
+
 
       // Assuming there is only one user with the given creatorId
-      const user = querySnapshot.docs[0].data();
-      console.log("user ", user);
-      setCreatorData(user);
-      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.log("Error getting user:", error);
@@ -59,65 +110,12 @@ export default function CourseMembersScreen({ navigation, route }: any) {
     }
   };
 
-  const getMembers = async () => {
-    console.log("getting members...");
-    setIsLoading(true);
-    try {
-      // const usersRef = query(
-      //   collection(db, "users"),
-      //   where("uid", "in", course.enrolledUsers)
-      // );
-
-      // const querySnapshot = await getDocs(usersRef);
-
-      const enrolledUsersIds = course.enrolledStudents;
-
-      const enrolledUsersPromises = enrolledUsersIds.map(async (userId: string) => {
-        const usersRef = query(collection(db,'users'), where('uid', '==', userId));
-        const querySnapshot = await getDocs(usersRef)
   
-        if (querySnapshot.empty) {
-          // Handle case where user is not found
-          return null;
-        }
-  
-        const userData = querySnapshot.docs[0].data();
-        return userData;
-      });
-      console.log('enrolled ids ', enrolledUsersIds)
-
-      console.log('promises ', enrolledUsersPromises)
-
-      Promise.all(enrolledUsersPromises)
-        .then((enrolledUsers: any) => {
-
-          setMembersData(enrolledUsers);
-          console.log("enrolled users ", enrolledUsers);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          setIsLoading(false);
-          console.log(error);
-          Alert.alert("Error obtaining enrolled courses");
-        });
-
-      // console.log("query snapshot ", querySnapshot);
-
-      // const users = querySnapshot.docs.map((doc) => doc.data());
-      // console.log("users ", users);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    if (isFocused) {
       console.log("course ", course);
       getData();
-      getMembers();
-    }
-  }, [isFocused]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -157,7 +155,7 @@ export default function CourseMembersScreen({ navigation, route }: any) {
             { fontSize: 22, borderBottomColor: "gray", borderBottomWidth: 1 },
           ]}
         >
-          Lecturer Name
+          Teachers
         </Text>
         <UserListCard
           text={creatorData?.firstName + " " + creatorData?.lastName}
@@ -170,15 +168,15 @@ export default function CourseMembersScreen({ navigation, route }: any) {
       >
         <Text
           style={[
-            { fontSize: 22, borderBottomColor: "gray", borderBottomWidth: 1 },
+            { fontSize: 22, borderBottomColor: "gray", borderBottomWidth: 1, paddingVertical: 5 },
           ]}
         >
-          Members
+          Members ({enrolledMembers.length})
         </Text>
-        {membersData.length > 0 ? (
+        {enrolledMembers.length > 0 ? (
           <FlatList
             style={styles.membersContainer}
-            data={membersData}
+            data={enrolledMembers}
             renderItem={({ item }) => (
               <UserListCard text={item?.firstName + " " + item?.lastName} />
             )}

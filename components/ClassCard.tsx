@@ -5,10 +5,10 @@ import React from "react";
 import { StyleSheet } from "react-native";
 
 export default function ClassCard({
-  classSection,
+  courseClass,
   navigation,
 }: {
-  classSection: IClassDetails;
+  courseClass: IClassDetails;
   navigation: any;
 }) {
   const theme = useColorScheme();
@@ -19,13 +19,15 @@ export default function ClassCard({
         {
           borderColor: theme === "light" ? "#737171" : "#fff",
           backgroundColor: theme === "light" ? "#fff" : "#121212",
-          justifyContent: 'space-around'
+          justifyContent: "space-around",
         },
       ]}
     >
-      <Text>{classSection.className}</Text>
-      <Text>{classSection.duration}hrs</Text>
-
+      <Text>{courseClass.className}</Text>
+      <Text>
+        Location:{" "}
+        {courseClass.classLocation.name.split(",").slice(0, 2).join(",")}
+      </Text>
     </InvTouchableOpacity>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "./Themed";
 import { Alert, Image, StyleSheet } from "react-native";
@@ -16,10 +16,13 @@ import { ICourseDetails } from "../types";
 import Colors from "../constants/Colors";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import useUser from "../hooks/useUser";
+import { CourseContext } from "../contexts/CourseContext";
 
 const CustomDrawer = (props: any) => {
   const { user } = useAuth();
   const { userDataPromise } = useUser()
+
+  const { enrolledCourses } = useContext(CourseContext)
   const [signOut, setSignout] = useState(false);
   const [courses, setCourses] = useState([])
 
@@ -159,7 +162,7 @@ const CustomDrawer = (props: any) => {
             borderBottomColor: theme === "dark" ? "#232323" : "#737171",
           }}
         >
-          {courses.map((course: ICourseDetails, index: number) => {
+          {enrolledCourses.map((course: ICourseDetails, index: number) => {
             return (
               <DrawerItem
                 key={index}
@@ -184,7 +187,7 @@ const CustomDrawer = (props: any) => {
                     </View>
                   );
                 }}
-                onPress={() =>
+                onPress={() => {
                   props.navigation.navigate("Root", {
                     screen: "CourseDetails",
                     params: {
@@ -192,6 +195,7 @@ const CustomDrawer = (props: any) => {
                       params: course,
                     },
                   })
+                }
                 }
               />
             );

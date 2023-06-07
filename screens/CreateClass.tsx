@@ -1,13 +1,13 @@
 import { InputField } from "../components/InputField";
 import { View, Text, TouchableOpacity } from "../components/Themed";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   StyleSheet,
   Platform,
   KeyboardAvoidingView,
   Dimensions,
   DatePickerIOSComponent,
-  FlatList
+  FlatList,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerAndroid,
@@ -15,24 +15,44 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import useColorScheme from "../hooks/useColorScheme";
 import axios from "axios";
+import { CourseContext } from "../contexts/CourseContext";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { db } from "../config/firebase";
+import uuid from "react-native-uuid";
+import { ClassContext } from "../contexts/ClassContext";
+import { StretchOutY } from "react-native-reanimated";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
   const [classStartTime, setClassStartTime] = useState("");
   const [classLocation, setClassLocation] = useState("");
-  const [classLocationSearch, setClassLocationSearch] = useState("")
+  const [classLocationSearch, setClassLocationSearch] = useState("");
   const [classDate, setClassDate] = useState(new Date(Date.now()));
   const [classTime, setClassTime] = useState(new Date(Date.now()));
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [places, setPlaces] = useState([]);
   const [isItemSelected, setIsItemSelected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
-  const [isPlacesLoading, setIsPlacesLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPlacesLoading, setIsPlacesLoading] = useState(false);
 
   const [platform, setPlatform] = useState("");
 
-  const theme = useColorScheme()
+  const { course } = useContext(CourseContext);
+
+  const { setCourseClassesData } = useContext(ClassContext)
+
+  const theme = useColorScheme();
 
   const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate;
@@ -40,11 +60,15 @@ export default function CreateClass({ navigation }: any) {
   };
 
   useEffect(() => {
-    console.log('item selected changed to ', isItemSelected)
-    console.log(isLoading, 'isloading ')
-    console.log(!(classTitle.length && classLocationSearch.length) || isLoading || !isItemSelected)
-    console.log('class length ', classLocationSearch.length)
-  }, [isItemSelected, isLoading])
+    console.log("item selected changed to ", isItemSelected);
+    console.log(isLoading, "isloading ");
+    console.log(
+      !(classTitle.length && classLocationSearch.length) ||
+        isLoading ||
+        !isItemSelected
+    );
+    console.log("class length ", classLocationSearch.length);
+  }, [isItemSelected, isLoading]);
 
   const handleClassLocChange = async (loc: string) => {
     setIsItemSelected(false);
@@ -75,19 +99,17 @@ export default function CreateClass({ navigation }: any) {
   };
 
   const openDate = () => {
-    if(Platform.OS === "android"){
-      setShowDate(false)
+    if (Platform.OS === "android") {
+      setShowDate(false);
       DateTimePickerAndroid.open({
-          value: classDate,
-          onChange: onChangeDate,
-          mode: "date",
-          is24Hour: true,
-        })
+        value: classDate,
+        onChange: onChangeDate,
+        mode: "date",
+        is24Hour: true,
+      });
+    } else if (Platform.OS === "ios") {
+      setShowDate(true);
     }
-    else if(Platform.OS === 'ios'){
-      setShowDate(true)
-    }
-
   };
 
   const width = Dimensions.get("screen").width - 40;
@@ -101,13 +123,20 @@ export default function CreateClass({ navigation }: any) {
             darkColor="#121212"
             onPress={() => createClass()}
             style={{}}
-            disabled={!(classTitle.length && classLocationSearch.length) || isLoading || !isItemSelected}
+            disabled={
+              !(classTitle.length && classLocationSearch.length) ||
+              isLoading ||
+              !isItemSelected
+            }
           >
             <Text
               style={{
-                color: !(classTitle.length && classLocationSearch.length) || isLoading || !isItemSelected
-                  ? "#023f65"
-                  : "#008be3",
+                color:
+                  !(classTitle.length && classLocationSearch.length) ||
+                  isLoading ||
+                  !isItemSelected
+                    ? "#023f65"
+                    : "#008be3",
                 fontSize: 16,
               }}
             >
@@ -131,9 +160,72 @@ export default function CreateClass({ navigation }: any) {
     setClassLocation(loc);
   };
 
-  const createClass = () => {
+  const createClass = async () => {
+    console.log("creating class...");
     console.log(classLocation);
-    navigation.goBack();
+    console.log(course);
+    setIsLoading(true);
+    try {
+      const classRef = await addDoc(collection(db, "classes"), {
+        courseId: course.uid,
+        className: classTitle,
+        classId: uuid.v4(),
+        classLocation: classLocation,
+        classDate: classDate,
+      });
+
+      const classId = classRef.id;
+
+      const courseQuery = query(
+        collection(db, "courses"),
+        where("uid", "==", course.uid)
+      );
+      await getDocs(courseQuery)
+        .then(async (snapshot) => {
+          const courseDocRef = snapshot.docs[0].ref;
+          const courseDocData = snapshot.docs[0].data();
+
+          const courseClasses = courseDocData.courseClasses || [];
+          courseClasses.push(classId);
+          console.log("course classes ", courseClasses);
+          await updateDoc(courseDocRef, {
+            courseClasses: courseClasses,
+          })
+            .then((res) => {
+              const courseClassesPromises = courseClasses.map(
+                async (classId: string) => {
+                  const classDoc = doc(db, "classes", classId);
+                  const classSnapshot = await getDoc(classDoc);
+                  return classSnapshot.data();
+                }
+                );
+
+                Promise.all(courseClassesPromises).then(
+                  async (courseClasses: any) => {
+                    console.log('enrolled courses', courseClasses )
+                    setCourseClassesData(courseClasses)
+                  }).then((res) => {
+                    navigation.goBack();
+                    setIsLoading(false);
+
+                  }).catch((error) => {
+                    console.log(error)
+                    setIsLoading(false)
+                  })
+            })
+            .catch((error) => {
+              console.log(error);
+              setIsLoading(false);
+            });
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsLoading(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    // navigation.goBack();
   };
   return (
     <View style={styles.container}>
@@ -199,27 +291,27 @@ export default function CreateClass({ navigation }: any) {
           </View>
         )}
       </View>
-        <View style={[styles.inputContainer, styles.marginVertical]}>
-          <InputField
-            keyboardType="default"
-            secure={false}
-            placeholder="Class date"
-            placeholderTextColor="gray"
-            value={classDate.toLocaleDateString()}
-            setValue={onChangeDate}
-            editable={false}
-            onClick={() => openDate()}
-          />
-        </View>
-        {showDate && Platform.OS === "ios" && (
-          <DateTimePicker
+      <View style={[styles.inputContainer, styles.marginVertical]}>
+        <InputField
+          keyboardType="default"
+          secure={false}
+          placeholder="Class date"
+          placeholderTextColor="gray"
+          value={classDate.toLocaleDateString()}
+          setValue={onChangeDate}
+          editable={false}
+          onClick={() => openDate()}
+        />
+      </View>
+      {showDate && Platform.OS === "ios" && (
+        <DateTimePicker
           testID="dateTimePicker"
           value={classDate}
           mode={"date"}
           is24Hour={true}
           onChange={onChangeDate}
         />
-        )}
+      )}
     </View>
   );
 }

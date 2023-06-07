@@ -85,34 +85,38 @@ export const SignInScreen = ({
 
   const createAccount = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, pwd).then(
-        async (response) => {
-          const user = response.user;
-          const queryRef = query(
-            collection(db, "users"),
-            where("uid", "==", user?.uid)
-          );
-
-          const querySnapshot = await getDocs(queryRef);
-
-          if (querySnapshot.size === 0) {
-            // create a new user
-            await addDoc(collection(db, "users"), {
-              uid: user?.uid,
-              firstName: firstName,
-              lastName: lastName,
-              email: email,
-              enrolledCourses: [],
-            }).finally(() => setIsLoading(false));
-          }
+      setIsLoading(true);
+  
+      const response = await createUserWithEmailAndPassword(auth, email, pwd);
+      const user = response.user;
+      const queryRef = query(collection(db, "users"), where("uid", "==", user?.uid));
+      console.log('response from creating user');
+  
+      const querySnapshot = await getDocs(queryRef);
+  
+      if (querySnapshot.size === 0) {
+        // Create a new user
+        try {
+          const userDocRef = await addDoc(collection(db, "users"), {
+            uid: user?.uid,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            enrolledCourses: [],
+          });
+  
+          console.log('response from adding user', userDocRef);
+        } catch (error) {
+          setIsLoading(false);
+          console.log(error);
+          return; // Exit early if there was an error adding the user data
         }
-      );
+      }
+  
+      setIsLoading(false);
     } catch (error: any) {
       setIsLoading(false);
-      if (
-        error.code === "auth/invalid-email" ||
-        error.code === "auth/wrong-password"
-      ) {
+      if (error.code === "auth/invalid-email" || error.code === "auth/wrong-password") {
         Alert.alert("Your email or password was incorrect");
       } else if (error.code === "auth/email-already-in-use") {
         Alert.alert("An account with this email already exists");
@@ -229,24 +233,26 @@ export const SignInScreen = ({
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
-              backgroundColor: !(
-                matchPwd &&
-                validEmail &&
-                validFirstName &&
-                validLastName &&
-                matchPwd2
-              ) || isLoading
-                ? "#147ec0"
-                : "#008be3",
-              opacity: !(
-                matchPwd &&
-                validEmail &&
-                validFirstName &&
-                validLastName &&
-                matchPwd2
-              ) || isLoading
-                ? 0.32
-                : 1,
+              backgroundColor:
+                !(
+                  matchPwd &&
+                  validEmail &&
+                  validFirstName &&
+                  validLastName &&
+                  matchPwd2
+                ) || isLoading
+                  ? "#147ec0"
+                  : "#008be3",
+              opacity:
+                !(
+                  matchPwd &&
+                  validEmail &&
+                  validFirstName &&
+                  validLastName &&
+                  matchPwd2
+                ) || isLoading
+                  ? 0.32
+                  : 1,
             },
           ]}
           disabled={
@@ -256,7 +262,7 @@ export const SignInScreen = ({
               validFirstName &&
               validLastName &&
               matchPwd2
-            ) || (isLoading)
+            ) || isLoading
           }
           onPress={handleSubmit}
         >
