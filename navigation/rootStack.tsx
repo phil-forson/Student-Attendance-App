@@ -9,7 +9,7 @@ import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
 import { SignInScreen } from "../screens/SignInScreen";
 import VerifyCodeScreen from "../screens/VerifyCodeScreen";
 import { RootStackParamList, RootStackScreenProps } from "../types";
-import FacialRecognitionScreen from "../screens/FacialRecognitionScreen";
+import {FacialRecognitionScreen} from "../screens/FacialRecognitionScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

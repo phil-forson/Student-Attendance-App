@@ -27,7 +27,7 @@ import {
 import * as Animatable from "react-native-animatable";
 import { Feather } from "@expo/vector-icons";
 
-const FacialRecognitionScreen = () => {
+export const FacialRecognitionScreen = () => {
   const height = Dimensions.get("screen").height;
   const width = Dimensions.get("screen").width;
   const [type, setType] = useState(CameraType.front);
@@ -286,4 +286,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FacialRecognitionScreen;
