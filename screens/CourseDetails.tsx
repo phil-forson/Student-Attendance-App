@@ -5,13 +5,7 @@ import { IClassDetails, ICourseDetails } from "../types";
 import useColorScheme from "../hooks/useColorScheme";
 import { FontAwesome5, AntDesign } from "@expo/vector-icons";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import {
-  StyleSheet,
-  Platform,
-  FlatList,
-  Alert,
-  Share,
-} from "react-native";
+import { StyleSheet, Platform, FlatList, Alert, Share } from "react-native";
 import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
@@ -41,8 +35,9 @@ export const PASTCLASSES = [
 
 export default function CourseDetails({ navigation, route }: any) {
   const course: ICourseDetails = route.params;
-  const { setCourseData } = useContext(CourseContext)
-  const { courseClasses, setCourseClassesData } = useContext(ClassContext)
+  const { setCourseData } = useContext(CourseContext);
+  const { courseClass, setCourseClassData, courseClasses, setCourseClassesData } =
+    useContext(ClassContext);
   const theme = useColorScheme();
   const nav = useNavigation<"Drawer">();
 
@@ -67,47 +62,89 @@ export default function CourseDetails({ navigation, route }: any) {
       });
   };
 
-  const getClassesData = () => {
-    const courseClasses = route.params.courseClasses
+  const getUpcomingClass = async () => {
+    const courseClassesData = route.params.courseClasses
 
-    const courseClassesPromises = courseClasses?.map(
-      async (classId: string) => {
-        const classDoc = doc(db, "classes", classId);
-        const classSnapshot = await getDoc(classDoc);
-        return classSnapshot.data();
+    const now = new Date();
+    console.log("course classes ", courseClassesData);
+    console.log('course classes length ' , courseClasses?.length)
+    if(courseClasses?.length > 0){
+      console.log('there are course classes', courseClasses.length)
+      const upcomingClasses = courseClasses.filter((classItem: any) => {
+        return now < new Date(classItem.classStartTime?.toDate());
+      });
+  
+      console.log("upcomingggg", upcomingClasses);
+  
+      if(upcomingClasses.length === 1){
+        console.log('only one upcoming clasd')
+        setCourseClassData(upcomingClasses[0])
       }
+      else {
+
+      upcomingClasses.sort((classA: any, classB: any) => {
+        const dateA = classA.classStartTime?.getDate();
+        const dateB = classB.classStartTime?.getDate();
+        return dateA - dateB;
+      });
+  
+      setCourseClassData(upcomingClasses[0]);}
+    }
+    else {
+      setIsLoading(false)
+    }
+  };
+
+  const getClassesData = async () => {
+
+    const courseClassesData = route.params.courseClasses ;
+
+    setCourseClassesData(courseClassesData)
+
+    console.log('from classes fn ',)
+    if(courseClassesData?.length > 0){
+
+      const courseClassesPromises = courseClassesData?.map(
+        async (classId: string) => {
+          const classDoc = doc(db, "classes", classId);
+          const classSnapshot = await getDoc(classDoc);
+          return classSnapshot.data();
+        }
       );
-
-      Promise.all(courseClassesPromises).then(
-        async (courseClasses: any) => {
-          console.log('enrolled courses', courseClasses )
-          setCourseClassesData(courseClasses)
-        }).then((res) => {
-          setIsLoading(false);
-
-        }).catch((error) => {
-          console.log(error)
-          setIsLoading(false)
+  
+      Promise.all(courseClassesPromises)
+        .then(async (courseClasses: any) => {
+          setCourseClassesData(courseClasses);
+          console.log('course classes enrolled ', courseClasses)
+          getUpcomingClass()
         })
+        .catch((error) => {
+          console.log(error);
+          setIsLoading(false);
+        });
+    }
 
-  }
+    
+  };
+  
 
   useEffect(() => {
     if (isFocused) {
       setIsLoading(true);
       userDataPromise
-        .then((userData: any) => {
-          getClassesData()
-          setCanCreateClass(userData?.uid === course.creatorId);
+        .then(async (userData: any) => {
+          await getClassesData();
+          setCanCreateClass(userData?.uid === course?.creatorId);
+          setIsLoading(false)
         })
         .catch((error) => {
-          setIsLoading(false)
-          console.log(error)
+          setIsLoading(false);
+          console.log(error);
           Alert.alert("Something unexpected happeneddd");
         });
     }
-    setCourseData(course)
-  }, [route]);
+    setCourseData(course);
+  }, [route, isFocused]);
 
   useEffect(() => {
     console.log("can create class changed to ", canCreateClass);
@@ -165,7 +202,9 @@ export default function CourseDetails({ navigation, route }: any) {
         >
           <View lightColor="#fff" darkColor="#0c0c0c">
             <Text style={[styles.bold]}>
-              {course.courseTitle.length > 10 ? course.courseTitle.slice(0, 10) + "..." : course.courseTitle}
+              {course.courseTitle.length > 10
+                ? course.courseTitle.slice(0, 10) + "..."
+                : course.courseTitle}
             </Text>
           </View>
           <View lightColor="#fff" darkColor="#0c0c0c">
@@ -183,7 +222,7 @@ export default function CourseDetails({ navigation, route }: any) {
               <Text style={[{ color: "#2f95dc" }]}>View All</Text>
             </InvTouchableOpacity>
           </View>
-          <View
+          <InvTouchableOpacity
             style={[
               styles.card,
               styles.extraMarginTop,
@@ -194,18 +233,19 @@ export default function CourseDetails({ navigation, route }: any) {
               },
             ]}
           >
-            <View style={[styles.transparentBg]}>
-              <Text style={[styles.bold]}>Interface Design</Text>
+            <View style={[styles.transparentBg, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+              <Text style={[styles.bold]}>{courseClass.className}</Text>
+              <Text style={[styles.smallText]}>In 2hrs</Text>
             </View>
             <View style={[styles.transparentBg]}>
-              <Text style={[styles.bold, styles.largeText]}>
-                UI/UX Prototyping
+              <Text style={[{ fontWeight: '400'}, styles.largeText]}>
+                {courseClass?.classLocation?.name.split(',').slice(0,2).join(',')}
               </Text>
             </View>
             <View style={[styles.transparentBg]}>
               <Text style={[styles.smallText]}>Duration: 2hrs</Text>
             </View>
-          </View>
+          </InvTouchableOpacity>
         </View>
         <View style={[{ marginTop: 50 }]}>
           <View
@@ -220,7 +260,7 @@ export default function CourseDetails({ navigation, route }: any) {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={[styles.pastClassesContainer]}
-            data={courseClasses ?? []} 
+            data={courseClasses ?? []}
             renderItem={({ item }) => (
               <ClassCard courseClass={item} navigation={navigation} />
             )}

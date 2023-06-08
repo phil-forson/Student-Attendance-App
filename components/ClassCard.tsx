@@ -26,7 +26,7 @@ export default function ClassCard({
       <Text>{courseClass.className}</Text>
       <Text>
         Location:{" "}
-        {courseClass.classLocation.name.split(",").slice(0, 2).join(",")}
+        {courseClass?.classLocation?.name.split(",").slice(0, 2).join(",")}
       </Text>
     </InvTouchableOpacity>
   );

@@ -163,7 +163,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
               // Check if the snapshot is from the local cache
               if (snapshot.metadata.fromCache) {
                 console.log("Snapshot data is from the local cache");
-                
+
                 // Perform actions for local cache data
               } else {
                 console.log("Snapshot data is synchronized with the server");
@@ -181,6 +181,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
       };
 
       verifyInSync();
+      getUserData()
     }
   }, [isFocused]);
 

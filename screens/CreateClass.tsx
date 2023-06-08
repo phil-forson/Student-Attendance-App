@@ -41,10 +41,10 @@ import { StretchOutY } from "react-native-reanimated";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
-  const [classStartTime, setClassStartTime] = useState<Date>();
+  const [classStartTime, setClassStartTime] = useState<Date | null>(null);
+  const [classEndTime, setClassEndTime] = useState<Date | null>(null);
   const [classStartTimeError, setClassStartTimeError] =
     useState<boolean>(false);
-  const [classEndTime, setClassEndTime] = useState<Date>();
   const [classEndTimeError, setClassEndTimeError] = useState<boolean>(false);
   const [classLocation, setClassLocation] = useState("");
   const [classLocationSearch, setClassLocationSearch] = useState<string>("");
@@ -84,6 +84,10 @@ export default function CreateClass({ navigation }: any) {
       Alert.alert("Select class date before proceeding");
       return;
     }
+    if (!classStartTime) {
+      Alert.alert("Select class start time before proceeding");
+      return;
+    }
     setEndTimePickerVisibility(true);
   };
 
@@ -107,7 +111,6 @@ export default function CreateClass({ navigation }: any) {
   };
 
   const handleConfirmStartTime = (time: Date) => {
-    console.log(time);
     if (!classDate) {
       Alert.alert("Select class date before proceeding");
       hideStartTimePicker();
@@ -124,8 +127,9 @@ export default function CreateClass({ navigation }: any) {
       hideStartTimePicker();
       setClassStartTimeError(false);
     } else {
-      console.log(classEndTime)
-      setClassStartTime(undefined)
+      console.log(classEndTime);
+      console.log("error ");
+      setClassStartTime(null);
       setClassStartTimeError(true);
       hideStartTimePicker();
     }
@@ -139,15 +143,16 @@ export default function CreateClass({ navigation }: any) {
       newDate?.getTime() >
       (classStartTime ? classStartTime.getTime() : newDate?.getTime() - 1)
     ) {
-      console.log('yes')
+      console.log("yes");
       setClassEndTime(newDate);
       hideEndTimePicker();
       setClassEndTimeError(false);
     } else {
-      console.log('no')
-      console.log(time.getTime())
-      console.log('start time ', classStartTime?.getTime())
-      setClassEndTime(undefined)
+      console.log("error ");
+      console.log("no");
+      console.log(time.getTime());
+      console.log("start time ", classStartTime?.getTime());
+      setClassEndTime(null);
       setClassEndTimeError(true);
       hideEndTimePicker();
     }
@@ -187,9 +192,21 @@ export default function CreateClass({ navigation }: any) {
 
   const createClass = async () => {
     setIsLoading(true);
-    if(!(classDate || classStartTime || classEndTime)){
-      console.log('nothing')
-      return ;
+    if (
+      !(
+        classDate &&
+        classStartTime &&
+        classEndTime &&
+        classStartTime !== null &&
+        classEndTime !== null
+      )
+    ) {
+      console.log("nothing");
+      console.log("class date", classDate);
+      console.log(classStartTime);
+      console.log(classEndTime);
+      setIsLoading(false);
+      return;
     }
     try {
       await addDoc(collection(db, "classes"), {
@@ -197,65 +214,65 @@ export default function CreateClass({ navigation }: any) {
         className: classTitle,
         classId: uuid.v4(),
         classLocation: classLocation,
-        classDate: classDate || "",
-        classStartTime: classStartTime || "",
-        classEndTime: classEndTime || ""
-      }).catch((error) => {
-        setIsLoading(false)
-        console.log(error)
-      }).then(async (res: any) => {
-        const classId = res.id;
-  
-        const courseQuery = query(
-          collection(db, "courses"),
-          where("uid", "==", course.uid)
-        );
-        await getDocs(courseQuery)
-          .then(async (snapshot) => {
-            const courseDocRef = snapshot.docs[0].ref;
-            const courseDocData = snapshot.docs[0].data();
-  
-            const courseClasses = courseDocData.courseClasses || [];
-            courseClasses.push(classId);
-            console.log("course classes ", courseClasses);
-            await updateDoc(courseDocRef, {
-              courseClasses: courseClasses,
-            })
-              .then((res) => {
-                const courseClassesPromises = courseClasses.map(
-                  async (classId: string) => {
-                    const classDoc = doc(db, "classes", classId);
-                    const classSnapshot = await getDoc(classDoc);
-                    return classSnapshot.data();
-                  }
-                );
-  
-                Promise.all(courseClassesPromises)
-                  .then(async (courseClasses: any) => {
-                    console.log("enrolled courses", courseClasses);
-                    setCourseClassesData(courseClasses);
-                  })
-                  .then((res) => {
-                    navigation.goBack();
-                    setIsLoading(false);
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                    setIsLoading(false);
-                  });
+        classDate: classDate,
+        classStartTime: classStartTime,
+        classEndTime: classEndTime,
+      })
+        .catch((error) => {
+          setIsLoading(false);
+          console.log(error);
+        })
+        .then(async (res: any) => {
+          const classId = res.id;
+
+          const courseQuery = query(
+            collection(db, "courses"),
+            where("uid", "==", course.uid)
+          );
+          await getDocs(courseQuery)
+            .then(async (snapshot) => {
+              const courseDocRef = snapshot.docs[0].ref;
+              const courseDocData = snapshot.docs[0].data();
+
+              const courseClasses = courseDocData.courseClasses || [];
+              courseClasses.push(classId);
+              console.log("course classes ", courseClasses);
+              await updateDoc(courseDocRef, {
+                courseClasses: courseClasses,
               })
-              .catch((error) => {
-                console.log(error);
-                setIsLoading(false);
-              });
-          })
-          .catch((error) => {
-            console.log(error);
-            setIsLoading(false);
-          });
+                .then((res) => {
+                  const courseClassesPromises = courseClasses.map(
+                    async (classId: string) => {
+                      const classDoc = doc(db, "classes", classId);
+                      const classSnapshot = await getDoc(classDoc);
+                      return classSnapshot.data();
+                    }
+                  );
 
-      });
-
+                  Promise.all(courseClassesPromises)
+                    .then(async (courseClasses: any) => {
+                      console.log("enrolled courses", courseClasses);
+                      setCourseClassesData(courseClasses);
+                    })
+                    .then((res) => {
+                      navigation.goBack();
+                      setIsLoading(false);
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                      setIsLoading(false);
+                    });
+                })
+                .catch((error) => {
+                  console.log(error);
+                  setIsLoading(false);
+                });
+            })
+            .catch((error) => {
+              console.log(error);
+              setIsLoading(false);
+            });
+        });
     } catch (error) {
       console.log(error);
     }
@@ -309,12 +326,34 @@ export default function CreateClass({ navigation }: any) {
   }, [
     classTitle,
     classLocation,
+    classDate,
+    classStartTime,
+    classEndTime,
     isLoading,
     isItemSelected,
     classStartTimeError,
     classEndTimeError,
   ]);
 
+  useEffect(() => {
+    if (classStartTime) {
+      const newDate = new Date(classDate || Date.now());
+      newDate.setHours(classStartTime.getHours());
+      newDate.setMinutes(classStartTime.getMinutes());
+      setClassStartTime(newDate);
+    }
+    if (classEndTime) {
+      const newDate = new Date(classDate || Date.now());
+      newDate.setHours(classEndTime.getHours());
+      newDate.setMinutes(classEndTime.getMinutes());
+      setClassEndTime(newDate);
+    }
+  }, [classDate]);
+  useEffect(() => {
+    console.log("class date changed to ", classDate);
+    console.log("class start time changed to ", classStartTime);
+    console.log("class end time changed to ", classEndTime);
+  }, [classDate, classStartTime, classEndTime]);
 
   return (
     <View style={styles.container}>
@@ -424,7 +463,11 @@ export default function CreateClass({ navigation }: any) {
               : "Class Start Time"}
           </Text>
         </InvTouchableOpacity>
-        {classStartTimeError && <Text style={{color: 'red', marginTop: 6, fontSize: 13}}>Start time cannot be greater than end time</Text>}
+        {classStartTimeError && (
+          <Text style={{ color: "red", marginTop: 6, fontSize: 13 }}>
+            Start time cannot be greater than end time
+          </Text>
+        )}
       </View>
       <View style={[styles.inputContainer, styles.marginVertical]}>
         <InvTouchableOpacity
@@ -448,7 +491,11 @@ export default function CreateClass({ navigation }: any) {
               : "Class End Time"}
           </Text>
         </InvTouchableOpacity>
-        {classEndTimeError && <Text style={{color: 'red', marginTop: 6, fontSize: 13}}>End time cannot be less than start time</Text>}
+        {classEndTimeError && (
+          <Text style={{ color: "red", marginTop: 6, fontSize: 13 }}>
+            End time cannot be less than start time
+          </Text>
+        )}
       </View>
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
