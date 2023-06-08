@@ -1,5 +1,10 @@
 import { InputField } from "../components/InputField";
-import { View, Text, TouchableOpacity } from "../components/Themed";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  InvTouchableOpacity,
+} from "../components/Themed";
 import React, { useEffect, useState, useContext } from "react";
 import {
   StyleSheet,
@@ -13,6 +18,7 @@ import DateTimePicker, {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import useColorScheme from "../hooks/useColorScheme";
 import axios from "axios";
 import { CourseContext } from "../contexts/CourseContext";
@@ -36,8 +42,8 @@ export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
   const [classStartTime, setClassStartTime] = useState("");
   const [classLocation, setClassLocation] = useState("");
-  const [classLocationSearch, setClassLocationSearch] = useState("");
-  const [classDate, setClassDate] = useState(new Date(Date.now()));
+  const [classLocationSearch, setClassLocationSearch] = useState<string>("");
+  const [classDate, setClassDate] = useState<any>("");
   const [classTime, setClassTime] = useState(new Date(Date.now()));
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
@@ -45,18 +51,35 @@ export default function CreateClass({ navigation }: any) {
   const [isItemSelected, setIsItemSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlacesLoading, setIsPlacesLoading] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => {
+    console.log("opening modal");
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date: any) => {
+    const classDate = new Date(date);
+    console.log(classDate);
+    setClassDate(classDate);
+    hideDatePicker();
+  };
 
   const [platform, setPlatform] = useState("");
 
   const { course } = useContext(CourseContext);
 
-  const { setCourseClassesData } = useContext(ClassContext)
+  const { setCourseClassesData } = useContext(ClassContext);
 
   const theme = useColorScheme();
 
-  const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    const currentDate = selectedDate;
-    setClassDate(currentDate ?? new Date(Date.now()));
+  const onChangeDate = (selectedDate?: any) => {
+    const classDate = selectedDate;
+    setClassDate(classDate ?? new Date(Date.now()));
   };
 
   useEffect(() => {
@@ -98,19 +121,19 @@ export default function CreateClass({ navigation }: any) {
     }
   };
 
-  const openDate = () => {
-    if (Platform.OS === "android") {
-      setShowDate(false);
-      DateTimePickerAndroid.open({
-        value: classDate,
-        onChange: onChangeDate,
-        mode: "date",
-        is24Hour: true,
-      });
-    } else if (Platform.OS === "ios") {
-      setShowDate(true);
-    }
-  };
+  // const openDate = () => {
+  //   if (Platform.OS === "android") {
+  //     setShowDate(false);
+  //     DateTimePickerAndroid.open({
+  //       value: classDate,
+  //       onChange: onChangeDate,
+  //       mode: "date",
+  //       is24Hour: true,
+  //     });
+  //   } else if (Platform.OS === "ios") {
+  //     setShowDate(true);
+  //   }
+  // };
 
   const width = Dimensions.get("screen").width - 40;
 
@@ -198,20 +221,21 @@ export default function CreateClass({ navigation }: any) {
                   const classSnapshot = await getDoc(classDoc);
                   return classSnapshot.data();
                 }
-                );
+              );
 
-                Promise.all(courseClassesPromises).then(
-                  async (courseClasses: any) => {
-                    console.log('enrolled courses', courseClasses )
-                    setCourseClassesData(courseClasses)
-                  }).then((res) => {
-                    navigation.goBack();
-                    setIsLoading(false);
-
-                  }).catch((error) => {
-                    console.log(error)
-                    setIsLoading(false)
-                  })
+              Promise.all(courseClassesPromises)
+                .then(async (courseClasses: any) => {
+                  console.log("enrolled courses", courseClasses);
+                  setCourseClassesData(courseClasses);
+                })
+                .then((res) => {
+                  navigation.goBack();
+                  setIsLoading(false);
+                })
+                .catch((error) => {
+                  console.log(error);
+                  setIsLoading(false);
+                });
             })
             .catch((error) => {
               console.log(error);
@@ -292,18 +316,32 @@ export default function CreateClass({ navigation }: any) {
         )}
       </View>
       <View style={[styles.inputContainer, styles.marginVertical]}>
-        <InputField
+        {/* <InputField
           keyboardType="default"
           secure={false}
           placeholder="Class date"
           placeholderTextColor="gray"
-          value={classDate.toLocaleDateString()}
+          value={classDate?.toLocaleDateString()}
           setValue={onChangeDate}
+          onClick={showDatePicker}
           editable={false}
-          onClick={() => openDate()}
-        />
+          caretHidden={false}
+        /> */}
+        <InvTouchableOpacity
+          style={{
+            borderBottomColor: "#C7C7CD",
+            borderBottomWidth: 1,
+            borderRadius: 4,
+            paddingVertical: 12,
+          }}
+          onPress={showDatePicker}
+        >
+          <Text style={{ color: classDate ? "white" : "gray", fontSize: 13.8 }}>
+            {classDate ? classDate?.toLocaleDateString() : "Class date"}
+          </Text>
+        </InvTouchableOpacity>
       </View>
-      {showDate && Platform.OS === "ios" && (
+      {/* {showDate && Platform.OS === "ios" && (
         <DateTimePicker
           testID="dateTimePicker"
           value={classDate}
@@ -311,7 +349,13 @@ export default function CreateClass({ navigation }: any) {
           is24Hour={true}
           onChange={onChangeDate}
         />
-      )}
+      )} */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
     </View>
   );
 }

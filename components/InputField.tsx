@@ -17,6 +17,7 @@ export type Props = {
   icon?: keyof typeof AntDesign.glyphMap;
   editable?: boolean;
   onClick?: () => void;
+  caretHidden?:boolean
 };
 
 export const InputField = ({
@@ -31,6 +32,8 @@ export const InputField = ({
   icon,
   editable = true,
   onClick,
+  caretHidden = false
+
 }: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isBlur, setIsBlur] = useState(false);
@@ -82,6 +85,7 @@ export const InputField = ({
         placeholder={placeholder}
         placeholderTextColor={placeholderTextColor}
         autoCorrect={false}
+        caretHidden={caretHidden}
         autoComplete={keyboardType === "email-address" ? "email" : undefined}
         onFocus={() => {
           setIsFocused(true);
