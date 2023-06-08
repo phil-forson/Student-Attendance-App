@@ -108,7 +108,7 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
             },
           ]}
 
-          onPress={() => navigation.navigate("SignIn")}
+          onPress={() => navigation.navigate("FacialRecognition")}
         >
           <Text
             lightColor="#fff"

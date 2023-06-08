@@ -9,6 +9,7 @@ import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
 import { SignInScreen } from "../screens/SignInScreen";
 import VerifyCodeScreen from "../screens/VerifyCodeScreen";
 import { RootStackParamList, RootStackScreenProps } from "../types";
+import FacialRecognitionScreen from "../screens/FacialRecognitionScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -78,6 +79,13 @@ export default function RootNavigator() {
         name="NotFound"
         component={NotFoundScreen}
         options={{ title: "Oops!" }}
+      />
+      <Stack.Screen 
+      name="FacialRecognition"
+      component={FacialRecognitionScreen}
+      options={({navigation}: RootStackScreenProps<"FacialRecognition">) => ({
+        header: () => null
+      })}
       />
     </Stack.Navigator>
   );

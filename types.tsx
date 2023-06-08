@@ -10,6 +10,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   VerifyCode: undefined;
   ResetPassword: undefined;
+  FacialRecognition: undefined
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
