@@ -27,7 +27,7 @@ import {
 import * as Animatable from "react-native-animatable";
 import { Feather } from "@expo/vector-icons";
 
-export const FacialRecognitionScreen = () => {
+const FacialRecognitionScreen = () => {
   const height = Dimensions.get("screen").height;
   const width = Dimensions.get("screen").width;
   const [type, setType] = useState(CameraType.front);
@@ -84,7 +84,7 @@ export const FacialRecognitionScreen = () => {
     if (faces.length > 0) {
       // Check if any face intersects with the frame area
       const frameArea = calculateFrameArea(); // Customize based on your frame dimensions
-      const isFaceDetected = faces.some((face: any) => {
+      const faceInFrame = faces.some((face: any) => {
         const faceBounds = face.bounds;
         console.log(faceBounds.origin.x , 'x area')
         console.log(faceBounds.origin.y, 'y area')
@@ -99,8 +99,11 @@ export const FacialRecognitionScreen = () => {
 
       });
 
-      setIsFaceInFrame(isFaceDetected);
+      setTimeout(() => {
+        setIsFaceInFrame(faceInFrame);
+      }, 2000);
     } else {
+        console.log('face not detected')
       setIsFaceInFrame(false);
     }
   };
@@ -285,4 +288,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
 });
+
+export default FacialRecognitionScreen as React.FC;
+
 
