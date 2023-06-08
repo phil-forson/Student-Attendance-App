@@ -70,7 +70,7 @@ export default function CourseDetails({ navigation, route }: any) {
   const getClassesData = () => {
     const courseClasses = route.params.courseClasses
 
-    const courseClassesPromises = courseClasses.map(
+    const courseClassesPromises = courseClasses?.map(
       async (classId: string) => {
         const classDoc = doc(db, "classes", classId);
         const classSnapshot = await getDoc(classDoc);
@@ -102,7 +102,8 @@ export default function CourseDetails({ navigation, route }: any) {
         })
         .catch((error) => {
           setIsLoading(false)
-          Alert.alert("Something unexpected happened");
+          console.log(error)
+          Alert.alert("Something unexpected happeneddd");
         });
     }
     setCourseData(course)
@@ -219,11 +220,11 @@ export default function CourseDetails({ navigation, route }: any) {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={[styles.pastClassesContainer]}
-            data={courseClasses}
+            data={courseClasses ?? []} 
             renderItem={({ item }) => (
               <ClassCard courseClass={item} navigation={navigation} />
             )}
-            keyExtractor={(course) => course.id}
+            keyExtractor={(courseClass) => courseClass.classId}
             ItemSeparatorComponent={() => (
               <View style={[{ paddingRight: 30 }]}></View>
             )}

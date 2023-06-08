@@ -35,6 +35,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
   where,
 } from "firebase/firestore";
@@ -70,13 +71,13 @@ export const DATA = [
 ];
 
 export const HomeScreen = ({ navigation, route }: any) => {
-  const reload = route.params
+  const reload = route.params;
 
-  const { enrolledCourses, setEnrolledCoursesData } = useContext(CourseContext)
+  const { enrolledCourses, setEnrolledCoursesData } = useContext(CourseContext);
   const theme = useColorScheme();
   const { userDataPromise } = useUser();
 
-  const isFocused = useIsFocused()
+  const isFocused = useIsFocused();
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
@@ -97,35 +98,16 @@ export const HomeScreen = ({ navigation, route }: any) => {
   };
 
   const getUserData = async () => {
-    console.log('on every render')
+    console.log("on every render");
     setIsLoading(true);
     await userDataPromise
-      .then((res: any) => {
+      .then(async (res: any) => {
         setFirstName(res.firstName);
         const enrolledCourseIds = res.enrolledCourses || [];
-        console.log(enrolledCourseIds)
+        console.log(enrolledCourseIds);
 
+        getAllCoursesData(enrolledCourseIds);
         // Fetch the enrolled courses based on the course IDs
-        const enrolledCoursesPromises = enrolledCourseIds.map(
-          async (courseId: string) => {
-            const courseDoc = doc(db, "courses", courseId);
-            const courseSnapshot = await getDoc(courseDoc);
-            return courseSnapshot.data();
-          }
-        );
-
-        console.log('courses promises ', enrolledCoursesPromises)
-        // Wait for all the enrolled courses to be fetched
-        Promise.all(enrolledCoursesPromises)
-          .then((enrolledCourses: any) => {
-            setEnrolledCoursesData(enrolledCourses)
-            setIsLoading(false);
-          })
-          .catch((error) => {
-            setIsLoading(false);
-            console.log(error);
-            Alert.alert("Error obtaining enrolled courses");
-          });
       })
       .catch((error) => {
         setIsLoading(false);
@@ -135,19 +117,72 @@ export const HomeScreen = ({ navigation, route }: any) => {
       .finally(() => {});
   };
 
+  const getAllCoursesData = (enrolledCourseIds: Array<any>) => {
+    const enrolledCoursesPromises = enrolledCourseIds.map(
+      async (courseId: string) => {
+        const courseDoc = doc(db, "courses", courseId);
+        const courseSnapshot = await getDoc(courseDoc);
+        return courseSnapshot.data();
+      }
+    );
+
+    console.log("courses promises ", enrolledCoursesPromises);
+    // Wait for all the enrolled courses to be fetched
+    Promise.all(enrolledCoursesPromises)
+      .then((enrolledCourses: any) => {
+        setEnrolledCoursesData(enrolledCourses);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.log(error);
+        Alert.alert("Error obtaining enrolled courses");
+      });
+  };
+
+  const checkIfInSync = () => {};
+
   useEffect(() => {
-
-      // Call the function to fetch the courses or reload the data
-      getUserData();
-
+    // Call the function to fetch the courses or reload the data
+    getUserData();
   }, []);
 
   useEffect(() => {
-    if(isFocused){
-      console.log('enrolled courses ' ,enrolledCourses)
-    }
-  },[isFocused])
+    if (isFocused) {
+      console.log("enrolled courses ", enrolledCourses);
+      const verifyInSync = async () => {
+        await userDataPromise.then(async (res: any) => {
+          const userQuery = query(
+            collection(db, "users"),
+            where("uid", "==", res?.uid)
+          );
+          const userSnapshot = await getDocs(userQuery);
+          const unsubscribe = onSnapshot(
+            userSnapshot.docs[0].ref,
+            (snapshot) => {
+              // Check if the snapshot is from the local cache
+              if (snapshot.metadata.fromCache) {
+                console.log("Snapshot data is from the local cache");
+                
+                // Perform actions for local cache data
+              } else {
+                console.log("Snapshot data is synchronized with the server");
+                // Perform actions for synchronized data
+              }
 
+              // Access the snapshot data
+              const data = snapshot.data();
+
+              // Perform actions based on the data
+              console.log("Snapshot data:", data);
+            }
+          );
+        });
+      };
+
+      verifyInSync();
+    }
+  }, [isFocused]);
 
   if (isLoading) {
     // Render a loading state or placeholder

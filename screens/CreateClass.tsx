@@ -13,6 +13,7 @@ import {
   Dimensions,
   DatePickerIOSComponent,
   FlatList,
+  Alert,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerAndroid,
@@ -40,11 +41,14 @@ import { StretchOutY } from "react-native-reanimated";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
-  const [classStartTime, setClassStartTime] = useState("");
+  const [classStartTime, setClassStartTime] = useState<Date>();
+  const [classStartTimeError, setClassStartTimeError] =
+    useState<boolean>(false);
+  const [classEndTime, setClassEndTime] = useState<Date>();
+  const [classEndTimeError, setClassEndTimeError] = useState<boolean>(false);
   const [classLocation, setClassLocation] = useState("");
   const [classLocationSearch, setClassLocationSearch] = useState<string>("");
-  const [classDate, setClassDate] = useState<any>("");
-  const [classTime, setClassTime] = useState(new Date(Date.now()));
+  const [classDate, setClassDate] = useState<Date>();
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [places, setPlaces] = useState([]);
@@ -52,14 +56,47 @@ export default function CreateClass({ navigation }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlacesLoading, setIsPlacesLoading] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isStartTimePickerVisible, setStartTimePickerVisibility] =
+    useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
+
+  const { course } = useContext(CourseContext);
+
+  const { setCourseClassesData } = useContext(ClassContext);
+
+  const theme = useColorScheme();
 
   const showDatePicker = () => {
     console.log("opening modal");
     setDatePickerVisibility(true);
   };
 
+  const showStartTimePicker = () => {
+    if (!classDate) {
+      Alert.alert("Select class date before proceeding");
+      return;
+    }
+    setStartTimePickerVisibility(true);
+  };
+
+  const showEndTimePicker = () => {
+    if (!classDate) {
+      Alert.alert("Select class date before proceeding");
+      return;
+    }
+    setEndTimePickerVisibility(true);
+  };
+
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
+  };
+
+  const hideStartTimePicker = () => {
+    setStartTimePickerVisibility(false);
+  };
+
+  const hideEndTimePicker = () => {
+    setEndTimePickerVisibility(false);
   };
 
   const handleConfirm = (date: any) => {
@@ -69,29 +106,52 @@ export default function CreateClass({ navigation }: any) {
     hideDatePicker();
   };
 
-  const [platform, setPlatform] = useState("");
-
-  const { course } = useContext(CourseContext);
-
-  const { setCourseClassesData } = useContext(ClassContext);
-
-  const theme = useColorScheme();
-
-  const onChangeDate = (selectedDate?: any) => {
-    const classDate = selectedDate;
-    setClassDate(classDate ?? new Date(Date.now()));
+  const handleConfirmStartTime = (time: Date) => {
+    console.log(time);
+    if (!classDate) {
+      Alert.alert("Select class date before proceeding");
+      hideStartTimePicker();
+      return;
+    }
+    const newDate = new Date(classDate ?? Date.now());
+    newDate.setHours(time.getHours());
+    newDate.setMinutes(time.getMinutes());
+    if (
+      newDate?.getTime() <
+      (classEndTime ? classEndTime.getTime() : newDate?.getTime() + 1)
+    ) {
+      setClassStartTime(newDate);
+      hideStartTimePicker();
+      setClassStartTimeError(false);
+    } else {
+      console.log(classEndTime)
+      setClassStartTime(undefined)
+      setClassStartTimeError(true);
+      hideStartTimePicker();
+    }
   };
 
-  useEffect(() => {
-    console.log("item selected changed to ", isItemSelected);
-    console.log(isLoading, "isloading ");
-    console.log(
-      !(classTitle.length && classLocationSearch.length) ||
-        isLoading ||
-        !isItemSelected
-    );
-    console.log("class length ", classLocationSearch.length);
-  }, [isItemSelected, isLoading]);
+  const handleConfirmEndTime = (time: Date) => {
+    const newDate = new Date(classDate ?? Date.now());
+    newDate.setHours(time.getHours());
+    newDate.setMinutes(time.getMinutes());
+    if (
+      newDate?.getTime() >
+      (classStartTime ? classStartTime.getTime() : newDate?.getTime() - 1)
+    ) {
+      console.log('yes')
+      setClassEndTime(newDate);
+      hideEndTimePicker();
+      setClassEndTimeError(false);
+    } else {
+      console.log('no')
+      console.log(time.getTime())
+      console.log('start time ', classStartTime?.getTime())
+      setClassEndTime(undefined)
+      setClassEndTimeError(true);
+      hideEndTimePicker();
+    }
+  };
 
   const handleClassLocChange = async (loc: string) => {
     setIsItemSelected(false);
@@ -121,21 +181,86 @@ export default function CreateClass({ navigation }: any) {
     }
   };
 
-  // const openDate = () => {
-  //   if (Platform.OS === "android") {
-  //     setShowDate(false);
-  //     DateTimePickerAndroid.open({
-  //       value: classDate,
-  //       onChange: onChangeDate,
-  //       mode: "date",
-  //       is24Hour: true,
-  //     });
-  //   } else if (Platform.OS === "ios") {
-  //     setShowDate(true);
-  //   }
-  // };
+  const handleClassTitleChange = (title: string) => {
+    setClassTitle(title);
+  };
 
-  const width = Dimensions.get("screen").width - 40;
+  const createClass = async () => {
+    setIsLoading(true);
+    if(!(classDate || classStartTime || classEndTime)){
+      console.log('nothing')
+      return ;
+    }
+    try {
+      await addDoc(collection(db, "classes"), {
+        courseId: course.uid,
+        className: classTitle,
+        classId: uuid.v4(),
+        classLocation: classLocation,
+        classDate: classDate || "",
+        classStartTime: classStartTime || "",
+        classEndTime: classEndTime || ""
+      }).catch((error) => {
+        setIsLoading(false)
+        console.log(error)
+      }).then(async (res: any) => {
+        const classId = res.id;
+  
+        const courseQuery = query(
+          collection(db, "courses"),
+          where("uid", "==", course.uid)
+        );
+        await getDocs(courseQuery)
+          .then(async (snapshot) => {
+            const courseDocRef = snapshot.docs[0].ref;
+            const courseDocData = snapshot.docs[0].data();
+  
+            const courseClasses = courseDocData.courseClasses || [];
+            courseClasses.push(classId);
+            console.log("course classes ", courseClasses);
+            await updateDoc(courseDocRef, {
+              courseClasses: courseClasses,
+            })
+              .then((res) => {
+                const courseClassesPromises = courseClasses.map(
+                  async (classId: string) => {
+                    const classDoc = doc(db, "classes", classId);
+                    const classSnapshot = await getDoc(classDoc);
+                    return classSnapshot.data();
+                  }
+                );
+  
+                Promise.all(courseClassesPromises)
+                  .then(async (courseClasses: any) => {
+                    console.log("enrolled courses", courseClasses);
+                    setCourseClassesData(courseClasses);
+                  })
+                  .then((res) => {
+                    navigation.goBack();
+                    setIsLoading(false);
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    setIsLoading(false);
+                  });
+              })
+              .catch((error) => {
+                console.log(error);
+                setIsLoading(false);
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+            setIsLoading(false);
+          });
+
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+    // navigation.goBack();
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -149,7 +274,9 @@ export default function CreateClass({ navigation }: any) {
             disabled={
               !(classTitle.length && classLocationSearch.length) ||
               isLoading ||
-              !isItemSelected
+              !isItemSelected ||
+              classStartTimeError ||
+              classEndTimeError
             }
           >
             <Text
@@ -157,9 +284,19 @@ export default function CreateClass({ navigation }: any) {
                 color:
                   !(classTitle.length && classLocationSearch.length) ||
                   isLoading ||
-                  !isItemSelected
+                  !isItemSelected ||
+                  classStartTimeError ||
+                  classEndTimeError
                     ? "#023f65"
                     : "#008be3",
+                opacity:
+                  !(classTitle.length && classLocationSearch.length) ||
+                  isLoading ||
+                  !isItemSelected ||
+                  classStartTimeError ||
+                  classEndTimeError
+                    ? 0.32
+                    : 1,
                 fontSize: 16,
               }}
             >
@@ -169,88 +306,16 @@ export default function CreateClass({ navigation }: any) {
         );
       },
     });
-  }, [classTitle, classLocation, isLoading, isItemSelected]);
+  }, [
+    classTitle,
+    classLocation,
+    isLoading,
+    isItemSelected,
+    classStartTimeError,
+    classEndTimeError,
+  ]);
 
-  const handleClassTitleChange = (title: string) => {
-    setClassTitle(title);
-  };
 
-  const handleClassStartTime = (time: string) => {
-    setClassStartTime(time);
-  };
-
-  const handleClassLoc = (loc: string) => {
-    setClassLocation(loc);
-  };
-
-  const createClass = async () => {
-    console.log("creating class...");
-    console.log(classLocation);
-    console.log(course);
-    setIsLoading(true);
-    try {
-      const classRef = await addDoc(collection(db, "classes"), {
-        courseId: course.uid,
-        className: classTitle,
-        classId: uuid.v4(),
-        classLocation: classLocation,
-        classDate: classDate,
-      });
-
-      const classId = classRef.id;
-
-      const courseQuery = query(
-        collection(db, "courses"),
-        where("uid", "==", course.uid)
-      );
-      await getDocs(courseQuery)
-        .then(async (snapshot) => {
-          const courseDocRef = snapshot.docs[0].ref;
-          const courseDocData = snapshot.docs[0].data();
-
-          const courseClasses = courseDocData.courseClasses || [];
-          courseClasses.push(classId);
-          console.log("course classes ", courseClasses);
-          await updateDoc(courseDocRef, {
-            courseClasses: courseClasses,
-          })
-            .then((res) => {
-              const courseClassesPromises = courseClasses.map(
-                async (classId: string) => {
-                  const classDoc = doc(db, "classes", classId);
-                  const classSnapshot = await getDoc(classDoc);
-                  return classSnapshot.data();
-                }
-              );
-
-              Promise.all(courseClassesPromises)
-                .then(async (courseClasses: any) => {
-                  console.log("enrolled courses", courseClasses);
-                  setCourseClassesData(courseClasses);
-                })
-                .then((res) => {
-                  navigation.goBack();
-                  setIsLoading(false);
-                })
-                .catch((error) => {
-                  console.log(error);
-                  setIsLoading(false);
-                });
-            })
-            .catch((error) => {
-              console.log(error);
-              setIsLoading(false);
-            });
-        })
-        .catch((error) => {
-          console.log(error);
-          setIsLoading(false);
-        });
-    } catch (error) {
-      console.log(error);
-    }
-    // navigation.goBack();
-  };
   return (
     <View style={styles.container}>
       <Text style={styles.header}>
@@ -316,17 +381,6 @@ export default function CreateClass({ navigation }: any) {
         )}
       </View>
       <View style={[styles.inputContainer, styles.marginVertical]}>
-        {/* <InputField
-          keyboardType="default"
-          secure={false}
-          placeholder="Class date"
-          placeholderTextColor="gray"
-          value={classDate?.toLocaleDateString()}
-          setValue={onChangeDate}
-          onClick={showDatePicker}
-          editable={false}
-          caretHidden={false}
-        /> */}
         <InvTouchableOpacity
           style={{
             borderBottomColor: "#C7C7CD",
@@ -337,24 +391,85 @@ export default function CreateClass({ navigation }: any) {
           onPress={showDatePicker}
         >
           <Text style={{ color: classDate ? "white" : "gray", fontSize: 13.8 }}>
-            {classDate ? classDate?.toLocaleDateString() : "Class date"}
+            {classDate
+              ? classDate?.toLocaleDateString(undefined, {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "Class Date"}
           </Text>
         </InvTouchableOpacity>
       </View>
-      {/* {showDate && Platform.OS === "ios" && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={classDate}
-          mode={"date"}
-          is24Hour={true}
-          onChange={onChangeDate}
-        />
-      )} */}
+      <View style={[styles.inputContainer, styles.marginVertical]}>
+        <InvTouchableOpacity
+          style={{
+            borderBottomColor: !classStartTimeError ? "#C7C7CD" : "red",
+            borderBottomWidth: 1,
+            borderRadius: 4,
+            paddingVertical: 12,
+          }}
+          onPress={showStartTimePicker}
+        >
+          <Text
+            style={{ color: classStartTime ? "white" : "gray", fontSize: 13.8 }}
+          >
+            {classStartTime
+              ? classStartTime?.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "Class Start Time"}
+          </Text>
+        </InvTouchableOpacity>
+        {classStartTimeError && <Text style={{color: 'red', marginTop: 6, fontSize: 13}}>Start time cannot be greater than end time</Text>}
+      </View>
+      <View style={[styles.inputContainer, styles.marginVertical]}>
+        <InvTouchableOpacity
+          style={{
+            borderBottomColor: !classEndTimeError ? "#C7C7CD" : "red",
+            borderBottomWidth: 1,
+            borderRadius: 4,
+            paddingVertical: 12,
+          }}
+          onPress={showEndTimePicker}
+        >
+          <Text
+            style={{ color: classEndTime ? "white" : "gray", fontSize: 13.8 }}
+          >
+            {classEndTime
+              ? classEndTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "Class End Time"}
+          </Text>
+        </InvTouchableOpacity>
+        {classEndTimeError && <Text style={{color: 'red', marginTop: 6, fontSize: 13}}>End time cannot be less than start time</Text>}
+      </View>
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
+        date={classDate ?? new Date(Date.now())}
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
+      />
+      <DateTimePickerModal
+        isVisible={isStartTimePickerVisible}
+        mode="time"
+        date={classStartTime ?? new Date(Date.now())}
+        onConfirm={handleConfirmStartTime}
+        onCancel={hideStartTimePicker}
+      />
+      <DateTimePickerModal
+        isVisible={isEndTimePickerVisible}
+        mode="time"
+        date={classEndTime ?? new Date(Date.now())}
+        onConfirm={handleConfirmEndTime}
+        onCancel={hideEndTimePicker}
       />
     </View>
   );

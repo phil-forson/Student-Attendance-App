@@ -197,8 +197,9 @@ export default function CreateCourse({ navigation }: any) {
                     })
                     .catch((e) => {
                       setIsLoading(false);
+                      console.log(e)
                       Alert.alert(
-                        "Something unexpected happened, try again later"
+                        "Error updating doc, try again later"
                       );
                     });
                 }
@@ -215,11 +216,11 @@ export default function CreateCourse({ navigation }: any) {
             });
         })
         .catch((e) =>
-          Alert.alert("Something unexpected happened. Try again later")
+          Alert.alert("Something unexpected happeneddd. Try again later")
         );
     } catch (e) {
       setIsLoading(false);
-      Alert.alert("Something unexpected happened. Try again later.");
+      Alert.alert("Something unexpected happenedd. Try again later.");
     }
   };
 
