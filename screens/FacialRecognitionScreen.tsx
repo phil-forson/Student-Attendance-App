@@ -35,9 +35,11 @@ const FacialRecognitionScreen = () => {
   const [pictureUri, setPictureUri] = useState("");
   const [isFaceDetected, setIsFaceDetected] = useState(false);
   const [isFaceInFrame, setIsFaceInFrame] = useState(false);
+  const [faceBounds, setFaceBounds] = useState<any>(null);
+
   const [frameArea, setFrameArea] = useState<any>({
-    x: (width - 300) / 2,
-    y: (height - 300) / 2,
+    x: (width - 300) / 4.5,
+    y: (height - 300) / 4,
   });
   const cameraRef = useRef<any>();
   useEffect(() => {
@@ -86,24 +88,28 @@ const FacialRecognitionScreen = () => {
       const frameArea = calculateFrameArea(); // Customize based on your frame dimensions
       const faceInFrame = faces.some((face: any) => {
         const faceBounds = face.bounds;
-        console.log(faceBounds.origin.x , 'x area')
-        console.log(faceBounds.origin.y, 'y area')
-        console.log(faceBounds.size.width, 'width')
-        console.log(faceBounds.size.height, 'height')
+        setFaceBounds(faceBounds);
+        console.log(faceBounds.origin.x, "x area");
+        console.log(faceBounds.origin.y, "y area");
+        console.log(faceBounds.size.width, "width");
+        console.log(faceBounds.size.height, "height");
+        const frameRight = frameArea.x + frameArea.width;
+        const faceBoundRight = faceBounds.origin.x + faceBounds.size.width;
+        const frameBottom = frameArea.y + frameArea.height;
+        const faceBoundBottom = faceBounds.origin.y + faceBounds.size.height;
         return (
-          faceBounds.origin.x < frameArea.x + frameArea.width &&
-          frameArea.x < faceBounds.origin.x + faceBounds.size.width &&
-          faceBounds.origin.y < frameArea.y + frameArea.height &&
-          frameArea.y < faceBounds.origin.y + faceBounds.size.height
+          faceBounds.origin.x >= frameArea.x &&
+          faceBoundBottom <= frameBottom &&
+          faceBoundRight <= frameRight &&
+          faceBounds.origin.y >= frameArea.y
         );
-
       });
 
       setTimeout(() => {
         setIsFaceInFrame(faceInFrame);
-      }, 2000);
+      }, 1000);
     } else {
-        console.log('face not detected')
+      console.log("face not detected");
       setIsFaceInFrame(false);
     }
   };
@@ -114,10 +120,9 @@ const FacialRecognitionScreen = () => {
 
   const calculateFrameArea = () => {
     const frameSize = 300; // Customize the frame size as needed
-    const frameX = (width - frameSize) / 2;
-    const frameY = (height - frameSize) / 2;
+    const frameX = (width - frameSize) / 4.5;
+    const frameY = (height - frameSize) / 4;
 
-    setFrameArea({ x: frameX, y: frameY });
     return {
       x: frameX,
       y: frameY,
@@ -137,7 +142,7 @@ const FacialRecognitionScreen = () => {
   //     </View>)
   //   }
   return (
-    <SafeAreaView style={[styles.container]}>
+    <SafeAreaView style={[{flex: 1}]}>
       {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Animatable.View
           animation="pulse"
@@ -156,12 +161,14 @@ const FacialRecognitionScreen = () => {
         animation={isFaceInFrame ? "pulse" : ""}
         iterationCount="infinite"
         style={{
-          width: isFaceInFrame ? 300 : width,
-          height: isFaceInFrame ? 300 : height,
+          width: isFaceInFrame ? 350 : width,
+          height: isFaceInFrame ? 350 : height,
           borderRadius: isFaceInFrame ? 700 : 0,
           borderWidth: isFaceInFrame ? 2 : 0,
           borderColor: "white",
           overflow: "hidden",
+          marginTop: isFaceInFrame ? 110: 0,
+          marginLeft: isFaceInFrame ? 20: 0
         }}
         children={
           <>
@@ -171,25 +178,37 @@ const FacialRecognitionScreen = () => {
               ref={cameraRef}
               onFacesDetected={handleFacesDetected}
             >
-              {!isFaceInFrame && <View
-                style={[
-                  styles.overlay,
-                  {
-                    left: frameArea.x,
-                    top: frameArea.y,
-                    width: 300,
-                    height: 300,
-                  },
-                ]}
-              >
-               
-              </View>}
+              
+              {faceBounds && (
+                <View
+                  style={{
+                    position: "absolute",
+                    backgroundColor: "transparent",
+                    left: faceBounds?.origin?.x,
+                    top: faceBounds.origin.y,
+                    width: faceBounds.size.width,
+                    height: faceBounds.size.height,
+                    borderWidth: 2,
+                    borderColor: "green",
+                    borderRadius: 4,
+                  }}
+                />
+              )}
             </Camera>
             {!isFaceInFrame && (
-              <View style={{flex: 1}}>
-                <Text style={{fontSize: 20, textAlign: 'center', marginTop: 10}}>Place Face in Frame</Text>
+              <View style={{ flex: 2 }}>
+                <Text
+                  style={{ fontSize: 20, textAlign: "center", marginTop: 10 }}
+                >
+                  Reposition your face inside the frame
+                </Text>
               </View>
             )}
+      {/* {isFaceInFrame && (
+        <View style={{marginTop: 150}}>
+          <Text>Move your head slowly </Text>
+        </View>
+      )} */}
           </>
         }
       />
@@ -199,6 +218,17 @@ const FacialRecognitionScreen = () => {
           Please perform facial scan
         </Text>
       </View> */}
+      <View
+                  style={[
+                    styles.overlay,
+                    {
+                      left: frameArea.x,
+                      top: frameArea.y,
+                      width: 350,
+                      height: 400,
+                    },
+                  ]}
+                />
     </SafeAreaView>
   );
 };
@@ -219,7 +249,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderWidth: 3,
     borderRadius: 8,
-    borderColor: 'white'
+    borderColor: "white",
   },
   indicator: {
     width: 100,
@@ -287,8 +317,18 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "white",
   },
+  hairContainer: {
+    flex: 1,
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  hairLine: {
+    width: "80%",
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#333",
+    opacity: 0.5,
+  },
 });
 
 export default FacialRecognitionScreen as React.FC;
-
-
