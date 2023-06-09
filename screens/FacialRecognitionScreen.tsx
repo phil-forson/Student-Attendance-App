@@ -37,6 +37,7 @@ const FacialRecognitionScreen = () => {
   const [isFaceDetected, setIsFaceDetected] = useState(false);
   const [isFaceInFrame, setIsFaceInFrame] = useState(false);
   const [faceBounds, setFaceBounds] = useState<any>(null);
+  const [rollAngle, setRollAngle] = useState(0);
 
   const [frameArea, setFrameArea] = useState<any>({
     x: (width - 300) / 4.5,
@@ -58,6 +59,14 @@ const FacialRecognitionScreen = () => {
 
     return cameraPermission.granted && microphonePermission.granted;
   };
+
+  function range(start: number, end: number, step: number) {
+    const result = [];
+    for (let i = start; i <= end; i += step) {
+      result.push(i);
+    }
+    return result;
+  }
 
   const switchFlashMode = () =>
     setFlashMode(flashMode === "off" ? "on" : "off");
@@ -87,13 +96,13 @@ const FacialRecognitionScreen = () => {
     if (faces.length > 0) {
       // Check if any face intersects with the frame area
       const frameArea = calculateFrameArea(); // Customize based on your frame dimensions
+      const face = faces[0];
+      console.log(face);
+      setRollAngle(face.rollAngle);
+
       const faceInFrame = faces.some((face: any) => {
         const faceBounds = face.bounds;
         setFaceBounds(faceBounds);
-        console.log(faceBounds.origin.x, "x area");
-        console.log(faceBounds.origin.y, "y area");
-        console.log(faceBounds.size.width, "width");
-        console.log(faceBounds.size.height, "height");
         return (
           faceBounds.origin.x < frameArea.x + frameArea.width &&
           frameArea.x < faceBounds.origin.x + faceBounds.size.width &&
@@ -156,16 +165,17 @@ const FacialRecognitionScreen = () => {
         animation={isFaceInFrame ? "" : ""}
         iterationCount="infinite"
         style={{
-          width: isFaceInFrame ? 320 : width,
-          height: isFaceInFrame ? 320 : height,
-          borderRadius: isFaceInFrame ? 700 : 0,
+          width: isFaceInFrame ? 300 : width,
+          height: isFaceInFrame ? 400 : height,
+          borderRadius: isFaceInFrame ? 1000 : 0,
           borderWidth: isFaceInFrame ? 2 : 0,
           borderColor: "white",
           overflow: "hidden",
-          marginTop: isFaceInFrame ? 110 : 0,
-          marginLeft: isFaceInFrame ? 30 : 0,
+          marginTop: isFaceInFrame ? 100 : 0,
+          marginLeft: isFaceInFrame ? 40 : 0,
           flex: isFaceInFrame ? 1 : 0,
-          marginBottom: isFaceInFrame ? 20 : 0,
+          marginBottom: isFaceInFrame ? 60 : 0,
+          zIndex: 1000,
         }}
         children={
           <>
@@ -199,17 +209,7 @@ const FacialRecognitionScreen = () => {
                 />
               )}
             </Camera>
-            {isFaceInFrame && (
-        <>
-          <View style={[styles.line, { transform: [{ rotate: "45deg" }] }]} />
-          <View style={[styles.line, { transform: [{ rotate: "90deg" }] }]} />
-          <View style={[styles.line, { transform: [{ rotate: "135deg" }] }]} />
-          <View style={[styles.line, { transform: [{ rotate: "180deg" }] }]} />
-          <View style={[styles.line, { transform: [{ rotate: "225deg" }] }]} />
-          <View style={[styles.line, { transform: [{ rotate: "270deg" }] }]} />
-          <View style={[styles.line, { transform: [{ rotate: "315deg" }] }]} />
-        </>
-      )}
+
             {!isFaceInFrame && (
               <View style={{ flex: 2 }}>
                 <Text
@@ -219,15 +219,24 @@ const FacialRecognitionScreen = () => {
                 </Text>
               </View>
             )}
-            {/* {isFaceInFrame && (
-        <View style={{marginTop: 150}}>
-          <Text>Move your head slowly </Text>
-        </View>
-      )} */}
           </>
         }
       />
-     
+      {isFaceInFrame && (
+        <>
+          {range(1, 200, 4).map((number, index) => (
+            <View
+              key={index}
+              style={[
+                styles.line,
+                {
+                  transform: [{ translateY: -1 }, { rotate: `${number}deg` }],
+                },
+              ]}
+            />
+          ))}
+        </>
+      )}
 
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>
@@ -337,11 +346,12 @@ const styles = StyleSheet.create({
   },
   line: {
     position: "absolute",
-    top: 0,
-    width: 200,
-    height: 2,
+    left: 16,
+    top: "39%",
+    width: "90%",
+    height: 4,
     backgroundColor: "white",
-    transform: [{ translateY: -1 }],
+    zIndex: 10,
   },
 });
 
