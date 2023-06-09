@@ -26,6 +26,7 @@ import {
 } from "expo-camera";
 import * as Animatable from "react-native-animatable";
 import { Feather } from "@expo/vector-icons";
+import * as FaceDetector from "expo-face-detector";
 
 const FacialRecognitionScreen = () => {
   const height = Dimensions.get("screen").height;
@@ -93,21 +94,15 @@ const FacialRecognitionScreen = () => {
         console.log(faceBounds.origin.y, "y area");
         console.log(faceBounds.size.width, "width");
         console.log(faceBounds.size.height, "height");
-        const frameRight = frameArea.x + frameArea.width;
-        const faceBoundRight = faceBounds.origin.x + faceBounds.size.width;
-        const frameBottom = frameArea.y + frameArea.height;
-        const faceBoundBottom = faceBounds.origin.y + faceBounds.size.height;
         return (
-          faceBounds.origin.x >= frameArea.x &&
-          faceBoundBottom <= frameBottom &&
-          faceBoundRight <= frameRight &&
-          faceBounds.origin.y >= frameArea.y
+          faceBounds.origin.x < frameArea.x + frameArea.width &&
+          frameArea.x < faceBounds.origin.x + faceBounds.size.width &&
+          faceBounds.origin.y < frameArea.y + frameArea.height &&
+          frameArea.y < faceBounds.origin.y + faceBounds.size.height
         );
       });
 
-      setTimeout(() => {
-        setIsFaceInFrame(faceInFrame);
-      }, 1000);
+      setIsFaceInFrame(faceInFrame);
     } else {
       console.log("face not detected");
       setIsFaceInFrame(false);
@@ -142,7 +137,7 @@ const FacialRecognitionScreen = () => {
   //     </View>)
   //   }
   return (
-    <SafeAreaView style={[{flex: 1}]}>
+    <SafeAreaView style={[{ flex: 1 }]}>
       {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Animatable.View
           animation="pulse"
@@ -158,17 +153,19 @@ const FacialRecognitionScreen = () => {
       </View> */}
 
       <Animatable.View
-        animation={isFaceInFrame ? "pulse" : ""}
+        animation={isFaceInFrame ? "" : ""}
         iterationCount="infinite"
         style={{
-          width: isFaceInFrame ? 350 : width,
-          height: isFaceInFrame ? 350 : height,
+          width: isFaceInFrame ? 320 : width,
+          height: isFaceInFrame ? 320 : height,
           borderRadius: isFaceInFrame ? 700 : 0,
           borderWidth: isFaceInFrame ? 2 : 0,
           borderColor: "white",
           overflow: "hidden",
-          marginTop: isFaceInFrame ? 110: 0,
-          marginLeft: isFaceInFrame ? 20: 0
+          marginTop: isFaceInFrame ? 110 : 0,
+          marginLeft: isFaceInFrame ? 30 : 0,
+          flex: isFaceInFrame ? 1 : 0,
+          marginBottom: isFaceInFrame ? 20 : 0,
         }}
         children={
           <>
@@ -177,8 +174,15 @@ const FacialRecognitionScreen = () => {
               type={type}
               ref={cameraRef}
               onFacesDetected={handleFacesDetected}
+              faceDetectorSettings={{
+                mode: FaceDetector.FaceDetectorMode.fast,
+                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+                runClassifications:
+                  FaceDetector.FaceDetectorClassifications.none,
+                minDetectionInterval: 100,
+                tracking: true,
+              }}
             >
-              
               {faceBounds && (
                 <View
                   style={{
@@ -195,6 +199,17 @@ const FacialRecognitionScreen = () => {
                 />
               )}
             </Camera>
+            {isFaceInFrame && (
+        <>
+          <View style={[styles.line, { transform: [{ rotate: "45deg" }] }]} />
+          <View style={[styles.line, { transform: [{ rotate: "90deg" }] }]} />
+          <View style={[styles.line, { transform: [{ rotate: "135deg" }] }]} />
+          <View style={[styles.line, { transform: [{ rotate: "180deg" }] }]} />
+          <View style={[styles.line, { transform: [{ rotate: "225deg" }] }]} />
+          <View style={[styles.line, { transform: [{ rotate: "270deg" }] }]} />
+          <View style={[styles.line, { transform: [{ rotate: "315deg" }] }]} />
+        </>
+      )}
             {!isFaceInFrame && (
               <View style={{ flex: 2 }}>
                 <Text
@@ -204,7 +219,7 @@ const FacialRecognitionScreen = () => {
                 </Text>
               </View>
             )}
-      {/* {isFaceInFrame && (
+            {/* {isFaceInFrame && (
         <View style={{marginTop: 150}}>
           <Text>Move your head slowly </Text>
         </View>
@@ -212,23 +227,26 @@ const FacialRecognitionScreen = () => {
           </>
         }
       />
+     
 
-      {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>
           Please perform facial scan
         </Text>
-      </View> */}
-      <View
-                  style={[
-                    styles.overlay,
-                    {
-                      left: frameArea.x,
-                      top: frameArea.y,
-                      width: 350,
-                      height: 400,
-                    },
-                  ]}
-                />
+      </View>
+      {!isFaceInFrame && (
+        <View
+          style={[
+            styles.overlay,
+            {
+              left: frameArea.x,
+              top: frameArea.y,
+              width: 350,
+              height: 350,
+            },
+          ]}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -317,17 +335,13 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "white",
   },
-  hairContainer: {
-    flex: 1,
-    justifyContent: "space-around",
-    alignItems: "center",
-  },
-  hairLine: {
-    width: "80%",
+  line: {
+    position: "absolute",
+    top: 0,
+    width: 200,
     height: 2,
-    borderRadius: 1,
-    backgroundColor: "#333",
-    opacity: 0.5,
+    backgroundColor: "white",
+    transform: [{ translateY: -1 }],
   },
 });
 
