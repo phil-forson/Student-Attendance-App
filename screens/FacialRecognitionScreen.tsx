@@ -185,7 +185,7 @@ const FacialRecognitionScreen = () => {
               ref={cameraRef}
               onFacesDetected={handleFacesDetected}
               faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.fast,
+                mode: FaceDetector.FaceDetectorMode.accurate,
                 detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
                 runClassifications:
                   FaceDetector.FaceDetectorClassifications.none,
