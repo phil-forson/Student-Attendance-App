@@ -9,6 +9,8 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@azure/cognitiveservices-face": "^5.0.0",
+    "@azure/ms-rest-js": "^2.6.6",
     "@expo/webpack-config": "^18.0.1",
     "@react-native-async-storage/async-storage": "^1.18.2",
     "@react-native-community/datetimepicker": "6.7.3",
@@ -24,10 +26,13 @@
     "expo": "~48.0.9",
     "expo-application": "~5.1.1",
     "expo-auth-session": "~4.0.3",
+    "expo-camera": "~13.2.1",
     "expo-constants": "~14.2.1",
     "expo-crypto": "~12.2.1",
     "expo-dev-client": "~2.2.1",
+    "expo-face-detector": "~12.1.1",
     "expo-google-app-auth": "~8.3.0",
+    "expo-linear-gradient": "~12.1.2",
     "expo-linking": "~4.0.1",
     "expo-splash-screen": "~0.18.1",
     "expo-status-bar": "~1.4.4",
@@ -56,8 +61,7 @@
     "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.10",
-    "expo-camera": "~13.2.1",
-    "expo-face-detector": "~12.1.1"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

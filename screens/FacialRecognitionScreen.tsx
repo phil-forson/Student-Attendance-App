@@ -27,6 +27,13 @@ import {
 import * as Animatable from "react-native-animatable";
 import { Feather } from "@expo/vector-icons";
 import * as FaceDetector from "expo-face-detector";
+import { LinearGradient } from 'expo-linear-gradient';
+import * as FileSystem from 'expo-file-system';
+import { FaceClient,  } from '@azure/cognitiveservices-face';
+import { } from '@azure/ms-rest-js'
+
+
+
 
 const FacialRecognitionScreen = () => {
   const height = Dimensions.get("screen").height;
@@ -59,6 +66,8 @@ const FacialRecognitionScreen = () => {
 
     return cameraPermission.granted && microphonePermission.granted;
   };
+
+  
 
   function range(start: number, end: number, step: number) {
     const result = [];
@@ -97,8 +106,8 @@ const FacialRecognitionScreen = () => {
       // Check if any face intersects with the frame area
       const frameArea = calculateFrameArea(); // Customize based on your frame dimensions
       const face = faces[0];
-      console.log(face);
-      setRollAngle(face.rollAngle);
+      console.log(face.rollAngle + 90);
+      setRollAngle(face.rollAngle + 90);
 
       const faceInFrame = faces.some((face: any) => {
         const faceBounds = face.bounds;
@@ -225,15 +234,18 @@ const FacialRecognitionScreen = () => {
       {isFaceInFrame && (
         <>
           {range(1, 200, 4).map((number, index) => (
-            <View
-              key={index}
-              style={[
-                styles.line,
-                {
-                  transform: [{ translateY: -1 }, { rotate: `${number}deg` }],
-                },
-              ]}
-            />
+            <LinearGradient
+            key={index}
+            colors={['white','white']} // Specify the colors for each edge
+            start={{ x: 0, y: 0 }} // Start position of the gradient
+            end={{ x: 1, y: 0 }} // End position of the gradient
+            style={[
+              styles.line,
+              {
+                transform: [{ translateY: -1 }, { rotate: `${number}deg` }],
+              },
+            ]}
+          />
           ))}
         </>
       )}
