@@ -127,8 +127,7 @@ export default function CreateClass({ navigation }: any) {
       hideStartTimePicker();
       setClassStartTimeError(false);
     } else {
-      console.log(classEndTime);
-      console.log("error ");
+
       setClassStartTime(null);
       setClassStartTimeError(true);
       hideStartTimePicker();
@@ -143,15 +142,10 @@ export default function CreateClass({ navigation }: any) {
       newDate?.getTime() >
       (classStartTime ? classStartTime.getTime() : newDate?.getTime() - 1)
     ) {
-      console.log("yes");
       setClassEndTime(newDate);
       hideEndTimePicker();
       setClassEndTimeError(false);
     } else {
-      console.log("error ");
-      console.log("no");
-      console.log(time.getTime());
-      console.log("start time ", classStartTime?.getTime());
       setClassEndTime(null);
       setClassEndTimeError(true);
       hideEndTimePicker();
@@ -217,6 +211,7 @@ export default function CreateClass({ navigation }: any) {
         classDate: classDate,
         classStartTime: classStartTime,
         classEndTime: classEndTime,
+        classStatus: 'upcoming'
       })
         .catch((error) => {
           setIsLoading(false);
@@ -225,22 +220,20 @@ export default function CreateClass({ navigation }: any) {
         .then(async (res: any) => {
           const classId = res.id;
 
-          const courseQuery = query(
-            collection(db, "courses"),
-            where("uid", "==", course.uid)
-          );
+          const courseQuery = query(collection(db, 'courses'), where('uid', '==', course.uid))
           await getDocs(courseQuery)
             .then(async (snapshot) => {
               const courseDocRef = snapshot.docs[0].ref;
               const courseDocData = snapshot.docs[0].data();
 
-              const courseClasses = courseDocData.courseClasses || [];
+              const courseClasses = courseDocData?.courseClasses || [];
               courseClasses.push(classId);
               console.log("course classes ", courseClasses);
               await updateDoc(courseDocRef, {
                 courseClasses: courseClasses,
               })
                 .then((res) => {
+                  console.log('response after updating ', res)
                   const courseClassesPromises = courseClasses.map(
                     async (classId: string) => {
                       const classDoc = doc(db, "classes", classId);
@@ -289,7 +282,7 @@ export default function CreateClass({ navigation }: any) {
             onPress={() => createClass()}
             style={{}}
             disabled={
-              !(classTitle.length && classLocationSearch.length) ||
+              !(classTitle.length && classLocationSearch.length  && classDate?.toLocaleString().length && classStartTime?.toLocaleString().length && classEndTime?.toLocaleString().length) ||
               isLoading ||
               !isItemSelected ||
               classStartTimeError ||
@@ -299,7 +292,7 @@ export default function CreateClass({ navigation }: any) {
             <Text
               style={{
                 color:
-                  !(classTitle.length && classLocationSearch.length) ||
+                  !(classTitle.length && classLocationSearch.length  && classDate?.toLocaleString().length && classStartTime?.toLocaleString().length && classEndTime?.toLocaleString().length) ||
                   isLoading ||
                   !isItemSelected ||
                   classStartTimeError ||
@@ -307,7 +300,7 @@ export default function CreateClass({ navigation }: any) {
                     ? "#023f65"
                     : "#008be3",
                 opacity:
-                  !(classTitle.length && classLocationSearch.length) ||
+                  !(classTitle.length && classLocationSearch.length && classDate && classStartTime && classEndTime) ||
                   isLoading ||
                   !isItemSelected ||
                   classStartTimeError ||
@@ -431,7 +424,7 @@ export default function CreateClass({ navigation }: any) {
         >
           <Text style={{ color: classDate ? "white" : "gray", fontSize: 13.8 }}>
             {classDate
-              ? classDate?.toLocaleDateString(undefined, {
+              ? classDate?.toLocaleDateString([], {
                   weekday: "long",
                   year: "numeric",
                   month: "long",

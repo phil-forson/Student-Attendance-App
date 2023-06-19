@@ -28,9 +28,8 @@ import * as Animatable from "react-native-animatable";
 import { Feather } from "@expo/vector-icons";
 import * as FaceDetector from "expo-face-detector";
 import { LinearGradient } from 'expo-linear-gradient';
-import * as FileSystem from 'expo-file-system';
-import { FaceClient,  } from '@azure/cognitiveservices-face';
-import { } from '@azure/ms-rest-js'
+
+
 
 
 

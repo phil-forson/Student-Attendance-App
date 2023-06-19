@@ -79,6 +79,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const isFocused = useIsFocused();
 
+  const [coursesData, setCoursesData] = enrolledCourses
+
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
     useState<boolean>(false);
@@ -98,7 +100,6 @@ export const HomeScreen = ({ navigation, route }: any) => {
   };
 
   const getUserData = async () => {
-    console.log("on every render");
     setIsLoading(true);
     await userDataPromise
       .then(async (res: any) => {
@@ -142,47 +143,14 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const checkIfInSync = () => {};
 
-  useEffect(() => {
-    // Call the function to fetch the courses or reload the data
-    getUserData();
-  }, []);
+  // useEffect(() => {
+  //   // Call the function to fetch the courses or reload the data
+  //   getUserData();
+  // }, []);
 
   useEffect(() => {
-    if (isFocused) {
       console.log("enrolled courses ", enrolledCourses);
-      const verifyInSync = async () => {
-        await userDataPromise.then(async (res: any) => {
-          const userQuery = query(
-            collection(db, "users"),
-            where("uid", "==", res?.uid)
-          );
-          const userSnapshot = await getDocs(userQuery);
-          const unsubscribe = onSnapshot(
-            userSnapshot.docs[0].ref,
-            (snapshot) => {
-              // Check if the snapshot is from the local cache
-              if (snapshot.metadata.fromCache) {
-                console.log("Snapshot data is from the local cache");
-
-                // Perform actions for local cache data
-              } else {
-                console.log("Snapshot data is synchronized with the server");
-                // Perform actions for synchronized data
-              }
-
-              // Access the snapshot data
-              const data = snapshot.data();
-
-              // Perform actions based on the data
-              console.log("Snapshot data:", data);
-            }
-          );
-        });
-      };
-
-      verifyInSync();
-      getUserData()
-    }
+    getUserData()
   }, [isFocused]);
 
   if (isLoading) {

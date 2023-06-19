@@ -1,4 +1,5 @@
 import { Text, TouchableOpacity } from "./Themed";
+import React from "react";
 
 export type Props = {
   onPress?: () => any;

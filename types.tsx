@@ -1,6 +1,7 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Timestamp } from "firebase/firestore";
 
 export type RootStackParamList = {
   Root: undefined;
@@ -22,6 +23,7 @@ export type UserStackParamList = {
   CreateCourse: undefined;
   CreateClass: undefined;
   CourseDetails: undefined;
+  ClassDetails: undefined
 };
 
 export type UserStackScreenProps<Screen extends keyof UserStackParamList> =
@@ -81,4 +83,26 @@ export interface UserData {
   lastName?: string;
   email?: string;
   enrolledCourses?: Array<any>;
+}
+
+export interface ICourse {
+  courseCode: string;
+  courseLinkCode: string;
+  courseTitle: string;
+  creatorId: string;
+  enrolledStudents: Array<any>
+  lecturerName: string;
+  teachers: Array<any>
+  uid: string;
+}
+
+export interface IClass {
+  className: string;
+  classId: string;
+  classLocation: any;
+  classStartTime: Timestamp;
+  classEndTime: Timestamp;
+  classDate: Timestamp;
+  courseId: string;
+  classStatus: string
 }

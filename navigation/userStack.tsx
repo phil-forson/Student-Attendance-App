@@ -39,6 +39,7 @@ import MyTabBar from "../components/MyTabBar";
 import CreateClass from "../screens/CreateClass";
 import CourseMembersScreen from "../screens/CourseMembersScreen";
 import { useNavigation } from "@react-navigation/native";
+import ClassDetails from "../screens/ClassDetails";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -248,6 +249,11 @@ function StackNavigator() {
       <Stack.Screen
         name="CourseDetails"
         component={BottomTabNavigator}
+        options={{ header: () => null }}
+      />
+      <Stack.Screen
+        name="ClassDetails"
+        component={ClassDetails}
         options={{ header: () => null }}
       />
     </Stack.Navigator>

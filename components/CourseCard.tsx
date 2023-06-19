@@ -18,12 +18,11 @@ export default function CourseCard({
     <InvTouchableOpacity
       style={[styles.container]}
       onPress={() => {
+        setCourseData(courseItem);
         navigation.navigate("CourseDetails", {
           screen: "Classes",
           params: courseItem
-          
         });
-        setCourseData(courseItem)
       }}
     >
       <View style={[styles.outside, styles.transparent]}>

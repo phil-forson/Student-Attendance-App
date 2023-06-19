@@ -36,8 +36,12 @@ export const PASTCLASSES = [
 export default function CourseDetails({ navigation, route }: any) {
   const course: ICourseDetails = route.params;
   const { setCourseData } = useContext(CourseContext);
-  const { courseClass, setCourseClassData, courseClasses, setCourseClassesData } =
-    useContext(ClassContext);
+  const {
+    courseClass,
+    setCourseClassData,
+    courseClasses,
+    setCourseClassesData,
+  } = useContext(ClassContext);
   const theme = useColorScheme();
   const nav = useNavigation<"Drawer">();
 
@@ -47,6 +51,8 @@ export default function CourseDetails({ navigation, route }: any) {
   const [classTab, setClassTab] = useState("upcoming");
   const [canCreateClass, setCanCreateClass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [upcomingClass, setUpcomingClass] = useState<any>({});
+  const [pastClasses, setPastClasses] = useState<any>([]);
 
   const handleTabSwitch = (value: string) => {
     setClassTab(value);
@@ -63,47 +69,66 @@ export default function CourseDetails({ navigation, route }: any) {
   };
 
   const getUpcomingClass = async () => {
-    const courseClassesData = route.params.courseClasses
+    await getClassesData();
+    // const courseClassesData = route.params.courseClasses;
+    // console.log('from upcoming class fn')
 
-    const now = new Date();
-    console.log("course classes ", courseClassesData);
-    console.log('course classes length ' , courseClasses?.length)
-    if(courseClasses?.length > 0){
-      console.log('there are course classes', courseClasses.length)
-      const upcomingClasses = courseClasses.filter((classItem: any) => {
-        return now < new Date(classItem.classStartTime?.toDate());
-      });
-  
-      console.log("upcomingggg", upcomingClasses);
-  
-      if(upcomingClasses.length === 1){
-        console.log('only one upcoming clasd')
-        setCourseClassData(upcomingClasses[0])
-      }
-      else {
+    // const now = new Date();
+    // console.log("course classes ", courseClassesData);
+    // console.log("course classes length ", courseClasses?.length);
+    // if (courseClasses?.length > 0) {
+    //   console.log("there are course classes", courseClasses.length);
+    //   const upcomingClasses = courseClasses.filter((classItem: any) => {
+    //     console.log('start time ',classItem?.classStartTime)
+    //     return now < new Date(classItem?.classStartTime?.toDate());
+    //   });
 
-      upcomingClasses.sort((classA: any, classB: any) => {
-        const dateA = classA.classStartTime?.getDate();
-        const dateB = classB.classStartTime?.getDate();
-        return dateA - dateB;
-      });
-  
-      setCourseClassData(upcomingClasses[0]);}
-    }
-    else {
-      setIsLoading(false)
-    }
+    //   const coursePastClasses = courseClasses.filter((classItem: any) => {
+    //     return now > new Date(classItem.classStartTime?.toDate());
+    //   });
+
+    //   console.log("upcomingggg", upcomingClasses);
+
+    //   if (upcomingClasses.length === 1) {
+    //     console.log("only one upcoming clasd");
+    //     setCourseClassData(upcomingClasses[0]);
+    //     setUpcomingClass(upcomingClasses[0]);
+    //     setIsLoading(false);
+    //   } else {
+    //     upcomingClasses.sort((classA: any, classB: any) => {
+    //       const dateA = classA.classStartTime?.getDate();
+    //       const dateB = classB.classStartTime?.getDate();
+    //       return dateA - dateB;
+    //     });
+
+    //     setCourseClassData(upcomingClasses[0]);
+    //     setUpcomingClass(upcomingClasses[0]);
+    //     setIsLoading(false);
+    //   }
+
+    //   if (coursePastClasses.length === 1) {
+    //     setPastClasses(coursePastClasses);
+    //   } else {
+    //     coursePastClasses.sort((classA: any, classB: any) => {
+    //       const dateA = classA.classStartTime?.getDate();
+    //       const dateB = classB.classStartTime?.getDate();
+    //       return dateA - dateB;
+    //     });
+    //     setPastClasses(coursePastClasses);
+    //   }
+    // } else {
+    //   setIsLoading(false);
+    // }
   };
 
   const getClassesData = async () => {
+    console.log(route.params.courseClasses);
+    const courseClassesData = route.params.courseClasses;
 
-    const courseClassesData = route.params.courseClasses ;
+    setCourseClassesData(courseClassesData);
 
-    setCourseClassesData(courseClassesData)
-
-    console.log('from classes fn ',)
-    if(courseClassesData?.length > 0){
-
+    console.log("from classes fn ", courseClassesData);
+    if (courseClassesData?.length > 0) {
       const courseClassesPromises = courseClassesData?.map(
         async (classId: string) => {
           const classDoc = doc(db, "classes", classId);
@@ -111,31 +136,87 @@ export default function CourseDetails({ navigation, route }: any) {
           return classSnapshot.data();
         }
       );
-  
-      Promise.all(courseClassesPromises)
-        .then(async (courseClasses: any) => {
-          setCourseClassesData(courseClasses);
-          console.log('course classes enrolled ', courseClasses)
-          getUpcomingClass()
+
+      await Promise.all(courseClassesPromises)
+        .then(async (allCourseClasses: any) => {
+          setCourseClassesData(allCourseClasses);
+          console.log("course classes enrolled ", courseClasses);
+          const now = new Date();
+          console.log("course classes length ", allCourseClasses?.length);
+          if (allCourseClasses?.length > 0) {
+            console.log("there are course classes", allCourseClasses.length);
+            const upcomingClasses = allCourseClasses.filter(
+              (classItem: any) => {
+                console.log("start time ", now < new Date(classItem?.classStartTime.toDate()));
+                return now < new Date(classItem?.classStartTime.toDate());
+              }
+            );
+
+            const coursePastClasses = allCourseClasses.filter(
+              (classItem: any) => {
+                console.log("end time ", now > new Date(classItem?.classStartTime.toDate()));
+                return now > new Date(classItem.classStartTime?.toDate());
+              }
+            );
+
+            console.log("upcomingggg", upcomingClasses);
+            console.log("past classes", pastClasses)
+
+            if (upcomingClasses.length === 1) {
+              console.log("only one upcoming clasd");
+              setCourseClassData(upcomingClasses[0]);
+              setUpcomingClass(upcomingClasses[0]);
+              setIsLoading(false);
+            } else {
+              upcomingClasses.sort((classA: any, classB: any) => {
+                const dateA = classA.classStartTime?.getDate();
+                const dateB = classB.classStartTime?.getDate();
+                return dateA - dateB;
+              });
+
+              setCourseClassData(upcomingClasses[0]);
+              // setUpcomingClass(upcomingClasses[0]);
+              setIsLoading(false);
+            }
+
+            if (coursePastClasses.length === 1) {
+              setPastClasses(coursePastClasses);
+            } else {
+              coursePastClasses.sort((classA: any, classB: any) => {
+                const dateA = classA.classStartTime?.getDate();
+                const dateB = classB.classStartTime?.getDate();
+                return dateA - dateB;
+              });
+              setPastClasses(coursePastClasses);
+            }
+          } else {
+            setIsLoading(false);
+          }
         })
         .catch((error) => {
           console.log(error);
           setIsLoading(false);
         });
     }
-
-    
   };
-  
 
+  //useEffect when route changes
   useEffect(() => {
     if (isFocused) {
       setIsLoading(true);
+      console.log("route ", route.params);
       userDataPromise
         .then(async (userData: any) => {
-          await getClassesData();
-          setCanCreateClass(userData?.uid === course?.creatorId);
-          setIsLoading(false)
+          await getUpcomingClass()
+            .then((res) => {
+              setCanCreateClass(userData?.uid === course?.creatorId);
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              console.log(error);
+              console.log("error from herer");
+              setIsLoading(false);
+            });
         })
         .catch((error) => {
           setIsLoading(false);
@@ -147,9 +228,10 @@ export default function CourseDetails({ navigation, route }: any) {
   }, [route, isFocused]);
 
   useEffect(() => {
-    console.log("can create class changed to ", canCreateClass);
-  }, [canCreateClass]);
+    console.log("upcoming class changed to ", upcomingClass);
+  }, [upcomingClass]);
 
+  //if loading
   if (isLoading) {
     return (
       <View style={styles.center}>
@@ -211,65 +293,86 @@ export default function CourseDetails({ navigation, route }: any) {
             <Text style={[styles.bold]}>{course.lecturerName}</Text>
           </View>
         </View>
-        {/* <View style={[styles.center]}>
-      </View> */}
-        <View style={[styles.marginTop]}>
-          <View
-            style={[{ flexDirection: "row", justifyContent: "space-between" }]}
-          >
-            <Text style={[styles.bold]}>Upcoming Class</Text>
-            <InvTouchableOpacity>
-              <Text style={[{ color: "#2f95dc" }]}>View All</Text>
+        {Object.keys(upcomingClass).length > 0 ? (
+          <View style={[styles.marginTop]}>
+            <View
+              style={[
+                { flexDirection: "row", justifyContent: "space-between" },
+              ]}
+            >
+              <Text style={[styles.bold]}>Upcoming Class</Text>
+              <InvTouchableOpacity>
+                <Text style={[{ color: "#2f95dc" }]}>View All</Text>
+              </InvTouchableOpacity>
+            </View>
+            <InvTouchableOpacity
+              onPress={() =>
+                navigation.navigate("ClassDetails", upcomingClass)
+              }
+              style={[
+                styles.card,
+                styles.extraMarginTop,
+                {
+                  justifyContent: "space-between",
+                  borderColor: theme === "light" ? "#737171" : "#fff",
+                  backgroundColor: theme === "light" ? "#fff" : "#121212",
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.transparentBg,
+                  { flexDirection: "row", justifyContent: "space-between" },
+                ]}
+              >
+                <Text style={[styles.bold]}>{upcomingClass.className}</Text>
+                <Text style={[styles.smallText]}>In 2hrs</Text>
+              </View>
+              <View style={[styles.transparentBg]}>
+                <Text style={[{ fontWeight: "400" }, styles.largeText]}>
+                  {courseClass?.classLocation?.name
+                    .split(",")
+                    .slice(0, 2)
+                    .join(",")}
+                </Text>
+              </View>
+              <View style={[styles.transparentBg]}>
+                <Text style={[styles.smallText]}>Duration: 2hrs</Text>
+              </View>
             </InvTouchableOpacity>
           </View>
-          <InvTouchableOpacity
-            style={[
-              styles.card,
-              styles.extraMarginTop,
-              {
-                justifyContent: "space-between",
-                borderColor: theme === "light" ? "#737171" : "#fff",
-                backgroundColor: theme === "light" ? "#fff" : "#121212",
-              },
-            ]}
-          >
-            <View style={[styles.transparentBg, {flexDirection: 'row', justifyContent: 'space-between'}]}>
-              <Text style={[styles.bold]}>{courseClass.className}</Text>
-              <Text style={[styles.smallText]}>In 2hrs</Text>
-            </View>
-            <View style={[styles.transparentBg]}>
-              <Text style={[{ fontWeight: '400'}, styles.largeText]}>
-                {courseClass?.classLocation?.name.split(',').slice(0,2).join(',')}
-              </Text>
-            </View>
-            <View style={[styles.transparentBg]}>
-              <Text style={[styles.smallText]}>Duration: 2hrs</Text>
-            </View>
-          </InvTouchableOpacity>
-        </View>
-        <View style={[{ marginTop: 50 }]}>
-          <View
-            style={[{ flexDirection: "row", justifyContent: "space-between" }]}
-          >
-            <Text style={[styles.bold]}>Past Classes</Text>
-            <InvTouchableOpacity>
-              <Text style={[{ color: "#2f95dc" }]}>View All</Text>
-            </InvTouchableOpacity>
+        ) : (
+          <View style={[styles.marginTop, styles.center]}>
+            <Text>No Upcoming Class</Text>
           </View>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={[styles.pastClassesContainer]}
-            data={courseClasses ?? []}
-            renderItem={({ item }) => (
-              <ClassCard courseClass={item} navigation={navigation} />
-            )}
-            keyExtractor={(courseClass) => courseClass.classId}
-            ItemSeparatorComponent={() => (
-              <View style={[{ paddingRight: 30 }]}></View>
-            )}
-          />
-        </View>
+        )}
+        {pastClasses.length > 0 && (
+          <View style={[{ marginTop: 50 }]}>
+            <View
+              style={[
+                { flexDirection: "row", justifyContent: "space-between" },
+              ]}
+            >
+              <Text style={[styles.bold]}>Past Classes</Text>
+              <InvTouchableOpacity>
+                <Text style={[{ color: "#2f95dc" }]}>View All</Text>
+              </InvTouchableOpacity>
+            </View>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={[styles.pastClassesContainer]}
+              data={courseClasses ?? []}
+              renderItem={({ item }) => (
+                <ClassCard courseClass={item} navigation={navigation} />
+              )}
+              keyExtractor={(courseClass: any) => courseClass.classId}
+              ItemSeparatorComponent={() => (
+                <View style={[{ paddingRight: 30 }]}></View>
+              )}
+            />
+          </View>
+        )}
       </ScrollView>
       {canCreateClass && (
         <InvTouchableOpacity
