@@ -26,13 +26,17 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const { userDataPromise } = useUser();
   const { course } = useContext(CourseContext);
-  const { courseClass } = useContext(ClassContext)
+  const { courseClass } = useContext(ClassContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [classData, setClassData] = useState<IClass>();
 
   const getClassData = async () => {
     setIsLoading(true);
     setClassData(route.params);
+    const userQuery = query(
+      collection(db, "users"),
+      where("uid", "==", course.creatorId)
+    );
     setIsLoading(false);
   };
 
@@ -41,10 +45,10 @@ export default function ClassDetails({ navigation, route }: any) {
       console.log({
         user: user,
         course: course,
-        class: courseClass
-      })
-    })
-  }
+        class: courseClass,
+      });
+    });
+  };
 
   const images = [
     require("../assets/profileimg.png"),
@@ -71,7 +75,16 @@ export default function ClassDetails({ navigation, route }: any) {
         },
       ]}
     >
-      <View style={[{ paddingHorizontal: 20, flex: 1 ,justifyContent: 'space-between', paddingVertical: 10}]}>
+      <View
+        style={[
+          {
+            paddingHorizontal: 20,
+            flex: 1,
+            justifyContent: "space-between",
+            paddingVertical: 10,
+          },
+        ]}
+      >
         <View style={[{}]}>
           <View style={[styles.marginTop, styles.header]}>
             <Text style={[styles.bold, styles.largeText]}>
@@ -134,11 +147,7 @@ export default function ClassDetails({ navigation, route }: any) {
             </Text>
           </View>
           <View
-            style={[
-              styles.flexRow,
-              styles.itemsCenter,
-              styles.extraMarginTop,
-            ]}
+            style={[styles.flexRow, styles.itemsCenter, styles.extraMarginTop]}
           >
             <View
               style={[styles.circle, styles.marginTop]}
@@ -183,7 +192,7 @@ export default function ClassDetails({ navigation, route }: any) {
               />
             </View>
             <Text style={[{ paddingLeft: 10 }, styles.mediumText]}>
-              {course.courseTitle + " "} ({" " + course.courseCode + " " })
+              {course.courseTitle + " "} ({" " + course.courseCode + " "})
             </Text>
           </View>
           <View
@@ -240,7 +249,7 @@ export default function ClassDetails({ navigation, route }: any) {
           </View>
         </View>
         <View>
-          <FullWidthButton text="Clock In" onPress={clockIn} disabled={true}/>
+          <FullWidthButton text="Clock In" onPress={clockIn} disabled={true} />
         </View>
       </View>
     </SafeAreaView>
