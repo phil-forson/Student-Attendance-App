@@ -85,6 +85,7 @@ export interface UserData {
   enrolledCourses?: Array<any>;
 }
 
+
 export interface ICourse {
   courseCode: string;
   courseLinkCode: string;

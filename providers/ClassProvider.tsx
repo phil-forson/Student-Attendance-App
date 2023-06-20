@@ -1,13 +1,14 @@
 import React, { ReactNode, useState } from "react";
 import { ClassContext } from "../contexts/ClassContext";
+import { IClass } from "../types";
 
 interface ClassProviderProps {
   children: ReactNode;
 }
 
 export const ClassProvider: React.FC<ClassProviderProps> = ({ children }) => {
-  const [courseClass, setCourseClass] = useState({});
-  const [courseClasses, setCourseClasses] = useState<any>([]);
+  const [courseClass, setCourseClass] = useState<IClass>();
+  const [courseClasses, setCourseClasses] = useState<IClass []>([]);
 
 
   const setCourseClassData = (data: any) => {

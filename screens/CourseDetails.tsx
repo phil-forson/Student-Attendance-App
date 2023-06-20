@@ -168,14 +168,15 @@ export default function CourseDetails({ navigation, route }: any) {
               setUpcomingClass(upcomingClasses[0]);
               setIsLoading(false);
             } else {
+              console.log("else block")
               upcomingClasses.sort((classA: any, classB: any) => {
-                const dateA = classA.classStartTime?.getDate();
-                const dateB = classB.classStartTime?.getDate();
-                return dateA - dateB;
+                const dateA = new Date(classA.classStartTime?.toDate());
+                const dateB = new Date(classB.classStartTime?.toDate());
+                return Math.abs(dateA.getTime() - now.getTime()) - Math.abs(dateB.getTime() - now.getTime());
               });
 
               setCourseClassData(upcomingClasses[0]);
-              // setUpcomingClass(upcomingClasses[0]);
+              setUpcomingClass(upcomingClasses[0]);
               setIsLoading(false);
             }
 

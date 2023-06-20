@@ -248,6 +248,7 @@ export default function CreateClass({ navigation }: any) {
                       setCourseClassesData(courseClasses);
                     })
                     .then((res) => {
+                      console.log('res from then ', res)
                       navigation.goBack();
                       setIsLoading(false);
                     })
