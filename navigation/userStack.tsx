@@ -40,6 +40,7 @@ import CreateClass from "../screens/CreateClass";
 import CourseMembersScreen from "../screens/CourseMembersScreen";
 import { useNavigation } from "@react-navigation/native";
 import ClassDetails from "../screens/ClassDetails";
+import ClockInScreen from "../screens/ClockInScreen";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -256,6 +257,10 @@ function StackNavigator() {
         component={ClassDetails}
         options={{ header: () => null }}
       />
+      <Stack.Screen
+      name="ClockScreen"
+      component={ClockInScreen}
+      options={{header: () => null}} />
     </Stack.Navigator>
   );
 }

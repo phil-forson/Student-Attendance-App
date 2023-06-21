@@ -23,7 +23,8 @@ export type UserStackParamList = {
   CreateCourse: undefined;
   CreateClass: undefined;
   CourseDetails: undefined;
-  ClassDetails: undefined
+  ClassDetails: undefined;
+  ClockScreen: undefined;
 };
 
 export type UserStackScreenProps<Screen extends keyof UserStackParamList> =

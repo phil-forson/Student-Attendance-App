@@ -1,11 +1,11 @@
 import { useColorScheme } from "react-native";
 import { Text, TouchableOpacity } from "./Themed";
-import React from "react";
+import React, { useEffect } from "react";
 
 export type Props = {
   onPress?: () => any;
   disabled?: boolean;
-  text: string;
+  text: any;
 };
 
 export default function FullWidthButton({
@@ -13,6 +13,9 @@ export default function FullWidthButton({
   text,
   disabled = false,
 }: Props) {
+  useEffect(()=> {
+    console.log('disabled changed to ', disabled)
+  }, [disabled])
   return (
     <TouchableOpacity
       style={{

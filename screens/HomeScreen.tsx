@@ -6,8 +6,9 @@ import {
   Dimensions,
   Platform,
   Alert,
+  RefreshControl,
 } from "react-native";
-import { useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import {
   InvTouchableOpacity,
   Text,
@@ -86,6 +87,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
     useState<boolean>(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -94,13 +96,25 @@ export const HomeScreen = ({ navigation, route }: any) => {
     setTimeout(() => navigation.navigate("JoinCourse"), 800);
   };
 
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    getUserData(true).then((res) => {
+      setIsRefreshing(false)
+    }).catch((error) => {
+      console.log(error)
+      setIsRefreshing(false)
+    })
+  }, [])
+
   const createCourse = () => {
     setModalVisible(false);
     setTimeout(() => navigation.navigate("CreateCourse"), 800);
   };
 
-  const getUserData = async () => {
-    setIsLoading(true);
+  const getUserData = async (refresh=false) => {
+    if(!refresh){
+      setIsLoading(true);
+    }
     await userDataPromise
       .then(async (res: any) => {
         setFirstName(res.firstName);
@@ -111,7 +125,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
         // Fetch the enrolled courses based on the course IDs
       })
       .catch((error) => {
-        setIsLoading(false);
+        if(!refresh){
+
+          setIsLoading(false);
+        }
         console.log(error);
         Alert.alert("Error obtaining user data");
       })
@@ -203,6 +220,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           <FlatList
             style={[styles.courseContainer]}
             data={enrolledCourses}
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh}/>}
             renderItem={({ item }) => (
               <CourseCard courseItem={item} navigation={navigation} />
             )}

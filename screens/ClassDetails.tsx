@@ -1,7 +1,12 @@
 import { useIsFocused } from "@react-navigation/native";
 import { View, Text } from "../components/Themed";
 import React, { useContext, useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, useColorScheme } from "react-native";
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { IClass, UserData } from "../types";
@@ -55,7 +60,7 @@ export default function ClassDetails({ navigation, route }: any) {
     }
 
     // Permission granted, proceed to get the location
-    getLocation();
+    await getLocation();
   };
 
   const getLocation = async () => {
@@ -148,12 +153,14 @@ export default function ClassDetails({ navigation, route }: any) {
     await requestLocationPermission();
 
     await userDataPromise.then(async (user: any) => {
-      console.log({
+      const fullObj = {
         user: user,
         course: course,
         class: classData,
-      });
+      };
+      navigation.navigate("ClockScreen", fullObj)
     });
+
   };
 
   const images = [
@@ -165,12 +172,14 @@ export default function ClassDetails({ navigation, route }: any) {
     if (isFocused) {
       getClassData();
     }
-    console.log(route.params?.classStartTime &&
-      route.params?.classEndTime &&
-      (new Date(route.params?.classStartTime?.toDate()).getDate() >=
-        new Date(Date.now()).getDate() &&
-      new Date(route.params?.classEndTime?.toDate()).getDate() <=
-        new Date(Date.now()).getDate()))
+    console.log(
+      route.params?.classStartTime &&
+        route.params?.classEndTime &&
+        new Date(route.params?.classStartTime?.toDate()).getDate() >=
+          new Date(Date.now()).getDate() &&
+        new Date(route.params?.classEndTime?.toDate()).getDate() <=
+          new Date(Date.now()).getDate()
+    );
     console.log("navigation route ", route.params);
   }, [isFocused, route]);
 
@@ -324,67 +333,84 @@ export default function ClassDetails({ navigation, route }: any) {
                 <Text>Hello World</Text>
               </View>
             )}
-            {classData?.classStartTime &&
+          {classData?.classStartTime &&
             classData?.classEndTime &&
             new Date(classData?.classStartTime?.toDate()).getDate() >=
               new Date(Date.now()).getDate() &&
             new Date(classData?.classEndTime?.toDate()).getDate() <
-              new Date(Date.now()).getDate() &&
-          <View
-            style={[
-              styles.marginTop,
-              styles.borderBottom,
-              {
-                paddingVertical: 10,
-                borderBottomColor: theme === "dark" ? "#fff" : "#000",
-              },
-            ]}
-          >
-            <Text style={[styles.largeText]}>Clocked In</Text>
-            <View
-              style={[
-                { flexDirection: "row", alignItems: "center" },
-                styles.marginTop,
-              ]}
-            >
-              {images.map((image, index) => (
-                <Image
-                  key={index}
-                  source={image}
-                  style={[styles.image, { marginLeft: index > 0 ? 10 : 0 }]}
-                />
-              ))}
+              new Date(Date.now()).getDate() && (
               <View
                 style={[
-                  styles.image,
+                  styles.marginTop,
+                  styles.borderBottom,
                   {
-                    marginLeft: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
+                    paddingVertical: 10,
+                    borderBottomColor: theme === "dark" ? "#fff" : "#000",
                   },
                 ]}
-                darkColor="#20212C"
               >
-                <Text style={[styles.bold, styles.mediumText]}>+53</Text>
+                <Text style={[styles.largeText]}>Clocked In</Text>
+                <View
+                  style={[
+                    { flexDirection: "row", alignItems: "center" },
+                    styles.marginTop,
+                  ]}
+                >
+                  {images.map((image, index) => (
+                    <Image
+                      key={index}
+                      source={image}
+                      style={[styles.image, { marginLeft: index > 0 ? 10 : 0 }]}
+                    />
+                  ))}
+                  <View
+                    style={[
+                      styles.image,
+                      {
+                        marginLeft: 10,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      },
+                    ]}
+                    darkColor="#20212C"
+                  >
+                    <Text style={[styles.bold, styles.mediumText]}>+53</Text>
+                  </View>
+                </View>
+                <Text style={[styles.marginTop, { paddingBottom: 10 }]}>
+                  Akosua, Akose, Akosu and 54 others are already clocked in
+                </Text>
               </View>
-            </View>
-            <Text style={[styles.marginTop, { paddingBottom: 10 }]}>
-              Akosua, Akose, Akosu and 54 others are already clocked in
-            </Text>
-          </View>}
+            )}
           <View style={[styles.marginTop]}>
             <Text>00:00</Text>
           </View>
         </View>
         {classData?.classStartTime &&
-            classData?.classEndTime &&
-            (new Date(classData?.classStartTime?.toDate()).getDate() >=
-              new Date(Date.now()).getDate() &&
-            new Date(classData?.classEndTime?.toDate()).getDate() <=
-              new Date(Date.now()).getDate()) &&
-        <View>
-          <FullWidthButton text={"Clock In"} onPress={clockIn} />
-        </View>}
+          classData?.classEndTime &&
+          new Date(classData?.classStartTime?.toDate()).getDate() >=
+            new Date(Date.now()).getDate() && (
+            <View>
+              <FullWidthButton
+                text={
+                  isLocationLoading ? (
+                    <Text
+                      lightColor="#fff"
+                      darkColor="#000"
+                      style={{ justifyContent: "center", alignItems: "center" }}
+                    >
+                      Verifying {" "}<ActivityIndicator size={10} />
+                    </Text>
+                  ) : (
+                    "Clock In"
+                  )
+                }
+                disabled={isLocationLoading}
+
+                onPress={clockIn}
+              />
+            </View>
+          )}
       </View>
     </SafeAreaView>
   );
