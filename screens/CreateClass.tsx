@@ -127,7 +127,6 @@ export default function CreateClass({ navigation }: any) {
       hideStartTimePicker();
       setClassStartTimeError(false);
     } else {
-
       setClassStartTime(null);
       setClassStartTimeError(true);
       hideStartTimePicker();
@@ -211,7 +210,7 @@ export default function CreateClass({ navigation }: any) {
         classDate: classDate,
         classStartTime: classStartTime,
         classEndTime: classEndTime,
-        classStatus: 'upcoming'
+        classStatus: "upcoming",
       })
         .catch((error) => {
           setIsLoading(false);
@@ -220,7 +219,10 @@ export default function CreateClass({ navigation }: any) {
         .then(async (res: any) => {
           const classId = res.id;
 
-          const courseQuery = query(collection(db, 'courses'), where('uid', '==', course.uid))
+          const courseQuery = query(
+            collection(db, "courses"),
+            where("uid", "==", course.uid)
+          );
           await getDocs(courseQuery)
             .then(async (snapshot) => {
               const courseDocRef = snapshot.docs[0].ref;
@@ -233,7 +235,7 @@ export default function CreateClass({ navigation }: any) {
                 courseClasses: courseClasses,
               })
                 .then((res) => {
-                  console.log('response after updating ', res)
+                  console.log("response after updating ", res);
                   const courseClassesPromises = courseClasses.map(
                     async (classId: string) => {
                       const classDoc = doc(db, "classes", classId);
@@ -248,8 +250,11 @@ export default function CreateClass({ navigation }: any) {
                       setCourseClassesData(courseClasses);
                     })
                     .then((res) => {
-                      console.log('res from then ', res)
-                      navigation.goBack();
+                      console.log("res from then ", res);
+                      navigation.navigate("CourseDetails", {
+                        screen: "Classes",
+                        params: snapshot.docs[0].data(),
+                      });
                       setIsLoading(false);
                     })
                     .catch((error) => {
@@ -283,7 +288,13 @@ export default function CreateClass({ navigation }: any) {
             onPress={() => createClass()}
             style={{}}
             disabled={
-              !(classTitle.length && classLocationSearch.length  && classDate?.toLocaleString().length && classStartTime?.toLocaleString().length && classEndTime?.toLocaleString().length) ||
+              !(
+                classTitle.length &&
+                classLocationSearch.length &&
+                classDate?.toLocaleString().length &&
+                classStartTime?.toLocaleString().length &&
+                classEndTime?.toLocaleString().length
+              ) ||
               isLoading ||
               !isItemSelected ||
               classStartTimeError ||
@@ -293,7 +304,13 @@ export default function CreateClass({ navigation }: any) {
             <Text
               style={{
                 color:
-                  !(classTitle.length && classLocationSearch.length  && classDate?.toLocaleString().length && classStartTime?.toLocaleString().length && classEndTime?.toLocaleString().length) ||
+                  !(
+                    classTitle.length &&
+                    classLocationSearch.length &&
+                    classDate?.toLocaleString().length &&
+                    classStartTime?.toLocaleString().length &&
+                    classEndTime?.toLocaleString().length
+                  ) ||
                   isLoading ||
                   !isItemSelected ||
                   classStartTimeError ||
@@ -301,7 +318,13 @@ export default function CreateClass({ navigation }: any) {
                     ? "#023f65"
                     : "#008be3",
                 opacity:
-                  !(classTitle.length && classLocationSearch.length && classDate && classStartTime && classEndTime) ||
+                  !(
+                    classTitle.length &&
+                    classLocationSearch.length &&
+                    classDate &&
+                    classStartTime &&
+                    classEndTime
+                  ) ||
                   isLoading ||
                   !isItemSelected ||
                   classStartTimeError ||

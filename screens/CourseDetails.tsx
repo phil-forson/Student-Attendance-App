@@ -1,11 +1,11 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IClassDetails, ICourseDetails } from "../types";
 import useColorScheme from "../hooks/useColorScheme";
 import { FontAwesome5, AntDesign } from "@expo/vector-icons";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { StyleSheet, Platform, FlatList, Alert, Share } from "react-native";
+import { StyleSheet, Platform, FlatList, Alert, Share, RefreshControl } from "react-native";
 import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
@@ -53,6 +53,7 @@ export default function CourseDetails({ navigation, route }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [upcomingClass, setUpcomingClass] = useState<any>({});
   const [pastClasses, setPastClasses] = useState<any>([]);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
 
   const handleTabSwitch = (value: string) => {
     setClassTab(value);
@@ -67,6 +68,31 @@ export default function CourseDetails({ navigation, route }: any) {
         Alert.alert("Error sharing link:", error);
       });
   };
+
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    userDataPromise
+        .then(async (userData: any) => {
+          await getUpcomingClass()
+            .then((res) => {
+              setCanCreateClass(userData?.uid === course?.creatorId);
+              setIsRefreshing(false)
+            })
+            .catch((error) => {
+              console.log(error);
+              console.log("error from herer");
+              setIsRefreshing(false)
+
+            });
+        })
+        .catch((error) => {
+          setIsLoading(false);
+          setIsRefreshing(false)
+          console.log(error);
+          Alert.alert("Something unexpected happeneddd");
+        });
+    setCourseData(course);
+  }, [])
 
   const getUpcomingClass = async () => {
     await getClassesData();
@@ -208,7 +234,7 @@ export default function CourseDetails({ navigation, route }: any) {
       console.log("route ", route.params);
       userDataPromise
         .then(async (userData: any) => {
-          await getUpcomingClass()
+          await getClassesData()
             .then((res) => {
               setCanCreateClass(userData?.uid === course?.creatorId);
               setIsLoading(false);
@@ -279,7 +305,7 @@ export default function CourseDetails({ navigation, route }: any) {
           />
         </InvTouchableOpacity>
       </View>
-      <ScrollView>
+      <ScrollView refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh}/>}>
         <View
           lightColor="#fff"
           darkColor="#0c0c0c"
