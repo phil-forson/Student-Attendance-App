@@ -22,6 +22,7 @@ export default function ClassCard({
           justifyContent: "space-around",
         },
       ]}
+      onPress={() => navigation.navigate("ClassDetails", courseClass)}
     >
       <Text>{courseClass.className}</Text>
       <Text>

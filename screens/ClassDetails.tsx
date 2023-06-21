@@ -19,6 +19,9 @@ import FullWidthButton from "../components/FullWidthButton";
 import useUser from "../hooks/useUser";
 import { CourseContext } from "../contexts/CourseContext";
 import { ClassContext } from "../contexts/ClassContext";
+import * as Location from "expo-location";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 
 export default function ClassDetails({ navigation, route }: any) {
   const theme = useColorScheme();
@@ -29,6 +32,64 @@ export default function ClassDetails({ navigation, route }: any) {
   const { courseClass } = useContext(ClassContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [classData, setClassData] = useState<IClass>();
+  const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
+  const [inClass, setInClass] = useState<boolean>(false);
+
+  const [location, setLocation] = useState<Location.LocationObject>();
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const requestLocationPermission = async () => {
+    setIsLocationLoading(true);
+    if (Platform.OS === "ios") {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Location permission denied");
+        return;
+      }
+    } else {
+      const { status } = await Location.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Location permission denied");
+        return;
+      }
+    }
+
+    // Permission granted, proceed to get the location
+    getLocation();
+  };
+
+  const getLocation = async () => {
+    try {
+      const { coords } = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = coords;
+      console.log("Current location:", latitude, longitude);
+      isLocationWithinBoundary(coords);
+      // Do something with the location data
+    } catch (error) {
+      setIsLocationLoading(false);
+      console.warn("Location error:", error);
+    }
+  };
+
+  const isLocationWithinBoundary = (
+    location: Location.LocationObjectCoords
+  ) => {
+    const { latitude, longitude } = location;
+    if (
+      latitude >= route.params.classLocation.boundingBox[0] &&
+      latitude <= route.params.classLocation.boundingBox[0] &&
+      longitude >= route.params.classLocation.boundingBox[0] &&
+      longitude <= route.params.classLocation.boundingBox[0]
+    ) {
+      console.log("is in class");
+      setInClass(true);
+      setIsLocationLoading(false);
+    } else {
+      console.log("is not in class");
+      setInClass(false);
+      setIsLocationLoading(false);
+    }
+  };
 
   const getClassData = async () => {
     setIsLoading(true);
@@ -40,12 +101,57 @@ export default function ClassDetails({ navigation, route }: any) {
     setIsLoading(false);
   };
 
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+        console.log("existingStatus", existingStatus);
+      }
+
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        console.log("finalStatus", finalStatus);
+        return;
+      }
+
+      // Project ID can be found in app.json | app.config.js; extra > eas > projectId
+      // token = (await Notifications.getExpoPushTokenAsync({ projectId: "YOUR_PROJECT_ID" })).data;
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+
+      // The token should be sent to the server so that it can be used to send push notifications to the device
+      console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+    }
+
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        showBadge: true,
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FE9018",
+      });
+    }
+
+    return token;
+  }
+
   const clockIn = async () => {
+    await requestLocationPermission();
+
     await userDataPromise.then(async (user: any) => {
       console.log({
         user: user,
         course: course,
-        class: courseClass,
+        class: classData,
       });
     });
   };
@@ -59,6 +165,12 @@ export default function ClassDetails({ navigation, route }: any) {
     if (isFocused) {
       getClassData();
     }
+    console.log(route.params?.classStartTime &&
+      route.params?.classEndTime &&
+      (new Date(route.params?.classStartTime?.toDate()).getDate() >=
+        new Date(Date.now()).getDate() &&
+      new Date(route.params?.classEndTime?.toDate()).getDate() <=
+        new Date(Date.now()).getDate()))
     console.log("navigation route ", route.params);
   }, [isFocused, route]);
 
@@ -195,16 +307,29 @@ export default function ClassDetails({ navigation, route }: any) {
               {course.courseTitle + " "} ({" " + course.courseCode + " "})
             </Text>
           </View>
-          <View
-            style={[
-              styles.marginTop,
-              styles.paddingBottom,
-              styles.borderBottom,
-              { borderBottomColor: theme === "dark" ? "#fff" : "#000" },
-            ]}
-          >
-            <Text>Hello World</Text>
-          </View>
+          {classData?.classStartTime &&
+            classData?.classEndTime &&
+            new Date(classData?.classStartTime?.toDate()).getDate() >=
+              new Date(Date.now()).getDate() &&
+            new Date(classData?.classEndTime?.toDate()).getDate() <
+              new Date(Date.now()).getDate() && (
+              <View
+                style={[
+                  styles.marginTop,
+                  styles.paddingBottom,
+                  styles.borderBottom,
+                  { borderBottomColor: theme === "dark" ? "#fff" : "#000" },
+                ]}
+              >
+                <Text>Hello World</Text>
+              </View>
+            )}
+            {classData?.classStartTime &&
+            classData?.classEndTime &&
+            new Date(classData?.classStartTime?.toDate()).getDate() >=
+              new Date(Date.now()).getDate() &&
+            new Date(classData?.classEndTime?.toDate()).getDate() <
+              new Date(Date.now()).getDate() &&
           <View
             style={[
               styles.marginTop,
@@ -226,14 +351,14 @@ export default function ClassDetails({ navigation, route }: any) {
                 <Image
                   key={index}
                   source={image}
-                  style={[styles.image, { marginLeft: index > 0 ? -40 : 0 }]}
+                  style={[styles.image, { marginLeft: index > 0 ? 10 : 0 }]}
                 />
               ))}
               <View
                 style={[
                   styles.image,
                   {
-                    marginLeft: -40,
+                    marginLeft: 10,
                     justifyContent: "center",
                     alignItems: "center",
                   },
@@ -246,11 +371,20 @@ export default function ClassDetails({ navigation, route }: any) {
             <Text style={[styles.marginTop, { paddingBottom: 10 }]}>
               Akosua, Akose, Akosu and 54 others are already clocked in
             </Text>
+          </View>}
+          <View style={[styles.marginTop]}>
+            <Text>00:00</Text>
           </View>
         </View>
+        {classData?.classStartTime &&
+            classData?.classEndTime &&
+            (new Date(classData?.classStartTime?.toDate()).getDate() >=
+              new Date(Date.now()).getDate() &&
+            new Date(classData?.classEndTime?.toDate()).getDate() <=
+              new Date(Date.now()).getDate()) &&
         <View>
-          <FullWidthButton text="Clock In" onPress={clockIn} disabled={true} />
-        </View>
+          <FullWidthButton text={"Clock In"} onPress={clockIn} />
+        </View>}
       </View>
     </SafeAreaView>
   );

@@ -167,7 +167,7 @@ export default function CourseDetails({ navigation, route }: any) {
               setCourseClassData(upcomingClasses[0]);
               setUpcomingClass(upcomingClasses[0]);
               setIsLoading(false);
-            } else {
+            } else if(upcomingClass.length > 1) {
               console.log("else block")
               upcomingClasses.sort((classA: any, classB: any) => {
                 const dateA = new Date(classA.classStartTime?.toDate());
@@ -182,11 +182,11 @@ export default function CourseDetails({ navigation, route }: any) {
 
             if (coursePastClasses.length === 1) {
               setPastClasses(coursePastClasses);
-            } else {
+            } else if(coursePastClasses.length > 1) {
               coursePastClasses.sort((classA: any, classB: any) => {
-                const dateA = classA.classStartTime?.getDate();
-                const dateB = classB.classStartTime?.getDate();
-                return dateA - dateB;
+                const dateA = new Date(classA.classEndTime?.toDate());
+                const dateB = new Date(classB.classEndTime?.toDate());
+                return Math.abs(dateA.getTime() - now.getTime()) - Math.abs(dateB.getTime() - now.getTime());
               });
               setPastClasses(coursePastClasses);
             }
@@ -231,6 +231,8 @@ export default function CourseDetails({ navigation, route }: any) {
   useEffect(() => {
     console.log("upcoming class changed to ", upcomingClass);
   }, [upcomingClass]);
+
+  
 
   //if loading
   if (isLoading) {
@@ -363,7 +365,7 @@ export default function CourseDetails({ navigation, route }: any) {
               horizontal
               showsHorizontalScrollIndicator={false}
               style={[styles.pastClassesContainer]}
-              data={courseClasses ?? []}
+              data={pastClasses ?? []}
               renderItem={({ item }) => (
                 <ClassCard courseClass={item} navigation={navigation} />
               )}
