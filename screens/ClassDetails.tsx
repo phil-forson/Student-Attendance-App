@@ -158,6 +158,7 @@ export default function ClassDetails({ navigation, route }: any) {
         course: course,
         class: classData,
       };
+      console.log('full obj' , fullObj)
       navigation.navigate("ClockScreen", fullObj)
     });
 
