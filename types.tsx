@@ -5,7 +5,7 @@ import { Timestamp } from "firebase/firestore";
 
 export type RootStackParamList = {
   Root: undefined;
-  SignIn: undefined;
+  SignUp: undefined;
   LogIn: undefined;
   NotFound: undefined;
   ForgotPassword: undefined;

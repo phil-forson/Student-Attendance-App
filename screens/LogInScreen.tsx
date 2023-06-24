@@ -1,4 +1,4 @@
-import React,{ useEffect, useState } from "react";
+import React,{ useContext, useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme, StyleSheet, Alert } from "react-native";
 import { Platform } from "react-native";
@@ -16,12 +16,15 @@ import { KeyboardAvoidingView } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { APIKEY } from "@env";
+import { UserContext } from "../contexts/UserContext";
+
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
+  const { setUserLoggedIn } = useContext(UserContext)
   const theme = useColorScheme();
   const [email, setEmail] = useState<string>("");
   const [validEmail, setValidEmail] = useState<boolean>(false);
@@ -52,7 +55,9 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
 
   const logIn = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, pwd).finally(() => setIsLoading(false));
+      await signInWithEmailAndPassword(auth, email, pwd).then((res) => {
+        setUserLoggedIn(true);
+      }).finally(() => setIsLoading(false));
     } catch (error: any) {
       if (
         error.code === "auth/invalid-email" ||

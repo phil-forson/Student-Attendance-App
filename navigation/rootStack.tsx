@@ -30,9 +30,9 @@ export default function RootNavigator() {
         })}
       />
       <Stack.Screen
-        name="SignIn"
+        name="SignUp"
         component={SignInScreen}
-        options={({ navigation }: RootStackScreenProps<"SignIn">) => ({
+        options={({ navigation }: RootStackScreenProps<"SignUp">) => ({
           title: "Sign Up",
           headerLeft: () => null,
           headerTransparent: true,

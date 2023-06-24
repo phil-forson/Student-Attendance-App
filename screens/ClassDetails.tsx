@@ -3,6 +3,7 @@ import { View, Text } from "../components/Themed";
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   SafeAreaView,
   StyleSheet,
   useColorScheme,
@@ -48,11 +49,11 @@ export default function ClassDetails({ navigation, route }: any) {
     if (Platform.OS === "ios") {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Location permission denied");
+        Alert.alert("Location permission denied. We need your location for attendance checking.");
         return;
       }
     } else {
-      const { status } = await Location.requestPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.log("Location permission denied");
         return;
@@ -65,6 +66,7 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const getLocation = async () => {
     try {
+
       const { coords } = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = coords;
       console.log("Current location:", latitude, longitude);

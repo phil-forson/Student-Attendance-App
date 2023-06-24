@@ -119,14 +119,13 @@ export const HomeScreen = ({ navigation, route }: any) => {
       .then(async (res: any) => {
         setFirstName(res.firstName);
         const enrolledCourseIds = res.enrolledCourses || [];
-        console.log(enrolledCourseIds);
+        console.log('enrolled courses ids', enrolledCourseIds);
 
         getAllCoursesData(enrolledCourseIds);
         // Fetch the enrolled courses based on the course IDs
       })
       .catch((error) => {
         if(!refresh){
-
           setIsLoading(false);
         }
         console.log(error);
@@ -167,7 +166,9 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   useEffect(() => {
       console.log("enrolled courses ", enrolledCourses);
-    getUserData()
+      if(isFocused){
+        getUserData()
+      }
   }, [isFocused]);
 
   if (isLoading) {

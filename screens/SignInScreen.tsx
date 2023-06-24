@@ -10,7 +10,7 @@ import {
 import { RootStackScreenProps } from "../types";
 import { StatusBar } from "expo-status-bar";
 import { InputField } from "../components/InputField";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { auth, db } from "../config/firebase";
 import {
@@ -22,6 +22,7 @@ import React from "react";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import useAuth from "../hooks/useAuth";
 import { FirebaseError } from "firebase/app";
+import { UserContext } from "../contexts/UserContext";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -29,8 +30,10 @@ const PWD_REGEX =
 
 export const SignInScreen = ({
   navigation,
-}: RootStackScreenProps<"SignIn">) => {
+}: RootStackScreenProps<"SignUp">) => {
   const theme = useColorScheme();
+
+  const { setUserLoggedIn } = useContext(UserContext);
 
   const [email, setEmail] = useState<string>("");
   const [validEmail, setValidEmail] = useState<boolean>(false);
@@ -86,14 +89,17 @@ export const SignInScreen = ({
   const createAccount = async () => {
     try {
       setIsLoading(true);
-  
+
       const response = await createUserWithEmailAndPassword(auth, email, pwd);
       const user = response.user;
-      const queryRef = query(collection(db, "users"), where("uid", "==", user?.uid));
-      console.log('response from creating user');
-  
+      const queryRef = query(
+        collection(db, "users"),
+        where("uid", "==", user?.uid)
+      );
+      console.log("response from creating user");
+
       const querySnapshot = await getDocs(queryRef);
-  
+
       if (querySnapshot.size === 0) {
         // Create a new user
         try {
@@ -103,20 +109,27 @@ export const SignInScreen = ({
             lastName: lastName,
             email: email,
             enrolledCourses: [],
+          }).then((res) => {
+            setUserLoggedIn(true);
           });
-  
-          console.log('response from adding user', userDocRef);
+
+          console.log("response from adding user", userDocRef);
         } catch (error) {
           setIsLoading(false);
           console.log(error);
           return; // Exit early if there was an error adding the user data
         }
+      } else {
+        Alert.alert("Email already in use");
       }
-  
+
       setIsLoading(false);
     } catch (error: any) {
       setIsLoading(false);
-      if (error.code === "auth/invalid-email" || error.code === "auth/wrong-password") {
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/wrong-password"
+      ) {
         Alert.alert("Your email or password was incorrect");
       } else if (error.code === "auth/email-already-in-use") {
         Alert.alert("An account with this email already exists");
@@ -222,7 +235,48 @@ export const SignInScreen = ({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.bottom}
       > */}
-      <View style={[styles.bottom]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.bottom}
+      >
+                <TouchableOpacity
+          style={[
+            {
+              width: "auto",
+              marginVertical: 15,
+              paddingHorizontal: 10,
+              height: 40,
+              borderRadius: 8,
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "row",
+              backgroundColor: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) || isLoading
+                ? "#147ec0"
+                : "#008be3",
+              opacity: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) || isLoading ? 0.32 : 1
+            },
+          ]}
+          disabled={!(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) || isLoading}
+          onPress={handleSubmit}
+        >
+          <Text
+            lightColor="#fff"
+            darkColor="#000"
+            style={{
+              fontWeight: "bold",
+            }}
+          >
+            Sign Up
+          </Text>
+          <AntDesign
+            name="arrowright"
+            size={20}
+            color={theme === "light" ? "white" : "black"}
+            style={{ marginLeft: 10 }}
+          />
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+      {/* <View style={[styles.bottom]}>
         <TouchableOpacity
           style={[
             {
@@ -282,7 +336,7 @@ export const SignInScreen = ({
             style={{ marginLeft: 10 }}
           />
         </TouchableOpacity>
-      </View>
+      </View> */}
       {/* </KeyboardAvoidingView> */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </SafeAreaView>
@@ -307,5 +361,6 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     flex: 1,
     justifyContent: "flex-end",
+    alignItems: "flex-end",
   },
 });

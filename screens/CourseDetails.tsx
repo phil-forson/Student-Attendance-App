@@ -5,7 +5,7 @@ import { IClassDetails, ICourseDetails } from "../types";
 import useColorScheme from "../hooks/useColorScheme";
 import { FontAwesome5, AntDesign } from "@expo/vector-icons";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { StyleSheet, Platform, FlatList, Alert, Share, RefreshControl } from "react-native";
+import { StyleSheet, Platform, FlatList, Alert, Share, RefreshControl, ActivityIndicator } from "react-native";
 import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
@@ -264,7 +264,7 @@ export default function CourseDetails({ navigation, route }: any) {
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <Text>Loading...</Text>
+        <ActivityIndicator />
       </View>
     );
   }

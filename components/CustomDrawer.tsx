@@ -154,7 +154,7 @@ const CustomDrawer = (props: any) => {
             }
             activeTintColor={theme === "dark" ? "#fbfcfd": "#2f95dc"}
           />
-          <DrawerItemList {...props} />
+          {/* <DrawerItemList {...props} /> */}
         </View>
         <View
           style={{
@@ -227,6 +227,7 @@ const CustomDrawer = (props: any) => {
                 },
                 {
                   text: "Yes",
+                  style: 'destructive',
                   onPress: handleSignOut,
                 },
               ])

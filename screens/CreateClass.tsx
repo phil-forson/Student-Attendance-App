@@ -446,7 +446,7 @@ export default function CreateClass({ navigation }: any) {
           }}
           onPress={showDatePicker}
         >
-          <Text style={{ color: classDate ? "white" : "gray", fontSize: 13.8 }}>
+          <Text style={{ color: theme === 'dark' ? classDate ? "white" : "gray": classDate ? "black": "gray", fontSize: 13.8 }}>
             {classDate
               ? classDate?.toLocaleDateString([], {
                   weekday: "long",
@@ -469,7 +469,7 @@ export default function CreateClass({ navigation }: any) {
           onPress={showStartTimePicker}
         >
           <Text
-            style={{ color: classStartTime ? "white" : "gray", fontSize: 13.8 }}
+            style={{ color: theme === 'dark' ? classStartTime ? "white" : "gray": classStartTime ? "black": "gray", fontSize: 13.8 }}
           >
             {classStartTime
               ? classStartTime?.toLocaleTimeString([], {
@@ -497,7 +497,7 @@ export default function CreateClass({ navigation }: any) {
           onPress={showEndTimePicker}
         >
           <Text
-            style={{ color: classEndTime ? "white" : "gray", fontSize: 13.8 }}
+            style={{ color: theme === 'dark' ? classEndTime ? "white" : "gray": classEndTime ? "black": "gray", fontSize: 13.8 }}
           >
             {classEndTime
               ? classEndTime.toLocaleTimeString([], {

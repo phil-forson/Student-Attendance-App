@@ -3,12 +3,13 @@ import {
   DefaultTheme,
   NavigationContainer,
 } from "@react-navigation/native";
-import React,{ useEffect } from "react";
+import React,{ useContext, useEffect } from "react";
 import { ColorSchemeName } from "react-native/types";
 import useAuth from "../hooks/useAuth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import RootNavigator from "./rootStack";
 import UserStack from "./userStack";
+import { UserContext } from "../contexts/UserContext";
 
 export default function Navigation({
   colorScheme,
@@ -17,13 +18,14 @@ export default function Navigation({
 }) {
 
     const { user } = useAuth();
+    const { userLoggedIn } = useContext(UserContext)
 
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      {user ? <UserStack /> : <RootNavigator />}
+      {userLoggedIn ? <UserStack /> : <RootNavigator />}
     </NavigationContainer>
   );
 }
