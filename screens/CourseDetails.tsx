@@ -76,6 +76,7 @@ export default function CourseDetails({ navigation, route }: any) {
           await getUpcomingClass()
             .then((res) => {
               setCanCreateClass(userData?.uid === course?.creatorId);
+              console.log('doneeee ')
               setIsRefreshing(false)
             })
             .catch((error) => {
@@ -186,21 +187,21 @@ export default function CourseDetails({ navigation, route }: any) {
             );
 
             console.log("upcomingggg", upcomingClasses);
-            console.log("past classes", pastClasses)
+            // console.log("past classes", pastClasses)
+
+            console.log(upcomingClasses.length)
 
             if (upcomingClasses.length === 1) {
               console.log("only one upcoming clasd");
               setCourseClassData(upcomingClasses[0]);
               setUpcomingClass(upcomingClasses[0]);
               setIsLoading(false);
-            } else if(upcomingClass.length > 1) {
-              console.log("else block")
+            } else if(upcomingClasses.length > 1) {
               upcomingClasses.sort((classA: any, classB: any) => {
                 const dateA = new Date(classA.classStartTime?.toDate());
                 const dateB = new Date(classB.classStartTime?.toDate());
                 return Math.abs(dateA.getTime() - now.getTime()) - Math.abs(dateB.getTime() - now.getTime());
               });
-
               setCourseClassData(upcomingClasses[0]);
               setUpcomingClass(upcomingClasses[0]);
               setIsLoading(false);

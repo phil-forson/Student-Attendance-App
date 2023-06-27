@@ -41,6 +41,7 @@ import { StretchOutY } from "react-native-reanimated";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
+  const [courseClassesIds,setCourseClassesIds] = useState([])
   const [classStartTime, setClassStartTime] = useState<Date | null>(null);
   const [classEndTime, setClassEndTime] = useState<Date | null>(null);
   const [classStartTimeError, setClassStartTimeError] =
@@ -230,6 +231,7 @@ export default function CreateClass({ navigation }: any) {
 
               const courseClasses = courseDocData?.courseClasses || [];
               courseClasses.push(classId);
+              setCourseClassesIds(courseClasses)
               console.log("course classes ", courseClasses);
               await updateDoc(courseDocRef, {
                 courseClasses: courseClasses,
@@ -248,14 +250,18 @@ export default function CreateClass({ navigation }: any) {
                     .then(async (courseClasses: any) => {
                       console.log("enrolled courses", courseClasses);
                       setCourseClassesData(courseClasses);
-                    })
-                    .then((res) => {
-                      console.log("res from then ", res);
+                      // console.log("res from then ", res);
+                      const userData = snapshot.docs[0].data()
+                      // userData?.courseClasses.append(classId);
+                      userData.courseClasses = courseClassesIds
+                      console.log('user data... ', userData?.courseClasses)
                       navigation.navigate("CourseDetails", {
                         screen: "Classes",
                         params: snapshot.docs[0].data(),
                       });
                       setIsLoading(false);
+                    })
+                    .then((res) => {
                     })
                     .catch((error) => {
                       console.log(error);
