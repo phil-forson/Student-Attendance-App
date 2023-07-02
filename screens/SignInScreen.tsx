@@ -146,7 +146,7 @@ export const SignInScreen = ({
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#eee" : "#121212",
+          backgroundColor: theme === "light" ? "#fff" : "#121212",
         },
       ]}
     >
@@ -239,7 +239,7 @@ export const SignInScreen = ({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.bottom}
       >
-                <TouchableOpacity
+        <TouchableOpacity
           style={[
             {
               width: "auto",
@@ -250,13 +250,37 @@ export const SignInScreen = ({
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
-              backgroundColor: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) || isLoading
-                ? "#147ec0"
-                : "#008be3",
-              opacity: !(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) || isLoading ? 0.32 : 1
+              backgroundColor:
+                !(
+                  matchPwd &&
+                  validEmail &&
+                  validFirstName &&
+                  validLastName &&
+                  matchPwd2
+                ) || isLoading
+                  ? "#147ec0"
+                  : "#008be3",
+              opacity:
+                !(
+                  matchPwd &&
+                  validEmail &&
+                  validFirstName &&
+                  validLastName &&
+                  matchPwd2
+                ) || isLoading
+                  ? 0.32
+                  : 1,
             },
           ]}
-          disabled={!(matchPwd && validEmail && validFirstName && validLastName && matchPwd2) || isLoading}
+          disabled={
+            !(
+              matchPwd &&
+              validEmail &&
+              validFirstName &&
+              validLastName &&
+              matchPwd2
+            ) || isLoading
+          }
           onPress={handleSubmit}
         >
           <Text

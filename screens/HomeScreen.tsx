@@ -80,14 +80,14 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const isFocused = useIsFocused();
 
-  const [coursesData, setCoursesData] = enrolledCourses
+  const [coursesData, setCoursesData] = enrolledCourses;
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isJoinCourseVisible, setIsJoinCourseVisible] =
     useState<boolean>(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -98,34 +98,36 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const onRefresh = useCallback(() => {
     setIsRefreshing(true);
-    getUserData(true).then((res) => {
-      setIsRefreshing(false)
-    }).catch((error) => {
-      console.log(error)
-      setIsRefreshing(false)
-    })
-  }, [])
+    getUserData(true)
+      .then((res) => {
+        setIsRefreshing(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsRefreshing(false);
+      });
+  }, []);
 
   const createCourse = () => {
     setModalVisible(false);
     setTimeout(() => navigation.navigate("CreateCourse"), 800);
   };
 
-  const getUserData = async (refresh=false) => {
-    if(!refresh){
+  const getUserData = async (refresh = false) => {
+    if (!refresh) {
       setIsLoading(true);
     }
     await userDataPromise
       .then(async (res: any) => {
         setFirstName(res.firstName);
         const enrolledCourseIds = res.enrolledCourses || [];
-        console.log('enrolled courses ids', enrolledCourseIds);
+        console.log("enrolled courses ids", enrolledCourseIds);
 
         getAllCoursesData(enrolledCourseIds);
         // Fetch the enrolled courses based on the course IDs
       })
       .catch((error) => {
-        if(!refresh){
+        if (!refresh) {
           setIsLoading(false);
         }
         console.log(error);
@@ -165,10 +167,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
   // }, []);
 
   useEffect(() => {
-      console.log("enrolled courses ", enrolledCourses);
-      if(isFocused){
-        getUserData()
-      }
+    console.log("enrolled courses ", enrolledCourses);
+    if (isFocused) {
+      getUserData();
+    }
   }, [isFocused]);
 
   if (isLoading) {
@@ -186,7 +188,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
         style={[
           styles.container,
           {
-            backgroundColor: theme === "light" ? "#eee" : "#121212",
+            backgroundColor: theme === "light" ? "#fff" : "#121212",
           },
         ]}
       >
@@ -221,7 +223,9 @@ export const HomeScreen = ({ navigation, route }: any) => {
           <FlatList
             style={[styles.courseContainer]}
             data={enrolledCourses}
-            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh}/>}
+            refreshControl={
+              <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+            }
             renderItem={({ item }) => (
               <CourseCard courseItem={item} navigation={navigation} />
             )}

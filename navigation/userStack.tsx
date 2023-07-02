@@ -71,7 +71,7 @@ export default function UserStack() {
           ),
           drawerLabel: "Upcoming classes",
           drawerLabelStyle: {
-            color: theme === "dark" ? "#eee" : "#737171",
+            color: theme === "dark" ? "#fff" : "#737171",
           },
         }}
       />
@@ -84,7 +84,7 @@ export default function UserStack() {
           ),
           drawerLabel: "Settings",
           drawerLabelStyle: {
-            color: theme === "dark" ? "#eee" : "#737171",
+            color: theme === "dark" ? "#fff" : "#737171",
           },
         }}
       />
@@ -258,9 +258,10 @@ function StackNavigator() {
         options={{ header: () => null }}
       />
       <Stack.Screen
-      name="ClockScreen"
-      component={ClockInScreen}
-      options={{header: () => null}} />
+        name="ClockScreen"
+        component={ClockInScreen}
+        options={{ header: () => null }}
+      />
     </Stack.Navigator>
   );
 }

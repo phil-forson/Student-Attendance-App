@@ -41,7 +41,7 @@ import { StretchOutY } from "react-native-reanimated";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
-  const [courseClassesIds,setCourseClassesIds] = useState([])
+  const [courseClassesIds, setCourseClassesIds] = useState([]);
   const [classStartTime, setClassStartTime] = useState<Date | null>(null);
   const [classEndTime, setClassEndTime] = useState<Date | null>(null);
   const [classStartTimeError, setClassStartTimeError] =
@@ -231,7 +231,7 @@ export default function CreateClass({ navigation }: any) {
 
               const courseClasses = courseDocData?.courseClasses || [];
               courseClasses.push(classId);
-              setCourseClassesIds(courseClasses)
+              setCourseClassesIds(courseClasses);
               console.log("course classes ", courseClasses);
               await updateDoc(courseDocRef, {
                 courseClasses: courseClasses,
@@ -251,18 +251,17 @@ export default function CreateClass({ navigation }: any) {
                       console.log("enrolled courses", courseClasses);
                       setCourseClassesData(courseClasses);
                       // console.log("res from then ", res);
-                      const userData = snapshot.docs[0].data()
+                      const userData = snapshot.docs[0].data();
                       // userData?.courseClasses.append(classId);
-                      userData.courseClasses = courseClassesIds
-                      console.log('user data... ', userData?.courseClasses)
+                      userData.courseClasses = courseClassesIds;
+                      console.log("user data... ", userData?.courseClasses);
                       navigation.navigate("CourseDetails", {
                         screen: "Classes",
                         params: snapshot.docs[0].data(),
                       });
                       setIsLoading(false);
                     })
-                    .then((res) => {
-                    })
+                    .then((res) => {})
                     .catch((error) => {
                       console.log(error);
                       setIsLoading(false);
@@ -416,7 +415,7 @@ export default function CreateClass({ navigation }: any) {
                 }}
                 style={[
                   {
-                    backgroundColor: theme === "light" ? "#eee" : "#121212",
+                    backgroundColor: theme === "light" ? "#fff" : "#121212",
                     padding: 10,
                   },
                 ]}
@@ -452,7 +451,19 @@ export default function CreateClass({ navigation }: any) {
           }}
           onPress={showDatePicker}
         >
-          <Text style={{ color: theme === 'dark' ? classDate ? "white" : "gray": classDate ? "black": "gray", fontSize: 13.8 }}>
+          <Text
+            style={{
+              color:
+                theme === "dark"
+                  ? classDate
+                    ? "white"
+                    : "gray"
+                  : classDate
+                  ? "black"
+                  : "gray",
+              fontSize: 13.8,
+            }}
+          >
             {classDate
               ? classDate?.toLocaleDateString([], {
                   weekday: "long",
@@ -475,7 +486,17 @@ export default function CreateClass({ navigation }: any) {
           onPress={showStartTimePicker}
         >
           <Text
-            style={{ color: theme === 'dark' ? classStartTime ? "white" : "gray": classStartTime ? "black": "gray", fontSize: 13.8 }}
+            style={{
+              color:
+                theme === "dark"
+                  ? classStartTime
+                    ? "white"
+                    : "gray"
+                  : classStartTime
+                  ? "black"
+                  : "gray",
+              fontSize: 13.8,
+            }}
           >
             {classStartTime
               ? classStartTime?.toLocaleTimeString([], {
@@ -503,7 +524,17 @@ export default function CreateClass({ navigation }: any) {
           onPress={showEndTimePicker}
         >
           <Text
-            style={{ color: theme === 'dark' ? classEndTime ? "white" : "gray": classEndTime ? "black": "gray", fontSize: 13.8 }}
+            style={{
+              color:
+                theme === "dark"
+                  ? classEndTime
+                    ? "white"
+                    : "gray"
+                  : classEndTime
+                  ? "black"
+                  : "gray",
+              fontSize: 13.8,
+            }}
           >
             {classEndTime
               ? classEndTime.toLocaleTimeString([], {

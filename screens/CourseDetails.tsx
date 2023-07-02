@@ -5,7 +5,15 @@ import { IClassDetails, ICourseDetails } from "../types";
 import useColorScheme from "../hooks/useColorScheme";
 import { FontAwesome5, AntDesign } from "@expo/vector-icons";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { StyleSheet, Platform, FlatList, Alert, Share, RefreshControl, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  Platform,
+  FlatList,
+  Alert,
+  Share,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
 import { MaterialCommunityIcons, EvilIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import ClassCard from "../components/ClassCard";
@@ -53,7 +61,7 @@ export default function CourseDetails({ navigation, route }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [upcomingClass, setUpcomingClass] = useState<any>({});
   const [pastClasses, setPastClasses] = useState<any>([]);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const handleTabSwitch = (value: string) => {
     setClassTab(value);
@@ -72,28 +80,27 @@ export default function CourseDetails({ navigation, route }: any) {
   const onRefresh = useCallback(() => {
     setIsRefreshing(true);
     userDataPromise
-        .then(async (userData: any) => {
-          await getUpcomingClass()
-            .then((res) => {
-              setCanCreateClass(userData?.uid === course?.creatorId);
-              console.log('doneeee ')
-              setIsRefreshing(false)
-            })
-            .catch((error) => {
-              console.log(error);
-              console.log("error from herer");
-              setIsRefreshing(false)
-
-            });
-        })
-        .catch((error) => {
-          setIsLoading(false);
-          setIsRefreshing(false)
-          console.log(error);
-          Alert.alert("Something unexpected happeneddd");
-        });
+      .then(async (userData: any) => {
+        await getUpcomingClass()
+          .then((res) => {
+            setCanCreateClass(userData?.uid === course?.creatorId);
+            console.log("doneeee ");
+            setIsRefreshing(false);
+          })
+          .catch((error) => {
+            console.log(error);
+            console.log("error from herer");
+            setIsRefreshing(false);
+          });
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        setIsRefreshing(false);
+        console.log(error);
+        Alert.alert("Something unexpected happeneddd");
+      });
     setCourseData(course);
-  }, [])
+  }, []);
 
   const getUpcomingClass = async () => {
     await getClassesData();
@@ -174,14 +181,20 @@ export default function CourseDetails({ navigation, route }: any) {
             console.log("there are course classes", allCourseClasses.length);
             const upcomingClasses = allCourseClasses.filter(
               (classItem: any) => {
-                console.log("start time ", now < new Date(classItem?.classStartTime.toDate()));
+                console.log(
+                  "start time ",
+                  now < new Date(classItem?.classStartTime.toDate())
+                );
                 return now < new Date(classItem?.classStartTime.toDate());
               }
             );
 
             const coursePastClasses = allCourseClasses.filter(
               (classItem: any) => {
-                console.log("end time ", now > new Date(classItem?.classStartTime.toDate()));
+                console.log(
+                  "end time ",
+                  now > new Date(classItem?.classStartTime.toDate())
+                );
                 return now > new Date(classItem.classStartTime?.toDate());
               }
             );
@@ -189,18 +202,21 @@ export default function CourseDetails({ navigation, route }: any) {
             console.log("upcomingggg", upcomingClasses);
             // console.log("past classes", pastClasses)
 
-            console.log(upcomingClasses.length)
+            console.log(upcomingClasses.length);
 
             if (upcomingClasses.length === 1) {
               console.log("only one upcoming clasd");
               setCourseClassData(upcomingClasses[0]);
               setUpcomingClass(upcomingClasses[0]);
               setIsLoading(false);
-            } else if(upcomingClasses.length > 1) {
+            } else if (upcomingClasses.length > 1) {
               upcomingClasses.sort((classA: any, classB: any) => {
                 const dateA = new Date(classA.classStartTime?.toDate());
                 const dateB = new Date(classB.classStartTime?.toDate());
-                return Math.abs(dateA.getTime() - now.getTime()) - Math.abs(dateB.getTime() - now.getTime());
+                return (
+                  Math.abs(dateA.getTime() - now.getTime()) -
+                  Math.abs(dateB.getTime() - now.getTime())
+                );
               });
               setCourseClassData(upcomingClasses[0]);
               setUpcomingClass(upcomingClasses[0]);
@@ -209,11 +225,14 @@ export default function CourseDetails({ navigation, route }: any) {
 
             if (coursePastClasses.length === 1) {
               setPastClasses(coursePastClasses);
-            } else if(coursePastClasses.length > 1) {
+            } else if (coursePastClasses.length > 1) {
               coursePastClasses.sort((classA: any, classB: any) => {
                 const dateA = new Date(classA.classEndTime?.toDate());
                 const dateB = new Date(classB.classEndTime?.toDate());
-                return Math.abs(dateA.getTime() - now.getTime()) - Math.abs(dateB.getTime() - now.getTime());
+                return (
+                  Math.abs(dateA.getTime() - now.getTime()) -
+                  Math.abs(dateB.getTime() - now.getTime())
+                );
               });
               setPastClasses(coursePastClasses);
             }
@@ -259,8 +278,6 @@ export default function CourseDetails({ navigation, route }: any) {
     console.log("upcoming class changed to ", upcomingClass);
   }, [upcomingClass]);
 
-  
-
   //if loading
   if (isLoading) {
     return (
@@ -275,7 +292,7 @@ export default function CourseDetails({ navigation, route }: any) {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "dark" ? "#121212" : "#eee",
+          backgroundColor: theme === "dark" ? "#121212" : "#fff",
         },
       ]}
     >
@@ -306,7 +323,11 @@ export default function CourseDetails({ navigation, route }: any) {
           />
         </InvTouchableOpacity>
       </View>
-      <ScrollView refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh}/>}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+      >
         <View
           lightColor="#fff"
           darkColor="#0c0c0c"
@@ -336,9 +357,7 @@ export default function CourseDetails({ navigation, route }: any) {
               </InvTouchableOpacity>
             </View>
             <InvTouchableOpacity
-              onPress={() =>
-                navigation.navigate("ClassDetails", upcomingClass)
-              }
+              onPress={() => navigation.navigate("ClassDetails", upcomingClass)}
               style={[
                 styles.card,
                 styles.extraMarginTop,

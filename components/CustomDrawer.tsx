@@ -20,11 +20,11 @@ import { CourseContext } from "../contexts/CourseContext";
 
 const CustomDrawer = (props: any) => {
   const { user } = useAuth();
-  const { userDataPromise } = useUser()
+  const { userDataPromise } = useUser();
 
-  const { enrolledCourses } = useContext(CourseContext)
+  const { enrolledCourses } = useContext(CourseContext);
   const [signOut, setSignout] = useState(false);
-  const [courses, setCourses] = useState([])
+  const [courses, setCourses] = useState([]);
 
   const handleSignOut = () => {
     auth.signOut();
@@ -36,19 +36,21 @@ const CustomDrawer = (props: any) => {
     await userDataPromise
       .then((res: any) => {
         const enrolledCourseIds = res.enrolledCourses;
-  
+
         // Fetch the enrolled courses based on the course IDs
-        const enrolledCoursesPromises = enrolledCourseIds.map(async (courseId: string) => {
-          const courseDoc = doc(db, "courses", courseId);
-          const courseSnapshot = await getDoc(courseDoc);
-          return courseSnapshot.data();
-        });
-  
+        const enrolledCoursesPromises = enrolledCourseIds.map(
+          async (courseId: string) => {
+            const courseDoc = doc(db, "courses", courseId);
+            const courseSnapshot = await getDoc(courseDoc);
+            return courseSnapshot.data();
+          }
+        );
+
         // Wait for all the enrolled courses to be fetched
         Promise.all(enrolledCoursesPromises)
           .then((enrolledCourses: any) => {
             setCourses(enrolledCourses);
-            console.log('enrolled courses ', enrolledCourses);
+            console.log("enrolled courses ", enrolledCourses);
           })
           .catch((error) => {
             console.log(error);
@@ -59,13 +61,12 @@ const CustomDrawer = (props: any) => {
         console.log(error);
         Alert.alert("Error obtaining user data");
       })
-      .finally(() => {
-      });
+      .finally(() => {});
   };
   useEffect(() => {
-    fetchCourses()
-  }, [])
-  
+    fetchCourses();
+  }, []);
+
   return (
     <View
       darkColor="#121212"
@@ -134,14 +135,14 @@ const CustomDrawer = (props: any) => {
                   <AntDesign
                     name="book"
                     size={20}
-                    color={theme === "dark" ? "#eee" : "#737171"}
+                    color={theme === "dark" ? "#fff" : "#737171"}
                   />
                   <Text
                     style={{
                       marginLeft: 33,
                       fontSize: 14,
                       fontWeight: "500",
-                      color: theme === "dark" ? "#eee" : "#737171",
+                      color: theme === "dark" ? "#fff" : "#737171",
                     }}
                   >
                     My Courses
@@ -152,7 +153,7 @@ const CustomDrawer = (props: any) => {
             onPress={() =>
               props.navigation.navigate("Root", { screen: "Home" })
             }
-            activeTintColor={theme === "dark" ? "#fbfcfd": "#2f95dc"}
+            activeTintColor={theme === "dark" ? "#fbfcfd" : "#2f95dc"}
           />
           {/* <DrawerItemList {...props} /> */}
         </View>
@@ -172,14 +173,14 @@ const CustomDrawer = (props: any) => {
                       <AntDesign
                         name="book"
                         size={20}
-                        color={theme === "dark" ? "#eee" : "#737171"}
+                        color={theme === "dark" ? "#fff" : "#737171"}
                       />
                       <Text
                         style={{
                           marginLeft: 33,
                           fontSize: 14,
                           fontWeight: "500",
-                          color: theme === "dark" ? "#eee" : "#737171",
+                          color: theme === "dark" ? "#fff" : "#737171",
                         }}
                       >
                         {course.courseTitle}
@@ -194,9 +195,8 @@ const CustomDrawer = (props: any) => {
                       screen: "Classes",
                       params: course,
                     },
-                  })
-                }
-                }
+                  });
+                }}
               />
             );
           })}
@@ -215,7 +215,7 @@ const CustomDrawer = (props: any) => {
         >
           <TouchableOpacity
             darkColor="#121212"
-            lightColor="#eee"
+            lightColor="#fff"
             style={{
               flexDirection: "row",
             }}
@@ -227,7 +227,7 @@ const CustomDrawer = (props: any) => {
                 },
                 {
                   text: "Yes",
-                  style: 'destructive',
+                  style: "destructive",
                   onPress: handleSignOut,
                 },
               ])

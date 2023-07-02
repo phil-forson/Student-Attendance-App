@@ -1,4 +1,4 @@
-import React,{ useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme, StyleSheet, Alert } from "react-native";
 import { Platform } from "react-native";
@@ -18,13 +18,12 @@ import { auth } from "../config/firebase";
 import { APIKEY } from "@env";
 import { UserContext } from "../contexts/UserContext";
 
-
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
-  const { setUserLoggedIn } = useContext(UserContext)
+  const { setUserLoggedIn } = useContext(UserContext);
   const theme = useColorScheme();
   const [email, setEmail] = useState<string>("");
   const [validEmail, setValidEmail] = useState<boolean>(false);
@@ -32,7 +31,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
   const [pwd, setPwd] = useState<string>("");
   const [matchPwd, setMatchPwd] = useState<boolean>(false);
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEmail = (email: string) => {
     setValidEmail(EMAIL_REGEX.test(email));
@@ -46,7 +45,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
 
   const handleSubmit = () => {
     if (validEmail && matchPwd) {
-      setIsLoading(true)
+      setIsLoading(true);
       logIn();
     } else {
       Alert.alert("Invalid", "Invalid Details!");
@@ -55,9 +54,11 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
 
   const logIn = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, pwd).then((res) => {
-        setUserLoggedIn(true);
-      }).finally(() => setIsLoading(false));
+      await signInWithEmailAndPassword(auth, email, pwd)
+        .then((res) => {
+          setUserLoggedIn(true);
+        })
+        .finally(() => setIsLoading(false));
     } catch (error: any) {
       if (
         error.code === "auth/invalid-email" ||
@@ -69,15 +70,22 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       } else {
         Alert.alert("There was a problem with your request");
       }
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => {
         return (
-          <InvTouchableOpacity onPress={() => navigation.goBack()} style={{paddingHorizontal: 5, paddingVertical: 5}}>
-            <AntDesign name="left" size={20} color={theme==='dark' ? 'white': 'black'}/>
+          <InvTouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ paddingHorizontal: 5, paddingVertical: 5 }}
+          >
+            <AntDesign
+              name="left"
+              size={20}
+              color={theme === "dark" ? "white" : "black"}
+            />
           </InvTouchableOpacity>
         );
       },
@@ -88,7 +96,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#eee" : "#121212",
+          backgroundColor: theme === "light" ? "#fff" : "#121212",
         },
       ]}
     >
@@ -140,7 +148,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
         style={styles.bottom}
       >
         <TouchableOpacity
-          lightColor="#eee"
+          lightColor="#fff"
           darkColor="#121212"
           style={{
             height: 40,
@@ -168,10 +176,9 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
-              backgroundColor: !(matchPwd && validEmail) || isLoading
-                ? "#147ec0"
-                : "#008be3",
-              opacity: !(matchPwd && validEmail) || isLoading ? 0.32 : 1
+              backgroundColor:
+                !(matchPwd && validEmail) || isLoading ? "#147ec0" : "#008be3",
+              opacity: !(matchPwd && validEmail) || isLoading ? 0.32 : 1,
             },
           ]}
           disabled={!(matchPwd && validEmail) || isLoading}

@@ -1,11 +1,11 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "./Themed";
-import { AntDesign, FontAwesome } from '@expo/vector-icons'
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { Platform, useColorScheme } from "react-native";
 import { UserStackParamList, UserStackScreenProps } from "../types";
 
-const UserHeader = ( navigation: any ) => {
-    const theme = useColorScheme()
+const UserHeader = (navigation: any) => {
+  const theme = useColorScheme();
   return (
     <SafeAreaView
       style={{
@@ -14,10 +14,10 @@ const UserHeader = ( navigation: any ) => {
         justifyContent: "space-between",
         alignItems: "center",
         paddingHorizontal: 20,
-        paddingTop: Platform.OS== 'ios' ? 15 : 1 ,
-        backgroundColor: theme === 'dark' ? '#000' : '#fff',
-        borderBottomColor: '#eee',
-        borderBottomWidth: 0.7
+        paddingTop: Platform.OS == "ios" ? 15 : 1,
+        backgroundColor: theme === "dark" ? "#000" : "#fff",
+        borderBottomColor: "#fff",
+        borderBottomWidth: 0.7,
       }}
     >
       <TouchableOpacity
@@ -30,7 +30,11 @@ const UserHeader = ( navigation: any ) => {
         darkColor="#000"
         onPress={() => navigation.openDrawer()}
       >
-        <FontAwesome name="bars" size={20} color={theme === 'dark' ? 'white' : 'black'} />
+        <FontAwesome
+          name="bars"
+          size={20}
+          color={theme === "dark" ? "white" : "black"}
+        />
       </TouchableOpacity>
       <View
         style={{
@@ -53,4 +57,4 @@ const UserHeader = ( navigation: any ) => {
   );
 };
 
-export default UserHeader
+export default UserHeader;

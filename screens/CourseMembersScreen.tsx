@@ -25,7 +25,8 @@ import { useIsFocused } from "@react-navigation/native";
 
 export default function CourseMembersScreen({ navigation, route }: any) {
   const theme = useColorScheme();
-  const { course, setEnrolledMembersData, enrolledMembers } = useContext(CourseContext);
+  const { course, setEnrolledMembersData, enrolledMembers } =
+    useContext(CourseContext);
 
   const [creatorData, setCreatorData] = useState<any>({});
   const [membersData, setMembersData] = useState<any>([]);
@@ -40,67 +41,72 @@ export default function CourseMembersScreen({ navigation, route }: any) {
         collection(db, "users"),
         where("uid", "==", course.creatorId)
       );
-      await getDocs(userRef).then(async (res) => {
-        if (res.empty) {
-          // No matching user found
-          return null;
-        }
+      await getDocs(userRef)
+        .then(async (res) => {
+          if (res.empty) {
+            // No matching user found
+            return null;
+          }
 
-        const user = res.docs[0].data();
-        console.log("user ", user);
-        setCreatorData(user);
-        try {
-          // const usersRef = query(
-          //   collection(db, "users"),
-          //   where("uid", "in", course.enrolledUsers)
-          // );
-    
-          // const querySnapshot = await getDocs(usersRef);
-    
-          const enrolledUsersIds = course.enrolledStudents;
-    
-          const enrolledUsersPromises = enrolledUsersIds.map(async (userId: string) => {
-            const usersRef = query(collection(db,'users'), where('uid', '==', userId));
-            const querySnapshot = await getDocs(usersRef)
-      
-            if (querySnapshot.empty) {
-              // Handle case where user is not found
-              return null;
-            }
-      
-            const userData = querySnapshot.docs[0].data();
-            return userData;
-          });
-          console.log('enrolled ids ', enrolledUsersIds)
-    
-          console.log('promises ', enrolledUsersPromises)
-    
-          Promise.all(enrolledUsersPromises)
-            .then((enrolledUsers: any) => {
-    
-              setMembersData(enrolledUsers);
-              setEnrolledMembersData(enrolledUsers)
-              console.log("enrolled users ", enrolledUsers);
-              setIsLoading(false);
-            })
-            .catch((error) => {
-              setIsLoading(false);
-              console.log(error);
-              Alert.alert("Error obtaining enrolled courses");
-            });
-    
-          // console.log("query snapshot ", querySnapshot);
-    
-          // const users = querySnapshot.docs.map((doc) => doc.data());
-          // console.log("users ", users);
-        } catch (error) {
+          const user = res.docs[0].data();
+          console.log("user ", user);
+          setCreatorData(user);
+          try {
+            // const usersRef = query(
+            //   collection(db, "users"),
+            //   where("uid", "in", course.enrolledUsers)
+            // );
+
+            // const querySnapshot = await getDocs(usersRef);
+
+            const enrolledUsersIds = course.enrolledStudents;
+
+            const enrolledUsersPromises = enrolledUsersIds.map(
+              async (userId: string) => {
+                const usersRef = query(
+                  collection(db, "users"),
+                  where("uid", "==", userId)
+                );
+                const querySnapshot = await getDocs(usersRef);
+
+                if (querySnapshot.empty) {
+                  // Handle case where user is not found
+                  return null;
+                }
+
+                const userData = querySnapshot.docs[0].data();
+                return userData;
+              }
+            );
+            console.log("enrolled ids ", enrolledUsersIds);
+
+            console.log("promises ", enrolledUsersPromises);
+
+            Promise.all(enrolledUsersPromises)
+              .then((enrolledUsers: any) => {
+                setMembersData(enrolledUsers);
+                setEnrolledMembersData(enrolledUsers);
+                console.log("enrolled users ", enrolledUsers);
+                setIsLoading(false);
+              })
+              .catch((error) => {
+                setIsLoading(false);
+                console.log(error);
+                Alert.alert("Error obtaining enrolled courses");
+              });
+
+            // console.log("query snapshot ", querySnapshot);
+
+            // const users = querySnapshot.docs.map((doc) => doc.data());
+            // console.log("users ", users);
+          } catch (error) {
+            console.log(error);
+            setIsLoading(false);
+          }
+        })
+        .catch((error) => {
           console.log(error);
-          setIsLoading(false);
-        }
-      }).catch((error) => {
-        console.log(error)
-      });
-
+        });
 
       // Assuming there is only one user with the given creatorId
     } catch (error) {
@@ -110,11 +116,9 @@ export default function CourseMembersScreen({ navigation, route }: any) {
     }
   };
 
-  
-
   useEffect(() => {
-      console.log("course ", course);
-      getData();
+    console.log("course ", course);
+    getData();
   }, []);
 
   if (isLoading) {
@@ -130,7 +134,7 @@ export default function CourseMembersScreen({ navigation, route }: any) {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "dark" ? "#121212" : "#eee",
+          backgroundColor: theme === "dark" ? "#121212" : "#fff",
         },
       ]}
     >
@@ -168,7 +172,12 @@ export default function CourseMembersScreen({ navigation, route }: any) {
       >
         <Text
           style={[
-            { fontSize: 22, borderBottomColor: "gray", borderBottomWidth: 1, paddingVertical: 5 },
+            {
+              fontSize: 22,
+              borderBottomColor: "gray",
+              borderBottomWidth: 1,
+              paddingVertical: 5,
+            },
           ]}
         >
           Members ({enrolledMembers.length})

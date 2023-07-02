@@ -49,7 +49,9 @@ export default function ClassDetails({ navigation, route }: any) {
     if (Platform.OS === "ios") {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Location permission denied. We need your location for attendance checking.");
+        Alert.alert(
+          "Location permission denied. We need your location for attendance checking."
+        );
         return;
       }
     } else {
@@ -66,7 +68,6 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const getLocation = async () => {
     try {
-
       const { coords } = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = coords;
       console.log("Current location:", latitude, longitude);
@@ -160,10 +161,9 @@ export default function ClassDetails({ navigation, route }: any) {
         course: course,
         class: classData,
       };
-      console.log('full obj' , fullObj)
-      navigation.navigate("ClockScreen", fullObj)
+      console.log("full obj", fullObj);
+      navigation.navigate("ClockScreen", fullObj);
     });
-
   };
 
   const images = [
@@ -194,7 +194,7 @@ export default function ClassDetails({ navigation, route }: any) {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "dark" ? "#121212" : "#eee",
+          backgroundColor: theme === "dark" ? "#121212" : "#fff",
           paddingTop: Platform.OS === "ios" ? 0 : 30,
         },
       ]}
@@ -402,14 +402,13 @@ export default function ClassDetails({ navigation, route }: any) {
                       darkColor="#000"
                       style={{ justifyContent: "center", alignItems: "center" }}
                     >
-                      Verifying {" "}<ActivityIndicator size={10} />
+                      Verifying <ActivityIndicator size={10} />
                     </Text>
                   ) : (
                     "Clock In"
                   )
                 }
                 disabled={isLocationLoading}
-
                 onPress={clockIn}
               />
             </View>
@@ -452,7 +451,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 2,
-    borderColor: "#eee",
+    borderColor: "#fff",
   },
   itemsCenter: {
     alignItems: "center",

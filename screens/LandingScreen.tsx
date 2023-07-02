@@ -11,7 +11,7 @@ import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
-import { ANDROIDCLIENTID, IOSCLIENTID, EXPOCLIENTID, SCHEME } from '@env'
+import { ANDROIDCLIENTID, IOSCLIENTID, EXPOCLIENTID, SCHEME } from "@env";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -67,7 +67,7 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#eee" : "#121212",
+          backgroundColor: theme === "light" ? "#fff" : "#121212",
         },
       ]}
     >
@@ -104,10 +104,9 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
               flexDirection: "row",
               paddingHorizontal: 20,
               justifyContent: "center",
-              backgroundColor: '#ed3f3f'
+              backgroundColor: "#ed3f3f",
             },
           ]}
-
           onPress={() => navigation.navigate("SignUp")}
         >
           <Text
@@ -143,7 +142,7 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
           style={[
             styles.btn,
             {
-              borderColor: theme === "dark" ? "#fff" : "#eee",
+              borderColor: theme === "dark" ? "#fff" : "#fff",
               borderWidth: 1.4,
               flexDirection: "row",
               justifyContent: "center",
@@ -179,11 +178,11 @@ const LandingScreen = ({ navigation }: RootStackScreenProps<"Root">) => {
           marginTop: Platform.OS === "ios" ? 50 : 20,
         }}
       >
-        <Text lightColor="#1a1616" darkColor="#eee">
+        <Text lightColor="#1a1616" darkColor="#fff">
           Already have an account?
         </Text>
         <TouchableOpacity
-          lightColor="#eee"
+          lightColor="#fff"
           darkColor="#121212"
           style={{ marginLeft: 10 }}
           onPress={() => navigation.navigate("LogIn")}

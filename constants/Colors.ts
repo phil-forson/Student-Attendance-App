@@ -4,7 +4,7 @@ const tintColorDark = "#fbfcfd";
 export default {
   light: {
     text: "#000",
-    background: "#eee",
+    background: "#fff",
     customBackground: "#fbfcfd",
     customBorderColor: "#C7C7CD",
     inverseBackground: "#121212",

@@ -39,7 +39,6 @@ export default function ClockInScreen({ navigation, route }: any) {
   const [status, setStatus] = React.useState<any>(null);
   const [progress, setProgress] = useState(0);
 
-
   async function registerBackgroundFetchAsync() {
     return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
       minimumInterval: 60 * 15, // 15 minutes
@@ -141,8 +140,6 @@ export default function ClockInScreen({ navigation, route }: any) {
     setProgress(calculateProgress());
   }, [seconds]);
 
-
-
   const renderProgressCircle = () => {
     return (
       <Svg width={200} height={200}>
@@ -176,42 +173,41 @@ export default function ClockInScreen({ navigation, route }: any) {
       style={[
         styles.container,
         {
-          backgroundColor: theme === "dark" ? "#121212" : "#eee",
+          backgroundColor: theme === "dark" ? "#121212" : "#fff",
           paddingTop: Platform.OS === "ios" ? 0 : 30,
         },
       ]}
     >
       <View>
-      {renderProgressCircle()}
-      <Text style={[styles.textCenter, styles.largeText]}>
-        {hours.toString().padStart(2, "0")}:
-        {minutes.toString().padStart(2, "0")}:
-        {seconds.toString().padStart(2, "0")}
-      </Text>
-      <Text style={[styles.mediumText, { alignItems: "center" }]}>
-        <Ionicons
-          name="alarm-outline"
-          size={30}
-          color={theme === "light" ? "black" : "white"}
+        {renderProgressCircle()}
+        <Text style={[styles.textCenter, styles.largeText]}>
+          {hours.toString().padStart(2, "0")}:
+          {minutes.toString().padStart(2, "0")}:
+          {seconds.toString().padStart(2, "0")}
+        </Text>
+        <Text style={[styles.mediumText, { alignItems: "center" }]}>
+          <Ionicons
+            name="alarm-outline"
+            size={30}
+            color={theme === "light" ? "black" : "white"}
           />{" "}
-        {new Date(route.params.class.classEndTime?.toDate()).toLocaleTimeString(
-          [],
-          {
+          {new Date(
+            route.params.class.classEndTime?.toDate()
+          ).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
+          })}
+        </Text>
+        <Button
+          title={
+            isRegistered
+              ? "Unregister BackgroundFetch task"
+              : "Register BackgroundFetch task"
           }
-          )}
-      </Text>
-      <Button
-        title={
-          isRegistered
-          ? "Unregister BackgroundFetch task"
-          : "Register BackgroundFetch task"
-        }
-        onPress={toggleFetchTask}
+          onPress={toggleFetchTask}
         />
-        </View>
+      </View>
     </SafeAreaView>
   );
 }

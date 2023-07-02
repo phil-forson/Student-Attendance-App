@@ -145,7 +145,7 @@ export default function CreateCourse({ navigation }: any) {
             lecturerName: res?.firstName + " " + res?.lastName,
             enrolledStudents: [],
             teachers: [],
-            courseClasses: []
+            courseClasses: [],
           })
             .then(async (response: any) => {
               console.log("create course response ", response);
@@ -280,7 +280,7 @@ export default function CreateCourse({ navigation }: any) {
                 }}
                 style={[
                   {
-                    backgroundColor: theme === "light" ? "#eee" : "#121212",
+                    backgroundColor: theme === "light" ? "#fff" : "#121212",
                     padding: 10,
                   },
                 ]}
