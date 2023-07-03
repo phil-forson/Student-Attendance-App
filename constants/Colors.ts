@@ -15,7 +15,7 @@ export default {
   },
   dark: {
     text: "#fff",
-    background: "#121212",
+    background: "#000",
     customBackground: "#121212",
     customBorderColor: "#C7C7CD",
     inverseBackground: "#fbfcfd",

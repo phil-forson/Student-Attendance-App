@@ -10,6 +10,8 @@ import { SignInScreen } from "../screens/SignInScreen";
 import VerifyCodeScreen from "../screens/VerifyCodeScreen";
 import { RootStackParamList, RootStackScreenProps } from "../types";
 import FacialRecognitionScreen from "../screens/FacialRecognitionScreen";
+import Onboarding from "../screens/Onboarding";
+import PersonalInfo from "../screens/PersonalInfo";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -23,20 +25,24 @@ export default function RootNavigator() {
     >
       <Stack.Screen
         name="Root"
-        component={LandingScreen}
+        component={Onboarding}
         options={({ navigation }: RootStackScreenProps<"Root">) => ({
-          title: "",
+          header: () => null,
           headerTransparent: true,
         })}
       />
       <Stack.Screen
+      name="PersonalInfo"
+      component={PersonalInfo}
+      options={({ navigation }: RootStackScreenProps<"PersonalInfo">) => ({
+        header: () => null
+      })}
+       />
+      <Stack.Screen
         name="SignUp"
         component={SignInScreen}
         options={({ navigation }: RootStackScreenProps<"SignUp">) => ({
-          title: "Sign Up",
-          headerLeft: () => null,
-          headerTransparent: true,
-          animation: "flip",
+          header: () => null,
         })}
       />
       <Stack.Screen
