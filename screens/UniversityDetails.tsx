@@ -65,9 +65,11 @@ export default function UniversityDetails({
     };
 
     console.log(data);
+
+    navigation.navigate("UserStatus", data)
   };
   return (
-    <SafeAreaView style={[styles.container]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme === "dark" ? "#000" : "#fff" }]}>
       <View
         style={[
           styles.subContainer,
@@ -88,12 +90,13 @@ export default function UniversityDetails({
             <Text style={{ fontSize: 20, fontWeight: "600" }}>
               Please select your university
             </Text>
-            <View style={[styles.inputContainer, styles.my]}>
+            <View style={[styles.inputContainer]}>
               <StyledInput
                 placeholder="Search University"
                 placeholderTextColor="gray"
                 secure={false}
                 keyboardType="default"
+                valid={isItemSelected}
                 value={universitySearch}
                 setValue={handleUniversityChange}
               />
@@ -177,7 +180,7 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   inputContainer: {
-    marginTop: 30,
+    marginTop: 10,
   },
   bottom: {
     flex: 1,

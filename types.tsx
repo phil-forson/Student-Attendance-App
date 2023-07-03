@@ -6,14 +6,16 @@ import { Timestamp } from "firebase/firestore";
 export type RootStackParamList = {
   Root: undefined;
   PersonalInfo: undefined;
-  UniversityDetails: {firstName: string, lastName: string};
+  UniversityDetails: { firstName: string; lastName: string };
+  UserStatus: { firstName: string; lastName: string, university: any };
+  AccountDetails: {firstName: string, lastName: string, university: any, userStatus: string}
   SignUp: undefined;
   LogIn: undefined;
   NotFound: undefined;
   ForgotPassword: undefined;
   VerifyCode: undefined;
   ResetPassword: undefined;
-  FacialRecognition: undefined
+  FacialRecognition: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -68,8 +70,8 @@ export interface ICourseDetails {
   courseLinkCode: string;
   creatorId: string;
   location: any;
-  courseClasses: Array<any>
-  teachers: Array<any>
+  courseClasses: Array<any>;
+  teachers: Array<any>;
 }
 
 export interface IClassDetails {
@@ -88,15 +90,14 @@ export interface UserData {
   enrolledCourses?: Array<any>;
 }
 
-
 export interface ICourse {
   courseCode: string;
   courseLinkCode: string;
   courseTitle: string;
   creatorId: string;
-  enrolledStudents: Array<any>
+  enrolledStudents: Array<any>;
   lecturerName: string;
-  teachers: Array<any>
+  teachers: Array<any>;
   uid: string;
 }
 
@@ -108,5 +109,5 @@ export interface IClass {
   classEndTime: Timestamp;
   classDate: Timestamp;
   courseId: string;
-  classStatus: string
+  classStatus: string;
 }

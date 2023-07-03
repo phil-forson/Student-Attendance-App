@@ -55,7 +55,6 @@ export default function PersonalInfo({
             <View style={[styles.headerSection]}>
               {/* <View style={[styles.iconContainer]}></View> */}
               <Text style={[styles.headerMainText]}>Personal Information</Text>
-              <View></View>
             </View>
             <Text style={[styles.headerSubText]}>
               Let's start with your personal information. Please provide your
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
   },
   headerSubText: {
     marginTop: 10,
-    fontSize: 15,
+    fontSize: 20,
   },
   iconContainer: {
     position: "absolute",

@@ -1,7 +1,7 @@
 import { View, Text, TextInput } from "./Themed";
 import React, { useState } from "react";
 import { KeyboardTypeOptions, StyleSheet, useColorScheme } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
 export type Props = {
   placeholderTextColor?: string;
@@ -44,8 +44,7 @@ export default function StyledInput({
         style={{
           height: 50,
           paddingHorizontal: 20,
-          borderWidth: 0,
-
+          borderWidth: textChanged && (isFocused || !valid) ? 1: 0,
           backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
           borderRadius: 4,
           borderColor: isFocused
@@ -94,8 +93,69 @@ export default function StyledInput({
         editable={editable}
         onPressIn={onClick}
       />
+      {/* {textChanged && valid !== undefined && (
+        <View style={styles.iconContainer}>
+          <View
+            style={[
+              styles.icon,
+              styles.end,
+              {
+                right: 10,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="check-decagram"
+              size={24}
+              color="green"
+            />
+          </View>
+        </View>
+      )}
+      {textChanged && !valid && valid !== undefined && (
+        <View style={styles.iconContainer}>
+          <View
+            style={[
+              styles.icon,
+              styles.end,
+              {
+                right: 10,
+                top: 10
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="alert-decagram"
+              size={24}
+              style={{alignItems: 'center', justifyContent: 'center'}}
+              color="red"
+            />
+          </View>
+        </View>
+      )} */}
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  iconContainer: {
+    position: "relative",
+    zIndex: 1,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "red",
+  },
+  icon: {
+    zIndex: 9999,
+    position: "absolute",
+    flex: 1,
+    alignSelf: "center",
+  },
+  front: {
+    top: 10,
+  },
+  end: {
+    top: -30,
+  },
+});

@@ -13,6 +13,9 @@ import FacialRecognitionScreen from "../screens/FacialRecognitionScreen";
 import Onboarding from "../screens/Onboarding";
 import PersonalInfo from "../screens/PersonalInfo";
 import UniversityDetails from "../screens/UniversityDetails";
+import UserStatus from "../screens/UserStatus";
+import EmailScreen from "../screens/AccountDetails";
+import AccountDetailsScreen from "../screens/AccountDetails";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -33,19 +36,35 @@ export default function RootNavigator() {
         })}
       />
       <Stack.Screen
-      name="PersonalInfo"
-      component={PersonalInfo}
-      options={({ navigation }: RootStackScreenProps<"PersonalInfo">) => ({
-        header: () => null
-      })}
-       />
-       <Stack.Screen
-      name="UniversityDetails"
-      component={UniversityDetails}
-      options={({ navigation }: RootStackScreenProps<"UniversityDetails">) => ({
-        header: () => null
-      })}
-       />
+        name="PersonalInfo"
+        component={PersonalInfo}
+        options={({ navigation }: RootStackScreenProps<"PersonalInfo">) => ({
+          header: () => null,
+        })}
+      />
+      <Stack.Screen
+        name="UniversityDetails"
+        component={UniversityDetails}
+        options={({
+          navigation,
+        }: RootStackScreenProps<"UniversityDetails">) => ({
+          header: () => null,
+        })}
+      />
+      <Stack.Screen
+        name="UserStatus"
+        component={UserStatus}
+        options={({ navigation }: RootStackScreenProps<"UserStatus">) => ({
+          header: () => null,
+        })}
+      />
+      <Stack.Screen
+        name="AccountDetails"
+        component={AccountDetailsScreen}
+        options={({ navigation }: RootStackScreenProps<"AccountDetails">) => ({
+          header: () => null,
+        })}
+      />
       <Stack.Screen
         name="SignUp"
         component={SignInScreen}
@@ -80,7 +99,7 @@ export default function RootNavigator() {
           animation: "flip",
         })}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="ResetPassword"
         component={ResetPasswordScreen}
         options={({ navigation }: RootStackScreenProps<"ResetPassword">) => ({
@@ -94,12 +113,14 @@ export default function RootNavigator() {
         component={NotFoundScreen}
         options={{ title: "Oops!" }}
       />
-      <Stack.Screen 
-      name="FacialRecognition"
-      component={FacialRecognitionScreen}
-      options={({navigation}: RootStackScreenProps<"FacialRecognition">) => ({
-        header: () => null
-      })}
+      <Stack.Screen
+        name="FacialRecognition"
+        component={FacialRecognitionScreen}
+        options={({
+          navigation,
+        }: RootStackScreenProps<"FacialRecognition">) => ({
+          header: () => null,
+        })}
       />
     </Stack.Navigator>
   );
