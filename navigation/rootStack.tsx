@@ -12,6 +12,7 @@ import { RootStackParamList, RootStackScreenProps } from "../types";
 import FacialRecognitionScreen from "../screens/FacialRecognitionScreen";
 import Onboarding from "../screens/Onboarding";
 import PersonalInfo from "../screens/PersonalInfo";
+import UniversityDetails from "../screens/UniversityDetails";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -35,6 +36,13 @@ export default function RootNavigator() {
       name="PersonalInfo"
       component={PersonalInfo}
       options={({ navigation }: RootStackScreenProps<"PersonalInfo">) => ({
+        header: () => null
+      })}
+       />
+       <Stack.Screen
+      name="UniversityDetails"
+      component={UniversityDetails}
+      options={({ navigation }: RootStackScreenProps<"UniversityDetails">) => ({
         header: () => null
       })}
        />

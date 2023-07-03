@@ -27,7 +27,7 @@ export default function Onboarding({navigation}: RootStackScreenProps<"Root">) {
               height: 55,
             }}
             textStyle={{ color: theme === "dark" ? "#fff" : "black" }}
-            onPress={()=> navigation.navigate("SignUp")}
+            onPress={()=> navigation.navigate("PersonalInfo")}
           />
           <Text style={[styles.textCenter]}>
             By signing in you accept our{" "}
