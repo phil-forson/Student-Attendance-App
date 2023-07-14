@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>647096322688-m70qha3iok7kh6tkk0g5rv5kpgfulu0j.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.647096322688-m70qha3iok7kh6tkk0g5rv5kpgfulu0j</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB42evvx31I3BEp2bJoe0iUUrXWWhJEpLU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>647096322688</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.philforson.presensa</string>
+	<key>PROJECT_ID</key>
+	<string>presensa-6dc73</string>
+	<key>STORAGE_BUCKET</key>
+	<string>presensa-6dc73.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:647096322688:ios:e1c7dc4a33b281b14ab465</string>
+</dict>
+</plist>

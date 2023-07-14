@@ -13,7 +13,7 @@ export type RootStackParamList = {
   LogIn: undefined;
   NotFound: undefined;
   ForgotPassword: undefined;
-  VerifyCode: undefined;
+  VerifyCode: {firstName: string, lastName: string, university: any, userStatus: string, email: string, password: string};
   ResetPassword: undefined;
   FacialRecognition: undefined;
 };

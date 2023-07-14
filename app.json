@@ -4,7 +4,7 @@
     "slug": "StudentAttendanceApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "com.philforson.studentattendanceapp",
+    "scheme": "com.philforson.presensa",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -13,14 +13,16 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "bundleIdentifier": "com.philforson.studentattendanceapp",
+      "bundleIdentifier": "com.philforson.presensa",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["location", "fetch"]
       }
     },
     "android": {
-      "package": "com.philforson.studentattendanceapp",
+      "package": "com.philforson.presensa",
+      "googleServicesFile": "google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -29,6 +31,17 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "693778c7-55d6-4f26-879b-081fa71708b0"

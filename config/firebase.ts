@@ -5,13 +5,15 @@ import Constants  from "expo-constants";
 import  { APIKEY, AUTHDOMAIN, PROJECTID,STORAGEBUCKET, MESSAGINGSENDERID, APPID} from '@env'
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBIeBEKx8P4gmBNfSxfb9kuDMJSjd1Vmkc",
-    authDomain: "student-attendance-mobile-app.firebaseapp.com",
-    projectId: "student-attendance-mobile-app",
-    storageBucket: "student-attendance-mobile-app.appspot.com",
-    messagingSenderId: "1032906779591",
-    appId: "1:1032906779591:web:d752e9ebc3ca069b5647e2"
-};
+    apiKey: "AIzaSyD-hWECrkfiIb_5YUz7-hwjJPtj_oMDRas",
+    authDomain: "presensa-6dc73.firebaseapp.com",
+    databaseURL: "https://presensa-6dc73-default-rtdb.firebaseio.com",
+    projectId: "presensa-6dc73",
+    storageBucket: "presensa-6dc73.appspot.com",
+    messagingSenderId: "647096322688",
+    appId: "1:647096322688:web:605803f28ac75e454ab465",
+    measurementId: "G-R35GLWWR6C"
+  };
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app)

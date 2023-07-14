@@ -44,7 +44,7 @@ export default function StyledInput({
         style={{
           height: 50,
           paddingHorizontal: 20,
-          borderWidth: textChanged && (isFocused || !valid) ? 1: 0,
+          borderWidth: textChanged && (isFocused || !valid) ? 1 : 0,
           backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
           borderRadius: 4,
           borderColor: isFocused
@@ -69,7 +69,9 @@ export default function StyledInput({
         secureTextEntry={isPasswordSecure}
         keyboardType={keyboardType}
         placeholder={placeholder}
-        placeholderTextColor={placeholderTextColor}
+        placeholderTextColor={
+          placeholderTextColor ? placeholderTextColor :  theme === "dark" ? "white" : "black"
+        }
         autoCorrect={false}
         caretHidden={caretHidden}
         autoComplete={keyboardType === "email-address" ? "email" : undefined}

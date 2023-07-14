@@ -94,9 +94,7 @@ export default function RootNavigator() {
         name="VerifyCode"
         component={VerifyCodeScreen}
         options={({ navigation }: RootStackScreenProps<"VerifyCode">) => ({
-          headerLeft: () => null,
-          headerTransparent: true,
-          animation: "flip",
+          header: () => null
         })}
       />
       <Stack.Screen

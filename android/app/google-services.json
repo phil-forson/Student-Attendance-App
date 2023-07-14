@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "647096322688",
+    "project_id": "presensa-6dc73",
+    "storage_bucket": "presensa-6dc73.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647096322688:android:b8a6602580e25fa74ab465",
+        "android_client_info": {
+          "package_name": "com.philforson.presensa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "647096322688-e7n0332mhmua31004ccp9jh82e2m45d0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiOZ0Z92fh_UiydOqeQsX0opBTsq3zTVo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "647096322688-e7n0332mhmua31004ccp9jh82e2m45d0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "647096322688-m70qha3iok7kh6tkk0g5rv5kpgfulu0j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.philforson.presensa"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

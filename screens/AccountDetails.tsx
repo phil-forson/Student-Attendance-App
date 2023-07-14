@@ -1,9 +1,21 @@
-import { StyleSheet, SafeAreaView, useColorScheme } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  SafeAreaView,
+  useColorScheme,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import React, { useContext, useEffect, useState } from "react";
 import { Text, View } from "../components/Themed";
 import StyledInput from "../components/StyledInput";
 import { RootStackScreenProps } from "../types";
 import FullWidthButton from "../components/FullWidthButton";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
+import { auth } from "../config/firebase";
 
 export default function AccountDetailsScreen({
   navigation,
@@ -11,13 +23,17 @@ export default function AccountDetailsScreen({
 }: RootStackScreenProps<"AccountDetails">) {
   const theme = useColorScheme();
   const [email, setEmail] = useState("");
+
   const [emailValid, setEmailValid] = useState<boolean>(false);
+  const [emailError, setEmailError] = useState<any>({});
 
   const [pwd, setPwd] = useState<string>("");
   const [matchPwd, setMatchPwd] = useState<boolean>(false);
 
   const [pwd2, setPwd2] = useState<string>("");
   const [matchPwd2, setMatchPwd2] = useState<boolean>(false);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handlePwd = (pwd: string) => {
     setMatchPwd(pwd.length > 7);
@@ -40,25 +56,91 @@ export default function AccountDetailsScreen({
   const emailRegex = new RegExp(emailRegexPattern);
   const work = route.params.university.domains;
 
-
   const handleEmail = (email: string) => {
     setEmail(email);
-    setEmailValid(emailRegex.test(email));
+    console.log(email, " email");
+    console.log(
+      email.endsWith(route.params.university.domains[0]) && email.includes("@"),
+      "ends with"
+    );
+    !email.endsWith(route.params.university.domains[0])
+      ? setEmailError((prev: any) => ({ ...prev, universityError: true }))
+      : setEmailError((prev: any) => ({ ...prev, universityError: false }));
+    !email.includes("@")
+      ? setEmailError((prev: any) => ({ ...prev, invalidFormat: true }))
+      : setEmailError((prev: any) => ({ ...prev, invalidFormat: false }));
+
+    setEmailValid(
+      email.endsWith(route.params.university.domains[0]) && email.includes("@")
+    );
+  };
+
+  const createAccount = async (data: any) => {
+    const { firstName, lastName, university, userStatus, email } = data;
+    try {
+      setIsLoading(true);
+      createUserWithEmailAndPassword(auth, email, pwd)
+        .then(async (res) => {
+          console.log(res);
+          console.log("user created");
+          setIsLoading(false);
+          await sendEmailVerification(res.user)
+            .then((res) => {
+              console.log("res from email verification ", res);
+              Alert.alert(
+                "Email Verification Sent",
+                "Email verification sent, go to your email to verify you account and then come back to log in"
+              );
+            })
+            .catch((err) => {
+              console.log("error from email verification ", err);
+            });
+        })
+        .catch((error) => {
+          setIsLoading(false);
+          console.log(error);
+          if (
+            error.code === "auth/invalid-email" ||
+            error.code === "auth/wrong-password"
+          ) {
+            Alert.alert("Your email or password was incorrect");
+          } else if (error.code === "auth/email-already-in-use") {
+            Alert.alert("An account with this email already exists");
+          } else {
+            Alert.alert("There was a problem with your request");
+          }
+        });
+
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log("error: ", error);
+      setIsLoading(false);
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/wrong-password"
+      ) {
+        Alert.alert("Your email or password was incorrect");
+      } else if (error.code === "auth/email-already-in-use") {
+        Alert.alert("An account with this email already exists");
+      } else {
+        Alert.alert("There was a problem with your request");
+      }
+    }
   };
 
   const handleSubmit = () => {
-    if(!(emailValid && matchPwd && matchPwd2)){
-      return ;
+    if (!(emailValid && matchPwd && matchPwd2)) {
+      return;
     }
 
     const data = {
       ...route.params,
       email: email,
-      password: pwd
-    }
+      password: pwd,
+    };
 
-    console.log('data ', data)
-  }
+    createAccount(data);
+  };
 
   useEffect(() => {
     console.log("email valid changed to ", emailValid);
@@ -74,7 +156,7 @@ export default function AccountDetailsScreen({
         <View style={[styles.headerView]}>
           <View style={[]}>
             {/* <View style={[styles.iconContainer]}></View> */}
-            <Text style={[styles.headerMainText]}>Email Address</Text>
+            <Text style={[styles.headerMainText]}>Account Details</Text>
           </View>
           <Text style={[styles.headerSubText]}>
             Please enter your{" "}
@@ -92,6 +174,17 @@ export default function AccountDetailsScreen({
               placeholderTextColor="gray"
               valid={emailValid}
             />
+            {emailError?.universityError && !emailError?.invalidFormat && (
+              <Text style={{ color: "red", fontSize: 12, marginTop: 5 }}>
+                Please enter your student email address ending with the
+                university's domain
+              </Text>
+            )}
+            {emailError?.invalidFormat && (
+              <Text style={{ color: "red", fontSize: 12, marginTop: 5 }}>
+                Please enter a valid email address
+              </Text>
+            )}
           </View>
           <View style={[styles.my]}>
             <Text style={[styles.label]}>Password</Text>
@@ -118,14 +211,17 @@ export default function AccountDetailsScreen({
             />
           </View>
         </View>
-        <View style={[styles.bottom]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.bottom}
+        >
           <FullWidthButton
             text={"Sign Up"}
             onPress={handleSubmit}
             disabled={!(emailValid && matchPwd && matchPwd2)}
             style={{ paddingHorizontal: 10 }}
           />
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
@@ -147,10 +243,10 @@ const styles = StyleSheet.create({
   },
   headerSubText: {
     marginTop: 10,
-    fontSize: 20,
+    fontSize: 15,
   },
   my: {
-    marginVertical: 20,
+    marginVertical: 15,
   },
   label: {
     fontSize: 15,
