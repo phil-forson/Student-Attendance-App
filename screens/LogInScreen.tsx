@@ -17,6 +17,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { APIKEY } from "@env";
 import { UserContext } from "../contexts/UserContext";
+import StyledInput from "../components/StyledInput";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -73,74 +74,44 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => {
-        return (
-          <InvTouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 5, paddingVertical: 5 }}
-          >
-            <AntDesign
-              name="left"
-              size={20}
-              color={theme === "dark" ? "white" : "black"}
-            />
-          </InvTouchableOpacity>
-        );
-      },
-    });
-  }, []);
   return (
     <SafeAreaView
       style={[
         styles.container,
         {
-          backgroundColor: theme === "light" ? "#fff" : "#121212",
+          backgroundColor: theme === "light" ? "#fff" : "#000",
         },
       ]}
     >
       <View
-        style={{
-          marginTop: 100,
-        }}
+        style={[styles.headerView]}
       >
         <Text
           style={[
-            styles.bold,
-            {
-              fontSize: 20,
-              // color: "#008be3",
-            },
+            styles.headerMainText
           ]}
         >
           Enter Your Details
         </Text>
       </View>
       <View style={styles.my}>
-        <InputField
-          placeholder="Email Address"
-          secure={false}
-          keyboardType="email-address"
-          placeholderTextColor="#C7C7C7"
-          value={email}
-          setValue={handleEmail}
-          valid={validEmail}
-          instructions="Email should be a valid email"
-          icon="mail"
+        <Text style={[styles.label]}>Email Address</Text>
+        <StyledInput 
+        value={email}
+        setValue={handleEmail}
+        secure={false}
+        keyboardType="email-address"
+        placeholder="Email address"
         />
       </View>
       <View style={styles.my}>
-        <InputField
-          placeholder="Password"
-          secure={true}
-          keyboardType="default"
-          placeholderTextColor="#C7C7C7"
-          value={pwd}
-          setValue={handlePwd}
-          valid={matchPwd}
-          instructions="Password must have a minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character"
-          icon="lock1"
+        <Text style={[styles.label]}>Password</Text>
+        <StyledInput 
+        value={pwd}
+        setValue={handlePwd}
+        secure={false}
+        keyboardType="default"
+        placeholder="Password"
         />
       </View>
       <KeyboardAvoidingView
@@ -216,14 +187,30 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: "bold",
   },
+  subContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    flex: 1,
+  },
+  headerView: {},
+  headerMainText: {
+    fontSize: 30,
+    fontWeight: "700",
+  },
+  headerSubText: {
+    marginTop: 10,
+    fontSize: 15,
+  },
   my: {
-    marginVertical: 10,
+    marginVertical: 15,
+  },
+  label: {
+    fontSize: 15,
+    marginBottom: 5,
   },
   bottom: {
-    marginBottom: 0,
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    marginBottom: 0,
   },
 });

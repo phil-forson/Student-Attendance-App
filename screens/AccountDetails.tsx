@@ -15,7 +15,8 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth, database } from "../config/firebase";
+import { ref, set } from "firebase/database";
 
 export default function AccountDetailsScreen({
   navigation,
@@ -75,21 +76,38 @@ export default function AccountDetailsScreen({
     );
   };
 
+  function capitalizeFirstLetter(string: string) {
+		return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
+	}
+
   const createAccount = async (data: any) => {
     const { firstName, lastName, university, userStatus, email } = data;
     try {
+
       setIsLoading(true);
       createUserWithEmailAndPassword(auth, email, pwd)
         .then(async (res) => {
           console.log(res);
           console.log("user created");
           setIsLoading(false);
+          set(ref(database, 'users/' + res.user.uid), {
+            email: email,
+            firstName: capitalizeFirstLetter(firstName),
+            lastName: capitalizeFirstLetter(lastName),
+            status: userStatus,
+            university: university,
+            verified: false
+          })
           await sendEmailVerification(res.user)
             .then((res) => {
               console.log("res from email verification ", res);
               Alert.alert(
                 "Email Verification Sent",
-                "Email verification sent, go to your email to verify you account and then come back to log in"
+                "Email verification sent, go to your email to verify you account and then come back to log in",
+                [{
+                  text: "Ok",
+                  onPress: () => navigation.navigate("LogIn")
+                }]
               );
             })
             .catch((err) => {

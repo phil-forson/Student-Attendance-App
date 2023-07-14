@@ -76,9 +76,7 @@ export default function RootNavigator() {
         name="LogIn"
         component={LogInScreen}
         options={({ navigation }: RootStackScreenProps<"LogIn">) => ({
-          headerLeft: () => null,
-          headerTransparent: true,
-          animation: "flip",
+          header: () => null
         })}
       />
       <Stack.Screen
