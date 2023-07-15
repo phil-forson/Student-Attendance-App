@@ -6,15 +6,7 @@ import {
   InvTouchableOpacity,
   SafeAreaView,
 } from "../components/Themed";
-import {
-  StyleSheet,
-  Animated,
-  PermissionsAndroid,
-  Touchable,
-  Alert,
-  Dimensions,
-} from "react-native";
-import { RNCamera } from "react-native-camera";
+import { StyleSheet, Alert, Dimensions } from "react-native";
 import {
   Camera,
   CameraType,
@@ -22,28 +14,22 @@ import {
   requestMicrophonePermissionsAsync,
   getCameraPermissionsAsync,
   getMicrophonePermissionsAsync,
-  FlashMode,
 } from "expo-camera";
 import * as Animatable from "react-native-animatable";
 import { Feather } from "@expo/vector-icons";
-import * as FaceDetector from "expo-face-detector";
-import { LinearGradient } from 'expo-linear-gradient';
-
-
-
-
-
+import { LinearGradient } from "expo-linear-gradient";
+import * as ImageManipulator from "expo-image-manipulator";
+import axios from "axios";
 
 const FacialRecognitionScreen = () => {
   const height = Dimensions.get("screen").height;
   const width = Dimensions.get("screen").width;
   const [type, setType] = useState(CameraType.front);
-  const [flashMode, setFlashMode] = useState("off");
   const [pictureUri, setPictureUri] = useState("");
-  const [isFaceDetected, setIsFaceDetected] = useState(false);
   const [isFaceInFrame, setIsFaceInFrame] = useState(false);
   const [faceBounds, setFaceBounds] = useState<any>(null);
   const [rollAngle, setRollAngle] = useState(0);
+  const [capturedImage, setCapturedImage] = useState(null);
 
   const [frameArea, setFrameArea] = useState<any>({
     x: (width - 300) / 4.5,
@@ -66,7 +52,55 @@ const FacialRecognitionScreen = () => {
     return cameraPermission.granted && microphonePermission.granted;
   };
 
-  
+  // const takePicture = async () => {
+  //   if (cameraRef) {
+  //     const photo = await camera.takePictureAsync({ base64: true });
+  //     const resizedPhoto = await ImageManipulator.manipulateAsync(
+  //       photo.uri,
+  //       [{ resize: { width: 480 } }],
+  //       { base64: true }
+  //     );
+  //     setCapturedImage(resizedPhoto);
+  //   }
+  // };
+
+  const checkHeadAngle = async (base64Image: any) => {
+    try {
+      const response = await axios.post(
+        "https://api.luxand.cloud/v2/person", // Replace with the appropriate Luxand.cloud API endpoint
+        {
+          name: "John Doe",
+          photos: base64Image,
+        },
+        {
+          headers: {
+            token: "e4efda97fdbc4b0495fc41b1b55a5fb6", // Replace with your Luxand.cloud API token
+          },
+        }
+      );
+
+      const { landmarks } = response.data;
+      // Assuming the Luxand.cloud API provides head angle information in the response
+
+      const rollAngle = landmarks.rollAngle; // Extract roll angle from the response
+      const pitchAngle = landmarks.pitchAngle; // Extract pitch angle from the response
+
+      const isHeadStraight =
+        Math.abs(rollAngle) < 15 && Math.abs(pitchAngle) < 15;
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      takePicture();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval); // Cleanup function to clear the interval when the component unmounts
+    };
+  }, []);
 
   function range(start: number, end: number, step: number) {
     const result = [];
@@ -76,19 +110,14 @@ const FacialRecognitionScreen = () => {
     return result;
   }
 
-  const switchFlashMode = () =>
-    setFlashMode(flashMode === "off" ? "on" : "off");
-
-  const switchType = () =>
-    setType(type === CameraType.back ? CameraType.front : CameraType.back);
-
   const takePicture = async () => {
-    if (cameraRef) {
+    if (cameraRef.current) {
+      const { uri, width, height } = await cameraRef.current.takePictureAsync({
+        base64: true,
+      });
+      console.log(uri);
+      checkHeadAngle(uri);
     }
-    const { uri, width, height } = (await cameraRef?.current)
-      ? cameraRef?.current.takePictureAsync()
-      : null;
-    setPictureUri(uri);
   };
 
   if (!getPermissions()) {
@@ -101,9 +130,10 @@ const FacialRecognitionScreen = () => {
 
   const handleFacesDetected = ({ faces }: any) => {
     console.log("yea faces ");
+    console.log("faces detected");
     if (faces.length > 0) {
       // Check if any face intersects with the frame area
-      const frameArea = calculateFrameArea(); // Customize based on your frame dimensions
+      // const frameArea = calculateFrameArea(); // Customize based on your frame dimensions
       const face = faces[0];
       console.log(face.rollAngle + 90);
       setRollAngle(face.rollAngle + 90);
@@ -142,17 +172,6 @@ const FacialRecognitionScreen = () => {
       height: frameSize,
     };
   };
-
-  useEffect(() => {
-    // calculateFrameArea()
-  }, []);
-
-  //   if(!permission?.granted){
-  //     return (<View>
-  //         <Text>We need to access your camera to continue</Text>
-  //         <InvTouchableOpacity style={{padding: 20, backgroundColor: 'red'}} onPress={() => permission?.canAskAgain}><Text>Ask Again</Text></InvTouchableOpacity>
-  //     </View>)
-  //   }
   return (
     <SafeAreaView style={[{ flex: 1 }]}>
       {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -191,15 +210,7 @@ const FacialRecognitionScreen = () => {
               style={styles.camera}
               type={type}
               ref={cameraRef}
-              onFacesDetected={handleFacesDetected}
-              faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.accurate,
-                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-                runClassifications:
-                  FaceDetector.FaceDetectorClassifications.none,
-                minDetectionInterval: 100,
-                tracking: true,
-              }}
+              onCameraReady={() => console.log("camera ready")}
             >
               {faceBounds && (
                 <View
@@ -210,7 +221,7 @@ const FacialRecognitionScreen = () => {
                     top: faceBounds.origin.y,
                     width: faceBounds.size.width,
                     height: faceBounds.size.height,
-                    borderWidth: 2,
+                    borderWidth: 5,
                     borderColor: "green",
                     borderRadius: 4,
                   }}
@@ -234,17 +245,17 @@ const FacialRecognitionScreen = () => {
         <>
           {range(1, 200, 4).map((number, index) => (
             <LinearGradient
-            key={index}
-            colors={['white','white']} // Specify the colors for each edge
-            start={{ x: 0, y: 0 }} // Start position of the gradient
-            end={{ x: 1, y: 0 }} // End position of the gradient
-            style={[
-              styles.line,
-              {
-                transform: [{ translateY: -1 }, { rotate: `${number}deg` }],
-              },
-            ]}
-          />
+              key={index}
+              colors={["white", "white"]} // Specify the colors for each edge
+              start={{ x: 0, y: 0 }} // Start position of the gradient
+              end={{ x: 1, y: 0 }} // End position of the gradient
+              style={[
+                styles.line,
+                {
+                  transform: [{ translateY: -1 }, { rotate: `${number}deg` }],
+                },
+              ]}
+            />
           ))}
         </>
       )}
@@ -254,19 +265,17 @@ const FacialRecognitionScreen = () => {
           Please perform facial scan
         </Text>
       </View>
-      {!isFaceInFrame && (
-        <View
-          style={[
-            styles.overlay,
-            {
-              left: frameArea.x,
-              top: frameArea.y,
-              width: 350,
-              height: 350,
-            },
-          ]}
-        />
-      )}
+      <View
+        style={[
+          styles.overlay,
+          {
+            left: 200,
+            top: 200,
+            width: 250,
+            height: 250,
+          },
+        ]}
+      />
     </SafeAreaView>
   );
 };

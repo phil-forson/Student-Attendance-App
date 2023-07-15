@@ -16,6 +16,7 @@ import UniversityDetails from "../screens/UniversityDetails";
 import UserStatus from "../screens/UserStatus";
 import EmailScreen from "../screens/AccountDetails";
 import AccountDetailsScreen from "../screens/AccountDetails";
+import EmailVerificationSent from "../screens/EmailVerificationSent";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -26,6 +27,7 @@ export default function RootNavigator() {
         gestureEnabled: true,
         gestureDirection: "horizontal",
       }}
+      initialRouteName="FacialRecognition"
     >
       <Stack.Screen
         name="Root"
@@ -66,6 +68,15 @@ export default function RootNavigator() {
         })}
       />
       <Stack.Screen
+        name="EmailVerification"
+        component={EmailVerificationSent}
+        options={({
+          navigation,
+        }: RootStackScreenProps<"EmailVerification">) => ({
+          header: () => null,
+        })}
+      />
+      <Stack.Screen
         name="SignUp"
         component={SignInScreen}
         options={({ navigation }: RootStackScreenProps<"SignUp">) => ({
@@ -76,7 +87,7 @@ export default function RootNavigator() {
         name="LogIn"
         component={LogInScreen}
         options={({ navigation }: RootStackScreenProps<"LogIn">) => ({
-          header: () => null
+          header: () => null,
         })}
       />
       <Stack.Screen
@@ -92,7 +103,7 @@ export default function RootNavigator() {
         name="VerifyCode"
         component={VerifyCodeScreen}
         options={({ navigation }: RootStackScreenProps<"VerifyCode">) => ({
-          header: () => null
+          header: () => null,
         })}
       />
       <Stack.Screen

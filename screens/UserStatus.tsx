@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   headerSubText: {
     marginTop: 10,
-    fontSize: 20,
+    fontSize: 16,
   },
   my: {
     marginVertical: 20,

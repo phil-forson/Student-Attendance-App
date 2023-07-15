@@ -9,6 +9,7 @@ export type RootStackParamList = {
   UniversityDetails: { firstName: string; lastName: string };
   UserStatus: { firstName: string; lastName: string, university: any };
   AccountDetails: {firstName: string, lastName: string, university: any, userStatus: string}
+  EmailVerification: any;
   SignUp: undefined;
   LogIn: undefined;
   NotFound: undefined;

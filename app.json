@@ -40,6 +40,12 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Presensa to access your camera."
+        }
       ]
     ],
     "extra": {
