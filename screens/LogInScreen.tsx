@@ -13,11 +13,16 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import { RootStackScreenProps } from "../types";
 import { KeyboardAvoidingView } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  browserSessionPersistence,
+  setPersistence,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { auth } from "../config/firebase";
 import { APIKEY } from "@env";
 import { UserContext } from "../contexts/UserContext";
 import StyledInput from "../components/StyledInput";
+import FullWidthButton from "../components/FullWidthButton";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -57,7 +62,14 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
     try {
       await signInWithEmailAndPassword(auth, email, pwd)
         .then((res) => {
-          setUserLoggedIn(true);
+          if (res.user.emailVerified) {
+            setUserLoggedIn(true);
+          } else {
+            Alert.alert(
+              "Account Verification",
+              "Your account has not been verified. Check your email to verify your account before proceeding."
+            );
+          }
         })
         .finally(() => setIsLoading(false));
     } catch (error: any) {
@@ -83,95 +95,53 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
         },
       ]}
     >
-      <View
-        style={[styles.headerView]}
-      >
-        <Text
-          style={[
-            styles.headerMainText
-          ]}
-        >
-          Enter Your Details
-        </Text>
+      <View style={[styles.headerView]}>
+        <Text style={[styles.headerMainText]}>Enter Your Details</Text>
       </View>
       <View style={styles.my}>
         <Text style={[styles.label]}>Email Address</Text>
-        <StyledInput 
-        value={email}
-        setValue={handleEmail}
-        secure={false}
-        keyboardType="email-address"
-        placeholder="Email address"
+        <StyledInput
+          value={email}
+          setValue={handleEmail}
+          secure={false}
+          keyboardType="email-address"
+          placeholder="Email address"
         />
       </View>
       <View style={styles.my}>
         <Text style={[styles.label]}>Password</Text>
-        <StyledInput 
-        value={pwd}
-        setValue={handlePwd}
-        secure={false}
-        keyboardType="default"
-        placeholder="Password"
+        <StyledInput
+          value={pwd}
+          setValue={handlePwd}
+          secure={false}
+          keyboardType="default"
+          placeholder="Password"
         />
       </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.bottom}
-      >
-        <TouchableOpacity
-          lightColor="#fff"
-          darkColor="#121212"
-          style={{
-            height: 40,
-            justifyContent: "center",
-            marginVertical: 15,
-          }}
-          onPress={() => navigation.navigate("ForgotPassword")}
+      <View style={[styles.bottom]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={[{}]}
         >
-          <Text
-            style={{
-              fontWeight: "bold",
-            }}
-          >
-            Forgot Password?
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+          <FullWidthButton
+            text={"Log In"}
+            onPress={handleSubmit}
+            disabled={!(matchPwd && validEmail) || isLoading}
+            style={{ borderRadius: 50, paddingHorizontal: 10 }}
+          />
+        </KeyboardAvoidingView>
+
+        <InvTouchableOpacity
           style={[
             {
-              width: "auto",
-              marginVertical: 15,
-              paddingHorizontal: 10,
-              height: 40,
-              borderRadius: 8,
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "row",
-              backgroundColor:
-                !(matchPwd && validEmail) || isLoading ? "#147ec0" : "#008be3",
-              opacity: !(matchPwd && validEmail) || isLoading ? 0.32 : 1,
+              alignItems: "flex-end",
             },
           ]}
-          disabled={!(matchPwd && validEmail) || isLoading}
-          onPress={handleSubmit}
+          onPress={() => navigation.navigate("PersonalInfo")}
         >
-          <Text
-            lightColor="#fff"
-            darkColor="#000"
-            style={{
-              fontWeight: "bold",
-            }}
-          >
-            Log In
-          </Text>
-          <AntDesign
-            name="arrowright"
-            size={20}
-            color={theme === "light" ? "white" : "black"}
-            style={{ marginLeft: 10 }}
-          />
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+          <Text>New here? Sign Up</Text>
+        </InvTouchableOpacity>
+      </View>
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </SafeAreaView>
   );

@@ -27,7 +27,6 @@ export default function RootNavigator() {
         gestureEnabled: true,
         gestureDirection: "horizontal",
       }}
-      initialRouteName="FacialRecognition"
     >
       <Stack.Screen
         name="Root"

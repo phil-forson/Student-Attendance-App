@@ -25,7 +25,9 @@ export default function Navigation({
       linking={LinkingConfiguration}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      {userLoggedIn ? <UserStack /> : <RootNavigator />}
+      {/* {userLoggedIn ? <UserStack /> : <RootNavigator />}
+       */}
+       <UserStack />
     </NavigationContainer>
   );
 }

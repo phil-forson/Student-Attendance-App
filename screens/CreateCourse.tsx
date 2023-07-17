@@ -23,7 +23,6 @@ import { db } from "../config/firebase";
 import useUser from "../hooks/useUser";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
-import SearchableDropdown from "react-native-searchable-dropdown";
 import uuid from "react-native-uuid";
 import { CourseContext } from "../contexts/CourseContext";
 

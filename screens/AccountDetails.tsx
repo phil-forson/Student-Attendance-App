@@ -84,52 +84,52 @@ export default function AccountDetailsScreen({
     const { firstName, lastName, university, userStatus, email } = data;
     try {
       navigation.navigate('EmailVerification')
-      // setIsLoading(true);
-      // createUserWithEmailAndPassword(auth, email, pwd)
-      //   .then(async (res) => {
-      //     console.log(res);
-      //     console.log("user created");
-      //     setIsLoading(false);
-      //     set(ref(database, 'users/' + res.user.uid), {
-      //       email: email,
-      //       firstName: capitalizeFirstLetter(firstName),
-      //       lastName: capitalizeFirstLetter(lastName),
-      //       status: userStatus,
-      //       university: university,
-      //       verified: false
-      //     })
-      //     await sendEmailVerification(res.user)
-      //       .then((res) => {
-      //         console.log("res from email verification ", res);
-      //         // Alert.alert(
-      //         //   "Email Verification Sent",
-      //         //   "Email verification sent, go to your email to verify you account and then come back to log in",
-      //         //   [{
-      //         //     text: "Ok",
-      //         //     onPress: () => navigation.navigate("FacialRecognition")
-      //         //   }]
-      //         // );
-      //       })
-      //       .catch((err) => {
-      //         console.log("error from email verification ", err);
-      //       });
-      //   })
-      //   .catch((error) => {
-      //     setIsLoading(false);
-      //     console.log(error);
-      //     if (
-      //       error.code === "auth/invalid-email" ||
-      //       error.code === "auth/wrong-password"
-      //     ) {
-      //       Alert.alert("Your email or password was incorrect");
-      //     } else if (error.code === "auth/email-already-in-use") {
-      //       Alert.alert("An account with this email already exists");
-      //     } else {
-      //       Alert.alert("There was a problem with your request");
-      //     }
-      //   });
+      setIsLoading(true);
+      createUserWithEmailAndPassword(auth, email, pwd)
+        .then(async (res) => {
+          console.log(res);
+          console.log("user created");
+          setIsLoading(false);
+          set(ref(database, 'users/' + res.user.uid), {
+            email: email,
+            firstName: capitalizeFirstLetter(firstName),
+            lastName: capitalizeFirstLetter(lastName),
+            status: userStatus,
+            university: university,
+            verified: false
+          })
+          await sendEmailVerification(res.user)
+            .then((res) => {
+              console.log("res from email verification ", res);
+              // Alert.alert(
+              //   "Email Verification Sent",
+              //   "Email verification sent, go to your email to verify you account and then come back to log in",
+              //   [{
+              //     text: "Ok",
+              //     onPress: () => navigation.navigate("FacialRecognition")
+              //   }]
+              // );
+            })
+            .catch((err) => {
+              console.log("error from email verification ", err);
+            });
+        })
+        .catch((error) => {
+          setIsLoading(false);
+          console.log(error);
+          if (
+            error.code === "auth/invalid-email" ||
+            error.code === "auth/wrong-password"
+          ) {
+            Alert.alert("Your email or password was incorrect");
+          } else if (error.code === "auth/email-already-in-use") {
+            Alert.alert("An account with this email already exists");
+          } else {
+            Alert.alert("There was a problem with your request");
+          }
+        });
 
-      // setIsLoading(false);
+      setIsLoading(false);
     } catch (error: any) {
       console.log("error: ", error);
       setIsLoading(false);

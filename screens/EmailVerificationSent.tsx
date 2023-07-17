@@ -10,14 +10,17 @@ import React from "react";
 import { Entypo } from "@expo/vector-icons";
 import FullWidthButton from "../components/FullWidthButton";
 import { RootStackScreenProps } from "../types";
+import useAuth from "../hooks/useAuth";
 
 export default function EmailVerificationSent({
   navigation,
 }: RootStackScreenProps<"EmailVerification">) {
+  const { user } = useAuth()
   const theme = useColorScheme();
 
   const handleContinue = () => {
-    navigation.navigate("FacialRecognition");
+    console.log(user);
+    navigation.navigate("LogIn")
   };
   return (
     <SafeAreaView
@@ -29,12 +32,7 @@ export default function EmailVerificationSent({
       <View style={[styles.subContainer]}>
         <View style={[styles.headerView]}>
           <View style={[styles.headerMainText]}>
-            <Entypo
-              name="mail"
-              size={24}
-              color={theme === "dark" ? "white" : "black"}
-              style={[{ marginRight: 20 }]}
-            />
+            
             <Text style={[{ fontSize: 30, fontWeight: "700" }]}>
               Email Verification
             </Text>
