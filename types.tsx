@@ -23,7 +23,7 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, Screen>;
 
 export type UserStackParamList = {
-  Home: undefined;
+  Root: undefined;
   JoinCourse: undefined;
   CreateCourse: undefined;
   CreateClass: undefined;
@@ -77,6 +77,7 @@ export interface ICourseDetails {
 
 export interface IClassDetails {
   id: string,
+  courseName: string,
   date: Date,
   startTime: Date,
   endTime: Date,

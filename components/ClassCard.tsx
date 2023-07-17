@@ -39,15 +39,16 @@ export default function ClassCard({
         <View
           style={[
             styles.transBg,
-            styles.mmy,
+            styles.smy,
             styles.mmx,
-            styles.justifyBetween,
+            styles.justifyAround,
             styles.flexColumn,
             styles.flexOne,
             { paddingVertical: 10 },
           ]}
         >
           <View style={[styles.transBg]}>
+            <Text style={[styles.semiBold]}>{courseClass.courseName}</Text>
             <Text style={[styles.semiBold]}>
               {convertToDayString(courseClass.date)}
             </Text>

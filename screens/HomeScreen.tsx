@@ -11,7 +11,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
-import { InvTouchableOpacity, Text, View } from "../components/Themed";
+import { InvTouchableOpacity, Text, TouchableOpacity, View } from "../components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useAuth from "../hooks/useAuth";
 import {
@@ -43,6 +43,7 @@ var width = Dimensions.get("window").width;
 const data: IClassDetails[] = [
   {
     id: "1",
+    courseName: "Agriculture",
     startTime: new Date(Date.now()),
     endTime: new Date(Date.now()),
     duration: "1h 50m",
@@ -50,6 +51,7 @@ const data: IClassDetails[] = [
   },
   {
     id: "2",
+    courseName: "Physics",
     startTime: new Date(Date.now()),
     endTime: new Date(Date.now()),
     duration: "1h 50m",
@@ -57,6 +59,7 @@ const data: IClassDetails[] = [
   },
   {
     id: "3",
+    courseName: "Chemistry",
     startTime: new Date(Date.now()),
     endTime: new Date(Date.now()),
     duration: "1h 50m",
@@ -64,6 +67,7 @@ const data: IClassDetails[] = [
   },
   {
     id: "4",
+    courseName: "Mathematics",
     startTime: new Date(Date.now()),
     endTime: new Date(Date.now()),
     duration: "1h 50m",
@@ -171,7 +175,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
             backgroundColor: theme === "dark" ? "#121212" : "#fff",
           }}
         >
-          <View style={styles.contentContainer} >
+          <View style={[styles.contentContainer, styles.transBg]}>
             {false && (
               <View darkColor="#121212">
                 <View darkColor="#121212">
@@ -218,16 +222,30 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 />
               </View>
             )}
-            
-            <Text style={[styles.bold, styles.my]}>Upcoming Classes</Text>
+
+            <Text style={[styles.bold, styles.smy
+            ]}>Log Files</Text>
+
+            <View style={[styles.flexRow, styles.justifyBetween]}>
+              <TouchableOpacity style={[{height: 50}]}></TouchableOpacity>
+              <TouchableOpacity></TouchableOpacity>
+            </View>
+
+
+
+            <Text style={[styles.bold, styles.my, styles.transBg]}>
+              Upcoming Classes
+            </Text>
           </View>
-            <BottomSheetFlatList
-              data={data}
-              keyExtractor={(courseClass: IClassDetails) => courseClass.id}
-              renderItem={renderItem}
-              ItemSeparatorComponent={() => <CardSeparator />}
-              contentContainerStyle={styles.contentContainer}
-              />
+          <BottomSheetFlatList
+            data={data}
+            keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => (
+              <CardSeparator viewStyle={[styles.transBg]} />
+            )}
+            contentContainerStyle={[styles.contentContainer, styles.transBg]}
+          />
           <InvTouchableOpacity
             style={[
               styles.addCourseIcon,

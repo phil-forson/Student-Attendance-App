@@ -226,7 +226,7 @@ function UserBottomTabNavigator() {
     >
       <UserBottomTab.Screen
         name="Home"
-        component={HomeScreen}
+        component={StackNavigator}
         options={{
           header: () => null,
           tabBarIcon: ({ color }) => (
@@ -336,12 +336,12 @@ function StackNavigator() {
           return <Button />;
         },
       }}
-      initialRouteName="Home"
+      initialRouteName="Root"
     >
       <Stack.Screen
-        name="Home"
+        name="Root"
         component={HomeScreen}
-        options={(navigation: UserStackScreenProps<"Home">) => ({
+        options={(navigation: UserStackScreenProps<"Root">) => ({
           header: () => null,
         })}
       />
