@@ -25,11 +25,23 @@ export const styles = StyleSheet.create({
   fullHeight: {
     height: height
   },
+  autoHeight: {
+    height: 'auto'
+  },
   textCenter: {
     textAlign: 'center'
   },
   smy: {
     marginVertical: 5,
+  },
+  smx: {
+    marginHorizontal: 5
+  },
+  mmy: {
+    marginVertical: 10
+  },
+  mmx: {
+    marginHorizontal: 10
   },
   headerView: {
     flexDirection: "row",
@@ -65,6 +77,12 @@ export const styles = StyleSheet.create({
   },
   largeText: {
     fontSize: 25
+  },
+  autoWidth: {
+    width: 'auto'
+  },
+  transBg: {
+    backgroundColor: 'transparent'
   },
   bigText: {
     fontSize: 20,

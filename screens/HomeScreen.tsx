@@ -7,6 +7,8 @@ import {
   Platform,
   Alert,
   RefreshControl,
+  ListRenderItem,
+  ScrollView,
 } from "react-native";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { InvTouchableOpacity, Text, View } from "../components/Themed";
@@ -27,10 +29,47 @@ import JoinCourseModal from "../components/JoinCourseModal";
 import React, { useEffect } from "react";
 import { styles } from "../styles/styles";
 import { StatusBar } from "expo-status-bar";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 import FullWidthButton from "../components/FullWidthButton";
+import ClassCard from "../components/ClassCard";
+import { convertToDayString } from "../utils/utils";
+import { IClassDetails } from "../types";
 
 var width = Dimensions.get("window").width;
+
+const data: IClassDetails[] = [
+  {
+    id: "1",
+    startTime: new Date(Date.now()),
+    endTime: new Date(Date.now()),
+    duration: "1h 50m",
+    date: new Date(Date.now()),
+  },
+  {
+    id: "2",
+    startTime: new Date(Date.now()),
+    endTime: new Date(Date.now()),
+    duration: "1h 50m",
+    date: new Date(Date.now()),
+  },
+  {
+    id: "3",
+    startTime: new Date(Date.now()),
+    endTime: new Date(Date.now()),
+    duration: "1h 50m",
+    date: new Date(Date.now()),
+  },
+  {
+    id: "4",
+    startTime: new Date(Date.now()),
+    endTime: new Date(Date.now()),
+    duration: "1h 50m",
+    date: new Date(Date.now()),
+  },
+];
 
 export const HomeScreen = ({ navigation, route }: any) => {
   const theme = useColorScheme();
@@ -56,15 +95,38 @@ export const HomeScreen = ({ navigation, route }: any) => {
     console.log("handleSheetChanges", index);
   }, []);
 
+  const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
+    // Render your list item here using `item` object
+    return (
+      // JSX representing your list item
+      <ClassCard courseClass={item} navigation={navigation} />
+    );
+  };
+
+  const courseClassDeets = {
+    id: "1",
+    startTime: new Date(Date.now()),
+    endTime: new Date(Date.now()),
+    date: new Date(Date.now()),
+    duration: "7h 50m",
+  };
+
   return (
     <>
       <SafeAreaView
         style={[
           styles.container,
-          { backgroundColor: theme === "dark" ? "#fff" : "#121212", zIndex: -11 },
+          {
+            backgroundColor: theme === "dark" ? "#fff" : "#121212",
+            zIndex: -11,
+          },
         ]}
       >
-        <View style={[styles.headerView]} darkColor="white" lightColor="#121212">
+        <View
+          style={[styles.headerView]}
+          darkColor="white"
+          lightColor="#121212"
+        >
           <View darkColor="white" lightColor="#121212">
             <View darkColor="white" lightColor="#121212">
               <Text
@@ -72,12 +134,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 darkColor="#121212"
                 style={[styles.largeText, styles.bold, styles.smy]}
               >
-                {new Date(Date.now()).toLocaleDateString([], {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {convertToDayString(new Date(Date.now()))}
               </Text>
             </View>
             <View darkColor="white" lightColor="#121212">
@@ -110,9 +167,11 @@ export const HomeScreen = ({ navigation, route }: any) => {
           index={0}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
-          backgroundStyle={{backgroundColor: theme === "dark" ? '#121212': "#fff"}}
+          backgroundStyle={{
+            backgroundColor: theme === "dark" ? "#121212" : "#fff",
+          }}
         >
-          <View style={styles.contentContainer} darkColor="#121212">
+          <View style={styles.contentContainer} >
             {false && (
               <View darkColor="#121212">
                 <View darkColor="#121212">
@@ -120,28 +179,55 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 </View>
               </View>
             )}
-            {false && <View
-              style={[
-                styles.justifyBetween,
-                styles.my,
-                {
-                  marginVertical: 40,
-                  marginHorizontal: 30,
-                },
-              ]}
-              darkColor="#121212"
-            >
-              <Image source={require('../assets/course.png')} style={[{resizeMode: 'contain', width: 'auto', height: 250}]}/>
-              <Text style={[styles.textCenter, styles.semiBold, styles.mediumText, styles.my]}>Join a course to get started</Text>
-              <FullWidthButton
-              
-                text={"Join Course"}
-                style={[styles.fullWidth, {
-                  backgroundColor: theme === "dark"? "#121212": "#fff"
-                }]}
-              />
-            </View>}
+            {false && (
+              <View
+                style={[
+                  styles.justifyBetween,
+                  styles.my,
+                  {
+                    marginVertical: 40,
+                    marginHorizontal: 30,
+                  },
+                ]}
+                darkColor="#121212"
+              >
+                <Image
+                  source={require("../assets/course.png")}
+                  style={[
+                    { resizeMode: "contain", width: "auto", height: 250 },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.textCenter,
+                    styles.semiBold,
+                    styles.mediumText,
+                    styles.my,
+                  ]}
+                >
+                  Join a course to get started
+                </Text>
+                <FullWidthButton
+                  text={"Join Course"}
+                  style={[
+                    styles.fullWidth,
+                    {
+                      backgroundColor: theme === "dark" ? "#121212" : "#fff",
+                    },
+                  ]}
+                />
+              </View>
+            )}
+            
+            <Text style={[styles.bold, styles.my]}>Upcoming Classes</Text>
           </View>
+            <BottomSheetFlatList
+              data={data}
+              keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+              renderItem={renderItem}
+              ItemSeparatorComponent={() => <CardSeparator />}
+              contentContainerStyle={styles.contentContainer}
+              />
           <InvTouchableOpacity
             style={[
               styles.addCourseIcon,
