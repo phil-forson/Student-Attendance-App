@@ -11,7 +11,12 @@ import {
   ScrollView,
 } from "react-native";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
-import { InvTouchableOpacity, Text, TouchableOpacity, View } from "../components/Themed";
+import {
+  InvTouchableOpacity,
+  Text,
+  TouchableOpacity,
+  View,
+} from "../components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useAuth from "../hooks/useAuth";
 import {
@@ -37,6 +42,7 @@ import FullWidthButton from "../components/FullWidthButton";
 import ClassCard from "../components/ClassCard";
 import { convertToDayString } from "../utils/utils";
 import { IClassDetails } from "../types";
+import Colors from "../constants/Colors";
 
 var width = Dimensions.get("window").width;
 
@@ -121,47 +127,46 @@ export const HomeScreen = ({ navigation, route }: any) => {
         style={[
           styles.container,
           {
-            backgroundColor: theme === "dark" ? "#fff" : "#121212",
-            zIndex: -11,
+            backgroundColor: theme === "dark" ? Colors.dark.background : Colors.light.primaryGrey,
           },
         ]}
       >
         <View
           style={[styles.headerView]}
-          darkColor="white"
-          lightColor="#121212"
+          darkColor={Colors.dark.background}
+          lightColor={Colors.light.primaryGrey}
         >
-          <View darkColor="white" lightColor="#121212">
-            <View darkColor="white" lightColor="#121212">
+          <View style={[styles.transBg]}>
+            <View style={[styles.transBg]}>
               <Text
-                lightColor="white"
-                darkColor="#121212"
+                lightColor={Colors.dark.background}
+                darkColor={Colors.dark.text}
                 style={[styles.largeText, styles.bold, styles.smy]}
               >
                 {convertToDayString(new Date(Date.now()))}
               </Text>
             </View>
-            <View darkColor="white" lightColor="#121212">
+            <View style={[styles.transBg]}>
               <Text
-                lightColor="white"
-                darkColor="#000"
+                lightColor={Colors.light.text}
+                darkColor={Colors.dark.text}
                 style={[styles.mediumText, styles.semiBold, styles.smy]}
               >
                 Good Day
               </Text>
             </View>
-            <View darkColor="white" lightColor="#121212">
+            <View style={[styles.transBg]}>
               <Text
-                lightColor="white"
-                darkColor="black"
+                lightColor={Colors.light.text}
+                darkColor={Colors.dark.text}
                 style={[styles.smy, styles.semiBold, styles.bigText]}
               >
                 Philemon Forson
               </Text>
             </View>
           </View>
-          <View darkColor="white" lightColor="#121212" style={[styles.smy]}>
-            <Text lightColor="white" darkColor="black">
+          <View style={[styles.smy, styles.transBg]}>
+            <Text lightColor={Colors.light.text} darkColor={Colors.dark.text}>
               Profile
             </Text>
           </View>
@@ -172,7 +177,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
           backgroundStyle={{
-            backgroundColor: theme === "dark" ? "#121212" : "#fff",
+            backgroundColor: theme === "dark" ? "#1b1b1b" : Colors.light.background,
           }}
         >
           <View style={[styles.contentContainer, styles.transBg]}>
@@ -223,15 +228,12 @@ export const HomeScreen = ({ navigation, route }: any) => {
               </View>
             )}
 
-            <Text style={[styles.bold, styles.smy
-            ]}>Log Files</Text>
+            <Text style={[styles.bold, styles.smy]}>Log Files</Text>
 
-            <View style={[styles.flexRow, styles.justifyBetween]}>
-              <TouchableOpacity style={[{height: 50}]}></TouchableOpacity>
+            <View style={[styles.flexRow, styles.justifyBetween]} darkColor={Colors.dark.secondaryGrey}>
+              <TouchableOpacity style={[{ height: 50 }]}></TouchableOpacity>
               <TouchableOpacity></TouchableOpacity>
             </View>
-
-
 
             <Text style={[styles.bold, styles.my, styles.transBg]}>
               Upcoming Classes
@@ -326,7 +328,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           </View>
         </Modal>
       )}
-      <StatusBar style={"inverted"} />
+      <StatusBar style={"auto"} />
     </>
   );
 };

@@ -43,6 +43,9 @@ export const styles = StyleSheet.create({
   mmx: {
     marginHorizontal: 10
   },
+  rounded: {
+    borderRadius: 10,
+  },
   headerView: {
     flexDirection: "row",
     flex: 1,
@@ -58,6 +61,9 @@ export const styles = StyleSheet.create({
   },
   justifyBetween: {
     justifyContent: 'space-between'
+  },
+  justifyCenter: {
+    justifyContent: 'center'
   },
   itemsCenter: {
     alignItems: 'center'

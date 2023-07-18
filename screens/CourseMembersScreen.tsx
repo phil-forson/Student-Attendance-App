@@ -190,7 +190,7 @@ export default function CourseMembersScreen({ navigation, route }: any) {
               <UserListCard text={item?.firstName + " " + item?.lastName} />
             )}
             keyExtractor={(member: any) => member?.uid}
-            ItemSeparatorComponent={() => <CardSeparator />}
+            ItemSeparatorComponent={() => <CardSeparator viewStyle={{}}/>}
           />
         ) : (
           <View style={styles.center}>

@@ -41,6 +41,7 @@ import CourseMembersScreen from "../screens/CourseMembersScreen";
 import { useNavigation } from "@react-navigation/native";
 import ClassDetails from "../screens/ClassDetails";
 import ClockInScreen from "../screens/ClockInScreen";
+import AttendanceScreen from "../screens/AttendanceScreen";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -236,7 +237,7 @@ function UserBottomTabNavigator() {
       />
       <UserBottomTab.Screen
         name="Attendance"
-        component={ProfileScreen}
+        component={AttendanceScreen}
         options={{
           header: () => null,
           tabBarIcon: ({ color }) => (

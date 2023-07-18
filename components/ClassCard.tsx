@@ -10,6 +10,7 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import Colors from "../constants/Colors";
 
 export default function ClassCard({
   courseClass,
@@ -30,11 +31,11 @@ export default function ClassCard({
             borderRadius: 10,
             zIndex: 1,
             borderLeftWidth: 10,
-            borderLeftColor: theme === "dark"? "#fff": "#121212"
+            borderLeftColor: theme === "dark" ? Colors.dark.text : "#121212",
           },
         ]}
-        lightColor="#ece8e8"
-        darkColor="#252525"
+        lightColor={Colors.light.primaryGrey}
+        darkColor={Colors.dark.secondaryGrey}
       >
         <View
           style={[
