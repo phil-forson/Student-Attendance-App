@@ -6,7 +6,7 @@ export default {
     text: "#000",
     background: "#fff",
     customBackground: "#fbfcfd",
-    primaryGrey: "#f1f1f7",
+    primaryGrey: "#f8f8fa",
     customBorderColor: "#C7C7CD",
     inverseBackground: "#121212",
     inverseText: "#fff",

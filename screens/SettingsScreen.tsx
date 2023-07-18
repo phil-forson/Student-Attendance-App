@@ -15,28 +15,21 @@ const SettingsScreen = ({ navigation }: any) => {
   return (
     <View style={[{}, styles.container]}>
       <View
-        style={[{ height: 250 }]}
+        style={[{ height: 200 }]}
         lightColor={Colors.light.primaryGrey}
+        darkColor={Colors.dark.primaryGrey}
       ></View>
       <ScrollView
         style={[
           {
             flex: 3,
             paddingHorizontal: 20,
+            marginTop: 110,
           },
           styles.my,
         ]}
       >
-        <Text
-          style={[
-            styles.bold,
-            styles.bigText,
-            styles.textCenter,
-            {
-              marginTop: 100,
-            },
-          ]}
-        >
+        <Text style={[styles.bold, styles.bigText, styles.textCenter, {}]}>
           John Doe
         </Text>
         <Text style={[styles.textCenter, styles.semiBold, styles.smy]}>
@@ -55,24 +48,34 @@ const SettingsScreen = ({ navigation }: any) => {
         >
           <View
             lightColor={Colors.light.primaryGrey}
+            darkColor={Colors.dark.primaryGrey}
             style={[
-              { height: "100%", flex: 1, paddingVertical: 40, paddingLeft: 20 },
+              {
+                height: "100%",
+                flex: 1,
+                paddingHorizontal: 15,
+                justifyContent: "space-evenly",
+              },
               styles.flexColumn,
-              styles.justifyBetween,
               styles.rounded,
             ]}
           >
-            <Text style={[styles.light, styles.smallText, { fontSize: 12 }]}>
+            <Text style={[styles.light, styles.smallText, { fontSize: 14 }]}>
               Total Attendance Time
             </Text>
             <Text style={[styles.bold, styles.mediumText]}>4h55m</Text>
           </View>
           <View
             lightColor={Colors.light.primaryGrey}
+            darkColor={Colors.dark.primaryGrey}
             style={[
-              { height: "100%", flex: 1, paddingVertical: 40, paddingLeft: 20 },
+              {
+                height: "100%",
+                flex: 1,
+                paddingHorizontal: 15,
+                justifyContent: "space-evenly",
+              },
               styles.flexColumn,
-              styles.justifyBetween,
               styles.rounded,
             ]}
           >
@@ -86,6 +89,7 @@ const SettingsScreen = ({ navigation }: any) => {
           <Text style={[styles.bigText, styles.bold, styles.my]}>Details</Text>
           <View
             lightColor={Colors.light.primaryGrey}
+            darkColor={Colors.dark.primaryGrey}
             style={[
               styles.flexRow,
               styles.itemsCenter,
@@ -105,7 +109,7 @@ const SettingsScreen = ({ navigation }: any) => {
                 styles.transBg,
               ]}
             >
-              <AntDesign name="mail" size={20} />
+              <AntDesign name="mail" size={20} color={theme === "dark" ? "white": "black"}/>
             </View>
             <View style={[styles.transBg]}>
               <Text
@@ -132,6 +136,8 @@ const SettingsScreen = ({ navigation }: any) => {
           </View>
           <View
             lightColor={Colors.light.primaryGrey}
+            darkColor={Colors.dark.primaryGrey}
+
             style={[
               styles.flexRow,
               styles.itemsCenter,
@@ -151,7 +157,7 @@ const SettingsScreen = ({ navigation }: any) => {
                 styles.transBg,
               ]}
             >
-              <AntDesign name="mail" size={20} />
+              <AntDesign name="mail" size={20} color={theme === "dark" ? "white": "black"} />
             </View>
             <View style={[styles.transBg]}>
               <Text
@@ -178,7 +184,7 @@ const SettingsScreen = ({ navigation }: any) => {
           </View>
         </View>
 
-        <FullWidthButton text={"Sign Out"}/>
+        <FullWidthButton text={"Sign Out"} />
       </ScrollView>
       <View
         style={[
@@ -186,12 +192,13 @@ const SettingsScreen = ({ navigation }: any) => {
             position: "absolute",
             height: 200,
             width: 200,
-            top: 150,
+            top: 100,
             left: width / 2 - 100,
             borderRadius: 10,
           },
         ]}
         lightColor={Colors.light.customBackground}
+        darkColor={Colors.dark.secondaryGrey}
       ></View>
     </View>
   );
