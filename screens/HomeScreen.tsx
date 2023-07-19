@@ -40,7 +40,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import FullWidthButton from "../components/FullWidthButton";
 import ClassCard from "../components/ClassCard";
-import { convertToDayString } from "../utils/utils";
+import { convertToDayString, convertToHHMM } from "../utils/utils";
 import { IClassDetails } from "../types";
 import Colors from "../constants/Colors";
 
@@ -106,18 +106,16 @@ export const HomeScreen = ({ navigation, route }: any) => {
   }, []);
 
   const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
-    // Render your list item here using `item` object
     return (
-      // JSX representing your list item
       <ClassCard courseClass={item} navigation={navigation} />
     );
   };
 
   const courseClassDeets = {
     id: "1",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
-    date: new Date(Date.now()),
+    startTime: convertToHHMM(new Date(Date.now())),
+    endTime: convertToHHMM(new Date(Date.now())),
+    date: convertToHHMM(new Date(Date.now())),
     duration: "7h 50m",
   };
 
@@ -127,7 +125,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
         style={[
           styles.container,
           {
-            backgroundColor: theme === "dark" ? Colors.dark.background : Colors.light.primaryGrey,
+            backgroundColor:
+              theme === "dark"
+                ? Colors.dark.background
+                : Colors.light.primaryGrey,
           },
         ]}
       >
@@ -177,7 +178,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
           backgroundStyle={{
-            backgroundColor: theme === "dark" ? "#1b1b1b" : Colors.light.background,
+            backgroundColor:
+              theme === "dark" ? "#1b1b1b" : Colors.light.background,
           }}
         >
           <View style={[styles.contentContainer, styles.transBg]}>
@@ -230,7 +232,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
             <Text style={[styles.bold, styles.smy]}>Log Files</Text>
 
-            <View style={[styles.flexRow, styles.justifyBetween]} darkColor={Colors.dark.secondaryGrey}>
+            <View
+              style={[styles.flexRow, styles.justifyBetween]}
+              darkColor={Colors.dark.secondaryGrey}
+            >
               <TouchableOpacity style={[{ height: 50 }]}></TouchableOpacity>
               <TouchableOpacity></TouchableOpacity>
             </View>

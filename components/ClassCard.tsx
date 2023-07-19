@@ -3,7 +3,7 @@ import { styles } from "../styles/styles";
 import { IClassDetails } from "../types";
 import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { convertToDayString, convertToHHMM } from "../utils/utils";
 import {
   AntDesign,
@@ -22,7 +22,7 @@ export default function ClassCard({
   const theme = useColorScheme();
   return (
     <>
-      <TouchableOpacity
+      <Pressable
         style={[
           ,
           {
@@ -32,10 +32,13 @@ export default function ClassCard({
             zIndex: 1,
             borderLeftWidth: 10,
             borderLeftColor: theme === "dark" ? Colors.dark.text : "#121212",
+            backgroundColor:
+              theme === "dark"
+                ? Colors.dark.secondaryGrey
+                : Colors.light.primaryGrey,
           },
         ]}
-        lightColor={Colors.light.primaryGrey}
-        darkColor={Colors.dark.secondaryGrey}
+        onPress={() => navigation.navigate("CourseDetails", courseClass)}
       >
         <View
           style={[
@@ -106,7 +109,7 @@ export default function ClassCard({
             </View>
           </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
       {/* <View
         style={[
           { position: "relative", height: 90 ,width: 10, backgroundColor: "red", top: -90, left: 10, zIndex: 1000, borderRadius: 50 },

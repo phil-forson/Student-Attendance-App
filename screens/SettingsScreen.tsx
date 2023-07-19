@@ -5,7 +5,7 @@ import { InvTouchableOpacity, Text, View } from "../components/Themed";
 import useColorScheme from "../hooks/useColorScheme";
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
-import { Dimensions, ScrollView } from "react-native";
+import { Dimensions, Image, Pressable, ScrollView } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import FullWidthButton from "../components/FullWidthButton";
 
@@ -38,7 +38,7 @@ const SettingsScreen = ({ navigation }: any) => {
         <View
           style={[
             {
-              height: 150,
+              height: 100,
               width: "100%",
               paddingVertical: 10,
               columnGap: 10,
@@ -60,10 +60,23 @@ const SettingsScreen = ({ navigation }: any) => {
               styles.rounded,
             ]}
           >
-            <Text style={[styles.light, styles.smallText, { fontSize: 14 }]}>
+            <Text
+              style={[styles.light, { fontSize: 12 }]}
+              darkColor={Colors.light.secondaryGrey}
+              lightColor={Colors.dark.tetiary}
+            >
               Total Attendance Time
             </Text>
-            <Text style={[styles.bold, styles.mediumText]}>4h55m</Text>
+            <Text
+              style={[
+                styles.bold,
+                {
+                  fontSize: 20,
+                },
+              ]}
+            >
+              4h55m
+            </Text>
           </View>
           <View
             lightColor={Colors.light.primaryGrey}
@@ -79,10 +92,23 @@ const SettingsScreen = ({ navigation }: any) => {
               styles.rounded,
             ]}
           >
-            <Text style={[styles.light, styles.smallText, { fontSize: 12 }]}>
+            <Text
+              style={[styles.light, { fontSize: 12 }]}
+              darkColor={Colors.light.secondaryGrey}
+              lightColor={Colors.dark.tetiary}
+            >
               Total Attendance Time
             </Text>
-            <Text style={[styles.bold, styles.mediumText]}>4h55m</Text>
+            <Text
+              style={[
+                styles.bold,
+                {
+                  fontSize: 20,
+                },
+              ]}
+            >
+              4h55m
+            </Text>
           </View>
         </View>
         <View>
@@ -109,7 +135,15 @@ const SettingsScreen = ({ navigation }: any) => {
                 styles.transBg,
               ]}
             >
-              <AntDesign name="mail" size={20} color={theme === "dark" ? "white": "black"}/>
+              <AntDesign
+                name="mail"
+                size={20}
+                color={
+                  theme === "dark"
+                    ? Colors.light.secondaryGrey
+                    : Colors.dark.tetiary
+                }
+              />
             </View>
             <View style={[styles.transBg]}>
               <Text
@@ -119,14 +153,16 @@ const SettingsScreen = ({ navigation }: any) => {
                   },
                   styles.light,
                 ]}
+                darkColor={Colors.light.secondaryGrey}
+                lightColor={Colors.dark.tetiary}
               >
                 Student Email Address
               </Text>
               <Text
                 style={[
-                  styles.bold,
                   {
                     paddingVertical: 5,
+                    fontWeight: "500",
                   },
                 ]}
               >
@@ -137,7 +173,6 @@ const SettingsScreen = ({ navigation }: any) => {
           <View
             lightColor={Colors.light.primaryGrey}
             darkColor={Colors.dark.primaryGrey}
-
             style={[
               styles.flexRow,
               styles.itemsCenter,
@@ -157,7 +192,15 @@ const SettingsScreen = ({ navigation }: any) => {
                 styles.transBg,
               ]}
             >
-              <AntDesign name="mail" size={20} color={theme === "dark" ? "white": "black"} />
+              <AntDesign
+                name="mail"
+                size={20}
+                color={
+                  theme === "dark"
+                    ? Colors.light.secondaryGrey
+                    : Colors.dark.tetiary
+                }
+              />
             </View>
             <View style={[styles.transBg]}>
               <Text
@@ -167,14 +210,16 @@ const SettingsScreen = ({ navigation }: any) => {
                   },
                   styles.light,
                 ]}
+                darkColor={Colors.light.secondaryGrey}
+                lightColor={Colors.dark.tetiary}
               >
                 University
               </Text>
               <Text
                 style={[
-                  styles.bold,
                   {
                     paddingVertical: 5,
+                    fontWeight: "500",
                   },
                 ]}
               >
@@ -195,11 +240,50 @@ const SettingsScreen = ({ navigation }: any) => {
             top: 100,
             left: width / 2 - 100,
             borderRadius: 10,
+            padding: 10,
           },
         ]}
-        lightColor={Colors.light.customBackground}
+        lightColor={Colors.light.tetiary}
         darkColor={Colors.dark.secondaryGrey}
-      ></View>
+      >
+        <View style={[{
+          width: '100%',
+          height: '100%'
+        }]}>
+          <Image
+            source={require("../assets/profile.jpg")}
+            style={[
+              styles.fullImage,
+              {
+                zIndex: 10,
+                
+              },
+            ]}
+          />
+        </View>
+        <Pressable
+          style={[
+            styles.rounded,
+            styles.circle,
+            styles.itemsCenter,
+            styles.justifyCenter,
+            {
+              width: 50,
+              position: "absolute",
+              right: -10,
+              top: -20,
+              zIndex: 1000,
+              backgroundColor:
+                theme === "dark"
+                  ? Colors.dark.background
+                  : Colors.light.background,
+            },
+          ]}
+          onPress={() => console.log("editing...")}
+        >
+          <AntDesign name="edit" size={20} color={"green"} />
+        </Pressable>
+      </View>
     </View>
   );
 };

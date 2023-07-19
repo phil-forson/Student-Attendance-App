@@ -1,104 +1,77 @@
-import { StyleSheet } from "react-native";
-import React, { useContext } from "react";
-import { ICourseDetails } from "../types";
-import { InvTouchableOpacity, Text, View } from "./Themed";
 import useColorScheme from "../hooks/useColorScheme";
-import { CourseContext } from "../contexts/CourseContext";
+import { styles } from "../styles/styles";
+import { IClassDetails } from "../types";
+import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
+import React, { useEffect } from "react";
+import {
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
+import { convertToDayString, convertToHHMM } from "../utils/utils";
+import {
+  AntDesign,
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import Colors from "../constants/Colors";
 
 export default function CourseCard({
-  courseItem,
+  courseClass,
   navigation,
 }: {
-  courseItem: ICourseDetails;
+  courseClass: IClassDetails;
   navigation: any;
 }) {
   const theme = useColorScheme();
-  const { course, setCourseData } = useContext(CourseContext);
+  const width = Dimensions.get("screen").width;
+
+  useEffect(() => {
+    console.log("width ", width);
+  }, []);
   return (
-    <InvTouchableOpacity
-      style={[styles.container]}
-      onPress={() => {
-        setCourseData(courseItem);
-        navigation.navigate("CourseDetails", {
-          screen: "Classes",
-          params: courseItem
-        });
-      }}
-    >
-      <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.courseName]}>{courseItem.courseTitle}</Text>
-      </View>
-      <View style={[styles.outside, styles.transparent]}>
-        <Text style={[styles.ownerName]}>{courseItem.lecturerName}</Text>
-      </View>
-      <View style={{ position: "relative", backgroundColor: "transparent" }}>
-        <View style={[styles.bigCircle]}>
-          <View style={[styles.smallCircle]}>
-            <View style={[styles.smallerCircle]}></View>
+    <>
+      <Pressable
+        style={[
+          ,
+          {
+            height: 180,
+            borderRadius: 10,
+            zIndex: 1,
+            backgroundColor:
+              theme === "dark"
+                ? Colors.dark.secondaryGrey
+                : Colors.light.primaryGrey,
+            width: (width - 30) / 2,
+            marginHorizontal: 5
+          },
+        ]}
+        onPress={() => navigation.navigate("CourseDetails")}
+      >
+        <View
+          style={[
+            styles.transBg,
+            styles.smy,
+            styles.mmx,
+            styles.justifyAround,
+            styles.flexColumn,
+            styles.flexOne,
+            { paddingVertical: 10 },
+          ]}
+        >
+          <View style={[styles.transBg]}>
+            <Text style={[styles.semiBold]}>{courseClass.courseName}</Text>
+            <Text style={[styles.semiBold]}></Text>
           </View>
         </View>
-      </View>
-    </InvTouchableOpacity>
+      </Pressable>
+      {/* <View
+        style={[
+          { position: "relative", height: 90 ,width: 10, backgroundColor: "red", top: -90, left: 10, zIndex: 1000, borderRadius: 50 },
+      
+        ]}
+      /> */}
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#008be3",
-    height: 150,
-    borderRadius: 10,
-    flex: 1,
-    padding: 19,
-    overflow: "hidden",
-  },
-  bigCircle: {
-    zIndex: -200,
-    borderRadius: 150,
-    backgroundColor: "transparent",
-    width: 250,
-    height: 250,
-    position: "absolute",
-    left: 200,
-    bottom: -78,
-    padding: 10,
-    borderWidth: 40,
-    borderColor: "#031b87",
-    opacity: 1.5,
-  },
-  smallCircle: {
-    borderRadius: 100,
-    backgroundColor: "transparent",
-    width: 150,
-    height: 150,
-    position: "relative",
-    borderWidth: 25,
-    borderColor: "#031b87",
-    padding: 10,
-    opacity: 0.7,
-  },
-  smallerCircle: {
-    borderRadius: 100,
-    backgroundColor: "transparent",
-    width: 80,
-    height: 80,
-    position: "relative",
-    borderWidth: 15,
-    borderColor: "#0626b5",
-    opacity: 0.6,
-  },
-  outside: {
-    zIndex: 100,
-  },
-  transparent: {
-    backgroundColor: "transparent",
-  },
-  courseName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-  ownerName: {
-    // marginTop: 20
-    color: "white",
-  },
-});

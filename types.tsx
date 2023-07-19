@@ -30,6 +30,7 @@ export type UserStackParamList = {
   CourseDetails: undefined;
   ClassDetails: undefined;
   ClockScreen: undefined;
+  MyCourses: undefined;
 };
 
 export type UserStackScreenProps<Screen extends keyof UserStackParamList> =

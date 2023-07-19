@@ -42,6 +42,7 @@ import { useNavigation } from "@react-navigation/native";
 import ClassDetails from "../screens/ClassDetails";
 import ClockInScreen from "../screens/ClockInScreen";
 import AttendanceScreen from "../screens/AttendanceScreen";
+import MyCourses from "../screens/MyCourses";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -246,8 +247,8 @@ function UserBottomTabNavigator() {
         }}
       />
       <UserBottomTab.Screen
-        name="Analytics"
-        component={ProfileScreen}
+        name="My Courses"
+        component={MyCourses}
         options={{
           header: () => null,
           tabBarIcon: ({ color }) => (
@@ -272,49 +273,7 @@ function UserBottomTabNavigator() {
 
 const BottomTab = createBottomTabNavigator<CourseTabParamList>();
 
-function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
 
-  const navigation = useNavigation<any>();
-
-  const navigateToMembersScreen = () => {
-    navigation.navigate("Members", { userId: 123 });
-  };
-
-  return (
-    <BottomTab.Navigator
-      initialRouteName="Classes"
-      screenOptions={{
-        tabBarActiveTintColor:
-          colorScheme === "light" ? Colors.light.tint : Colors.dark.tint,
-      }}
-    >
-      <BottomTab.Screen
-        name="Classes"
-        component={CourseDetails}
-        options={({ navigation }: CourseTabScreenProps<"Classes">) => ({
-          header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="book-outline" color={color} />
-          ),
-        })}
-      />
-      <BottomTab.Screen
-        name="Members"
-        component={CourseMembersScreen}
-        listeners={{
-          tabPress: () => navigateToMembersScreen,
-        }}
-        options={{
-          header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="people-outline" color={color} />
-          ),
-        }}
-      />
-    </BottomTab.Navigator>
-  );
-}
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>["name"];
@@ -425,7 +384,7 @@ function StackNavigator() {
       </Stack.Group>
       <Stack.Screen
         name="CourseDetails"
-        component={BottomTabNavigator}
+        component={CourseDetails}
         options={{ header: () => null }}
       />
       <Stack.Screen

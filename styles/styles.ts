@@ -53,6 +53,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
+  fullImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: undefined,
+    height: undefined,
+  },
   flexRow: {
     flexDirection: 'row'
   },
@@ -81,11 +86,21 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10
   },
+  separator: {
+    height: 10
+  },
   largeText: {
     fontSize: 25
   },
   autoWidth: {
     width: 'auto'
+  },
+  list: {
+    justifyContent: 'space-around',
+    marginHorizontal: 10
+  },
+  column: {
+    flexShrink: 1,
   },
   transBg: {
     backgroundColor: 'transparent'
