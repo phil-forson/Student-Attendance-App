@@ -7,7 +7,7 @@ export default {
     background: "#fff",
     customBackground: "#fbfcfd",
     primaryGrey: "#f6f5f9",
-    secondaryGrey: "#c7c7c7",
+    secondaryGrey: "#bbb3bb53",
     tetiary: "#eae9e9",
     customBorderColor: "#C7C7CD",
     inverseBackground: "#121212",
