@@ -106,9 +106,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
   }, []);
 
   const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
-    return (
-      <ClassCard courseClass={item} navigation={navigation} />
-    );
+    return <ClassCard courseClass={item} navigation={navigation} />;
   };
 
   const courseClassDeets = {
@@ -177,6 +175,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           index={0}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
+          handleIndicatorStyle={{ display: "none" }}
           backgroundStyle={{
             backgroundColor:
               theme === "dark" ? "#1b1b1b" : Colors.light.background,
@@ -314,8 +313,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 },
               ]}
               onPress={() => {
-                navigation.navigate("CourseDetails")
-                setModalVisible(false)
+                navigation.navigate("CourseDetails");
+                setModalVisible(false);
               }}
             >
               <AntDesign

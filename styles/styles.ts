@@ -151,7 +151,17 @@ export const styles = StyleSheet.create({
     bottom: 15,
     right: 20
   },
+  courseDeetsIcon: {
+    position: 'absolute',
+    bottom: 60,
+    right: 20
+  },
   flexOne: {
     flex: 1
-  }
+  },
+  itemContainer: {
+    padding: 6,
+    margin: 6,
+    backgroundColor: "#eee",
+  },
 });
