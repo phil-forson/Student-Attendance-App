@@ -50,34 +50,34 @@ const data: IClassDetails[] = [
   {
     id: "1",
     courseName: "Agriculture",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
+    startTime: convertToHHMM(new Date(Date.now())),
+    endTime: convertToHHMM(new Date(Date.now())),
     duration: "1h 50m",
-    date: new Date(Date.now()),
+    date: convertToHHMM(new Date(Date.now())),
   },
   {
     id: "2",
     courseName: "Physics",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
+    startTime: convertToHHMM(new Date(Date.now())),
+    endTime: convertToHHMM(new Date(Date.now())),
     duration: "1h 50m",
-    date: new Date(Date.now()),
+    date: convertToHHMM(new Date(Date.now())),
   },
   {
     id: "3",
     courseName: "Chemistry",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
+    startTime: convertToHHMM(new Date(Date.now())),
+    endTime: convertToHHMM(new Date(Date.now())),
     duration: "1h 50m",
-    date: new Date(Date.now()),
+    date: convertToHHMM(new Date(Date.now())),
   },
   {
     id: "4",
     courseName: "Mathematics",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
+    startTime: convertToHHMM(new Date(Date.now())),
+    endTime: convertToHHMM(new Date(Date.now())),
     duration: "1h 50m",
-    date: new Date(Date.now()),
+    date: convertToHHMM(new Date(Date.now())),
   },
 ];
 
@@ -313,6 +313,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
                   alignItems: "center",
                 },
               ]}
+              onPress={() => {
+                navigation.navigate("CourseDetails")
+                setModalVisible(false)
+              }}
             >
               <AntDesign
                 name="addusergroup"

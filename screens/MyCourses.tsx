@@ -5,7 +5,7 @@ import {
   SafeAreaView,
   useColorScheme,
 } from "react-native";
-import React from "react";
+import React, { useRef } from "react";
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import FullWidthButton from "../components/FullWidthButton";
@@ -13,41 +13,43 @@ import { IClassDetails } from "../types";
 import CourseCard from "../components/CourseCard";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
+import { convertToHHMM } from "../utils/utils";
+import { event } from "react-native-reanimated";
 
 const data: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
-    duration: "1h 50m",
-    date: new Date(Date.now()),
-  },
-  {
-    id: "2",
-    courseName: "Physics",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
-    duration: "1h 50m",
-    date: new Date(Date.now()),
-  },
-  {
-    id: "3",
-    courseName: "Chemistry",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
-    duration: "1h 50m",
-    date: new Date(Date.now()),
-  },
-  {
-    id: "4",
-    courseName: "Mathematics",
-    startTime: new Date(Date.now()),
-    endTime: new Date(Date.now()),
-    duration: "1h 50m",
-    date: new Date(Date.now()),
-  },
-];
+    {
+      id: "1",
+      courseName: "Agriculture",
+      startTime: convertToHHMM(new Date(Date.now())),
+      endTime: convertToHHMM(new Date(Date.now())),
+      duration: "1h 50m",
+      date: convertToHHMM(new Date(Date.now())),
+    },
+    {
+      id: "2",
+      courseName: "Physics",
+      startTime: convertToHHMM(new Date(Date.now())),
+      endTime: convertToHHMM(new Date(Date.now())),
+      duration: "1h 50m",
+      date: convertToHHMM(new Date(Date.now())),
+    },
+    {
+      id: "3",
+      courseName: "Chemistry",
+      startTime: convertToHHMM(new Date(Date.now())),
+      endTime: convertToHHMM(new Date(Date.now())),
+      duration: "1h 50m",
+      date: convertToHHMM(new Date(Date.now())),
+    },
+    {
+      id: "4",
+      courseName: "Mathematics",
+      startTime: convertToHHMM(new Date(Date.now())),
+      endTime: convertToHHMM(new Date(Date.now())),
+      duration: "1h 50m",
+      date: convertToHHMM(new Date(Date.now())),
+    },
+  ];
 
 const ItemSeparator = () => <View style={styles.separator} />;
 
@@ -55,8 +57,9 @@ export default function MyCourses({ navigation, route }: any) {
   const theme = useColorScheme();
 
   const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
-    return <CourseCard courseClass={item} navigation={navigation} />;
+    return <CourseCard course={item} navigation={navigation} />;
   };
+
   return (
     <SafeAreaView
       style={[
@@ -123,20 +126,23 @@ export default function MyCourses({ navigation, route }: any) {
                 backgroundColor: theme === "dark" ? "#121212" : "#fff",
               },
             ]}
+            onPress={() => navigation.navigate("CourseDetails")}
           />
         </View>
       )}
-      <FlatList
-        data={data}
-        keyExtractor={(courseClass: IClassDetails) => courseClass.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <ItemSeparator />}
-        columnWrapperStyle={styles.column}
-        horizontal={false}
-        key={2}
-        numColumns={2}
-      />
+      {true && (
+        <FlatList
+          data={data}
+          keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={() => <ItemSeparator />}
+          columnWrapperStyle={styles.column}
+          horizontal={false}
+          key={2}
+          numColumns={2}
+        />
+      )}
     </SafeAreaView>
   );
 }

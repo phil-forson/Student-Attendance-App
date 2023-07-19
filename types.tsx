@@ -79,9 +79,9 @@ export interface ICourseDetails {
 export interface IClassDetails {
   id: string,
   courseName: string,
-  date: Date,
-  startTime: Date,
-  endTime: Date,
+  date: string,
+  startTime: string,
+  endTime: string,
   duration: string
 }
 

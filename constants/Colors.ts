@@ -6,7 +6,7 @@ export default {
     text: "#000",
     background: "#fff",
     customBackground: "#fbfcfd",
-    primaryGrey: "#f8f8fa",
+    primaryGrey: "#f6f5f9",
     secondaryGrey: "#c7c7c7",
     tetiary: "#eae9e9",
     customBorderColor: "#C7C7CD",

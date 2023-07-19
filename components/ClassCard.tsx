@@ -53,9 +53,7 @@ export default function ClassCard({
         >
           <View style={[styles.transBg]}>
             <Text style={[styles.semiBold]}>{courseClass.courseName}</Text>
-            <Text style={[styles.semiBold]}>
-              {convertToDayString(courseClass.date)}
-            </Text>
+            <Text style={[styles.semiBold]}>{courseClass.date}</Text>
           </View>
           <View style={[styles.flexRow, styles.justifyBetween, styles.transBg]}>
             <View
@@ -72,7 +70,7 @@ export default function ClassCard({
                 color="green"
                 size={16}
               />
-              <Text>{convertToHHMM(courseClass.startTime)}</Text>
+              <Text>{courseClass.startTime}</Text>
             </View>
             <View
               style={[
@@ -89,7 +87,7 @@ export default function ClassCard({
                 size={16}
               />
 
-              <Text>{convertToHHMM(courseClass.endTime)}</Text>
+              <Text>{courseClass.endTime}</Text>
             </View>
             <View
               style={[

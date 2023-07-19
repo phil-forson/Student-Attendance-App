@@ -86,6 +86,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10
   },
+  h30: {
+    height: 30
+  },
   separator: {
     height: 10
   },

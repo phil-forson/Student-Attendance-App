@@ -12,16 +12,16 @@ import {
 import { convertToDayString, convertToHHMM } from "../utils/utils";
 import {
   AntDesign,
-  MaterialIcons,
+  Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import Colors from "../constants/Colors";
 
 export default function CourseCard({
-  courseClass,
+  course,
   navigation,
 }: {
-  courseClass: IClassDetails;
+  course: IClassDetails;
   navigation: any;
 }) {
   const theme = useColorScheme();
@@ -44,34 +44,37 @@ export default function CourseCard({
                 ? Colors.dark.secondaryGrey
                 : Colors.light.primaryGrey,
             width: (width - 30) / 2,
-            marginHorizontal: 5
+            marginHorizontal: 5,
           },
         ]}
-        onPress={() => navigation.navigate("CourseDetails")}
+        onPress={() => navigation.navigate("CourseDetails", course)}
       >
         <View
           style={[
             styles.transBg,
             styles.smy,
-            styles.mmx,
-            styles.justifyAround,
             styles.flexColumn,
+            styles.justifyBetween,
             styles.flexOne,
-            { paddingVertical: 10 },
+            { paddingVertical: 30, paddingHorizontal: 15 },
           ]}
         >
           <View style={[styles.transBg]}>
-            <Text style={[styles.semiBold]}>{courseClass.courseName}</Text>
-            <Text style={[styles.semiBold]}></Text>
+            <Text style={[styles.semiBold, styles.largeText]}>
+              {course.courseName}
+            </Text>
+            <Text style={[styles.semiBold]}>Mr. John Doe</Text>
+          </View>
+          <View style={[styles.transBg, styles.flexRow, styles.itemsCenter]}>
+            <Ionicons
+              name="people"
+              size={30}
+              color={theme === "dark" ? "white" : "black"}
+            />
+            <Text style={[{ paddingRight: 10 }]}>127 members</Text>
           </View>
         </View>
       </Pressable>
-      {/* <View
-        style={[
-          { position: "relative", height: 90 ,width: 10, backgroundColor: "red", top: -90, left: 10, zIndex: 1000, borderRadius: 50 },
-      
-        ]}
-      /> */}
     </>
   );
 }

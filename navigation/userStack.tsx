@@ -201,8 +201,22 @@ export default function UserStack() {
     //     options={{ header: () => null }}
     //   />
     // </Stack.Navigator>  );
-    <UserBottomTabNavigator />
-  )
+    <MainStackNavigator />
+  );
+}
+
+const MainStack = createNativeStackNavigator();
+
+function MainStackNavigator() {
+  return (
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Screen name="Main" component={UserBottomTabNavigator} />
+      <MainStack.Screen name="CourseDetails" component={CourseDetails} />
+      <MainStack.Group screenOptions={{ presentation: "modal" }}>
+        <MainStack.Screen name="JoinCourse" component={JoinCourse} />
+      </MainStack.Group>
+    </MainStack.Navigator>
+  );
 }
 
 const handleGoToMembersScreen = () => {};
@@ -228,12 +242,10 @@ function UserBottomTabNavigator() {
     >
       <UserBottomTab.Screen
         name="Home"
-        component={StackNavigator}
+        component={HomeScreen}
         options={{
           header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="home" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <UserBottomTab.Screen
@@ -242,7 +254,7 @@ function UserBottomTabNavigator() {
         options={{
           header: () => null,
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="people-outline" color={color} />
+            <TabBarIcon name="calendar" color={color} />
           ),
         }}
       />
@@ -251,9 +263,7 @@ function UserBottomTabNavigator() {
         component={MyCourses}
         options={{
           header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="book" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
         }}
       />
       <UserBottomTab.Screen
@@ -270,10 +280,7 @@ function UserBottomTabNavigator() {
   );
 }
 
-
 const BottomTab = createBottomTabNavigator<CourseTabParamList>();
-
-
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>["name"];
@@ -305,83 +312,7 @@ function StackNavigator() {
           header: () => null,
         })}
       />
-      <Stack.Group screenOptions={{ presentation: "modal" }}>
-        <Stack.Screen
-          name="JoinCourse"
-          component={JoinCourse}
-          options={({ navigation }: UserStackScreenProps<"JoinCourse">) => ({
-            headerLeft: () => {
-              return (
-                <InvTouchableOpacity onPress={() => navigation.goBack()}>
-                  <MaterialCommunityIcons
-                    name="window-close"
-                    size={25}
-                    color={
-                      theme !== (null || undefined)
-                        ? Colors[theme !== null ? theme : "light"].text
-                        : "white"
-                    }
-                  />
-                </InvTouchableOpacity>
-              );
-            },
-            title: "Join Course",
-            headerTitleStyle: {
-              fontSize: 16,
-            },
-          })}
-        />
-        <Stack.Screen
-          name="CreateCourse"
-          component={CreateCourse}
-          options={({ navigation }: UserStackScreenProps<"CreateCourse">) => ({
-            headerLeft: () => {
-              return (
-                <InvTouchableOpacity onPress={() => navigation.goBack()}>
-                  <MaterialCommunityIcons
-                    name="window-close"
-                    size={25}
-                    color={
-                      theme !== (null || undefined)
-                        ? Colors[theme !== null ? theme : "light"].text
-                        : "white"
-                    }
-                  />
-                </InvTouchableOpacity>
-              );
-            },
-            title: "Create Course",
-            headerTitleStyle: {
-              fontSize: 16,
-            },
-          })}
-        />
-        <Stack.Screen
-          name="CreateClass"
-          component={CreateClass}
-          options={({ navigation }: UserStackScreenProps<"CreateClass">) => ({
-            headerLeft: () => {
-              return (
-                <InvTouchableOpacity onPress={() => navigation.goBack()}>
-                  <MaterialCommunityIcons
-                    name="window-close"
-                    size={25}
-                    color={
-                      theme !== (null || undefined)
-                        ? Colors[theme !== null ? theme : "light"].text
-                        : "white"
-                    }
-                  />
-                </InvTouchableOpacity>
-              );
-            },
-            title: "Create Class",
-            headerTitleStyle: {
-              fontSize: 16,
-            },
-          })}
-        />
-      </Stack.Group>
+
       <Stack.Screen
         name="CourseDetails"
         component={CourseDetails}
