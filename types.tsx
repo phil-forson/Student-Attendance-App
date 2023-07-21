@@ -7,44 +7,55 @@ export type RootStackParamList = {
   Root: undefined;
   PersonalInfo: undefined;
   UniversityDetails: { firstName: string; lastName: string };
-  UserStatus: { firstName: string; lastName: string, university: any };
-  AccountDetails: {firstName: string, lastName: string, university: any, userStatus: string}
+  UserStatus: { firstName: string; lastName: string; university: any };
+  AccountDetails: {
+    firstName: string;
+    lastName: string;
+    university: any;
+    userStatus: string;
+  };
   EmailVerification: any;
   SignUp: undefined;
   LogIn: undefined;
   NotFound: undefined;
   ForgotPassword: undefined;
-  VerifyCode: {firstName: string, lastName: string, university: any, userStatus: string, email: string, password: string};
+  VerifyCode: {
+    firstName: string;
+    lastName: string;
+    university: any;
+    userStatus: string;
+    email: string;
+    password: string;
+  };
   ResetPassword: undefined;
   FacialRecognition: undefined;
 };
 
-export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
-  NativeStackScreenProps<RootStackParamList, Screen>;
-
 export type UserStackParamList = {
-  Root: undefined;
+  Main: undefined;
   JoinCourse: undefined;
   CreateCourse: undefined;
   CreateClass: undefined;
   CourseDetails: undefined;
   ClassDetails: undefined;
-  ClockScreen: undefined;
-  MyCourses: undefined;
 };
+
+export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
+  NativeStackScreenProps<RootStackParamList, Screen>;
 
 export type UserStackScreenProps<Screen extends keyof UserStackParamList> =
   NativeStackScreenProps<UserStackParamList, Screen>;
 
-export type UserTabParamList = {
+export type StudentTabParamList = {
   Home: undefined;
-  Profile: undefined;
-  Courses: undefined;
+  Attendance: undefined;
+  MyCourses: undefined;
+  Settings: undefined
 };
 
-export type UserTabScreenProps<Screen extends keyof UserTabParamList> =
+export type UserTabScreenProps<Screen extends keyof StudentTabParamList> =
   CompositeScreenProps<
-    BottomTabScreenProps<UserTabParamList, Screen>,
+    BottomTabScreenProps<StudentTabParamList, Screen>,
     NativeStackScreenProps<RootStackParamList>
   >;
 
@@ -77,12 +88,12 @@ export interface ICourseDetails {
 }
 
 export interface IClassDetails {
-  id: string,
-  courseName: string,
-  date: string,
-  startTime: string,
-  endTime: string,
-  duration: string
+  id: string;
+  courseName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: string;
 }
 
 export interface UserData {

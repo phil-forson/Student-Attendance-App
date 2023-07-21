@@ -15,8 +15,10 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
-import { auth, database } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import { ref, set } from "firebase/database";
+import { doc, setDoc } from "firebase/firestore";
+import { capitalizeFirstLetter } from "../utils/utils";
 
 export default function AccountDetailsScreen({
   navigation,
@@ -54,8 +56,6 @@ export default function AccountDetailsScreen({
   const emailRegexPattern = `^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+(${preparedDomain.join(
     "|"
   )})$`;
-  const emailRegex = new RegExp(emailRegexPattern);
-  const work = route.params.university.domains;
 
   const handleEmail = (email: string) => {
     setEmail(email);
@@ -76,47 +76,33 @@ export default function AccountDetailsScreen({
     );
   };
 
-  function capitalizeFirstLetter(string: string) {
-		return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
-	}
+
 
   const createAccount = async (data: any) => {
     const { firstName, lastName, university, userStatus, email } = data;
     try {
-      navigation.navigate('EmailVerification')
+      navigation.navigate("EmailVerification");
       setIsLoading(true);
       createUserWithEmailAndPassword(auth, email, pwd)
         .then(async (res) => {
-          console.log(res);
-          console.log("user created");
+
           setIsLoading(false);
-          set(ref(database, 'users/' + res.user.uid), {
+          await setDoc(doc(db, "users", res.user.uid), {
             email: email,
             firstName: capitalizeFirstLetter(firstName),
             lastName: capitalizeFirstLetter(lastName),
             status: userStatus,
             university: university,
-            verified: false
-          })
+            verified: false,
+          });
           await sendEmailVerification(res.user)
             .then((res) => {
-              console.log("res from email verification ", res);
-              // Alert.alert(
-              //   "Email Verification Sent",
-              //   "Email verification sent, go to your email to verify you account and then come back to log in",
-              //   [{
-              //     text: "Ok",
-              //     onPress: () => navigation.navigate("FacialRecognition")
-              //   }]
-              // );
             })
             .catch((err) => {
-              console.log("error from email verification ", err);
             });
         })
         .catch((error) => {
           setIsLoading(false);
-          console.log(error);
           if (
             error.code === "auth/invalid-email" ||
             error.code === "auth/wrong-password"

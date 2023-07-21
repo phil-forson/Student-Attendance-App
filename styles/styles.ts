@@ -1,17 +1,17 @@
 import { Dimensions, StyleSheet } from "react-native";
 
-export const width= Dimensions.get("screen").width
-export const height= Dimensions.get("screen").height
+export const width = Dimensions.get("screen").width;
+export const height = Dimensions.get("screen").height;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   light: {
-    fontWeight: "500"
+    fontWeight: "500",
   },
   semiBold: {
-    fontWeight: "700"
+    fontWeight: "700",
   },
   bold: {
     fontWeight: "bold",
@@ -19,29 +19,32 @@ export const styles = StyleSheet.create({
   my: {
     marginVertical: 10,
   },
+  pr20: {
+    paddingRight: 20
+  },
   fullWidth: {
-    width: width
+    width: width,
   },
   fullHeight: {
-    height: height
+    height: height,
   },
   autoHeight: {
-    height: 'auto'
+    height: "auto",
   },
   textCenter: {
-    textAlign: 'center'
+    textAlign: "center",
   },
   smy: {
     marginVertical: 5,
   },
   smx: {
-    marginHorizontal: 5
+    marginHorizontal: 5,
   },
   mmy: {
-    marginVertical: 10
+    marginVertical: 20,
   },
   mmx: {
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   rounded: {
     borderRadius: 10,
@@ -59,54 +62,54 @@ export const styles = StyleSheet.create({
     height: undefined,
   },
   flexRow: {
-    flexDirection: 'row'
+    flexDirection: "row",
   },
   flexColumn: {
-    flexDirection: 'column'
+    flexDirection: "column",
   },
   justifyBetween: {
-    justifyContent: 'space-between'
+    justifyContent: "space-between",
   },
   justifyCenter: {
-    justifyContent: 'center'
+    justifyContent: "center",
   },
   itemsCenter: {
-    alignItems: 'center'
+    alignItems: "center",
   },
   justifyAround: {
-    justifyContent: 'space-around'
+    justifyContent: "space-around",
   },
-  itemsStart : {
-    alignItems: 'flex-start'
+  itemsStart: {
+    alignItems: "flex-start",
   },
   itemsEnd: {
-    alignItems: 'flex-end'
+    alignItems: "flex-end",
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   h30: {
-    height: 30
+    height: 30,
   },
   separator: {
-    height: 10
+    height: 10,
   },
   largeText: {
-    fontSize: 25
+    fontSize: 25,
   },
   autoWidth: {
-    width: 'auto'
+    width: "auto",
   },
   list: {
-    justifyContent: 'space-around',
-    marginHorizontal: 10
+    justifyContent: "space-around",
+    marginHorizontal: 10,
   },
   column: {
     flexShrink: 1,
   },
   transBg: {
-    backgroundColor: 'transparent'
+    backgroundColor: "transparent",
   },
   bigText: {
     fontSize: 20,
@@ -147,17 +150,17 @@ export const styles = StyleSheet.create({
     marginVertical: 20,
   },
   addCourseIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 15,
-    right: 20
+    right: 20,
   },
   courseDeetsIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 60,
-    right: 20
+    right: 20,
   },
   flexOne: {
-    flex: 1
+    flex: 1,
   },
   itemContainer: {
     padding: 6,

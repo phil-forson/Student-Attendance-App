@@ -427,6 +427,34 @@ export default function CourseDetails({ navigation, route }: any) {
                   },
                 ]}
                 onPress={() => {
+                  navigation.navigate("CreateClass")
+                }}
+              >
+                <Ionicons
+                  name="add-circle"
+                  size={20}
+                  color={theme === "dark" ? "white" : "#424242"}
+                />
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 15,
+                    fontWeight: "600",
+                    color: theme === "dark" ? "#fff" : "#424242",
+                  }}
+                >
+                  Create Class
+                </Text>
+              </InvTouchableOpacity>
+              <InvTouchableOpacity
+                style={[
+                  {
+                    flexDirection: "row",
+                    height: 50,
+                    alignItems: "center",
+                  },
+                ]}
+                onPress={() => {
                   setModalVisible(false);
                   setIsBottomSheetVisible(true);
                   console.log("done");

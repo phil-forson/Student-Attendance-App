@@ -1,5 +1,10 @@
 import { InputField } from "../components/InputField";
-import { View, Text, TouchableOpacity } from "../components/Themed";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+} from "../components/Themed";
 import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -16,6 +21,7 @@ import {
   getDoc,
   getDocs,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -25,9 +31,12 @@ import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import uuid from "react-native-uuid";
 import { CourseContext } from "../contexts/CourseContext";
+import Colors from "../constants/Colors";
+import StyledInput from "../components/StyledInput";
+import { styles } from "../styles/styles";
 
 export default function CreateCourse({ navigation }: any) {
-  const { userDataPromise } = useUser();
+  // const { userDataPromise } = useUser();
   const theme = useColorScheme();
 
   const { enrolledCourses, setEnrolledCoursesData } = useContext(CourseContext);
@@ -73,7 +82,9 @@ export default function CreateCourse({ navigation }: any) {
         );
       },
     });
-  }, [courseTitle, courseCode, isLoading]);
+    console.log("yea");
+    console.log(navigation);
+  }, [courseTitle, courseCode, isLoading, navigation]);
 
   useEffect(() => {
     console.log("places changed to ", places);
@@ -129,252 +140,142 @@ export default function CreateCourse({ navigation }: any) {
       setIsLoading(false);
       return;
     }
-    try {
-      await userDataPromise
-        .then(async (res: any) => {
-          const courseLinkCode = generateCourseCode();
-          const coursesCollectionRef = collection(db, "courses");
+    // try {
+    //   await userDataPromise
+    //     .then(async (res: any) => {
+    //       const courseLinkCode = generateCourseCode();
+    //       const coursesDocRef = doc(db, "courses", uuid.v4().toString());
 
-          await addDoc(coursesCollectionRef, {
-            uid: uuid.v4(),
-            courseTitle: courseTitle,
-            courseCode: courseCode,
-            courseLinkCode: courseLinkCode,
-            creatorId: res?.uid,
-            lecturerName: res?.firstName + " " + res?.lastName,
-            enrolledStudents: [],
-            teachers: [],
-            courseClasses: [],
-          })
-            .then(async (response: any) => {
-              console.log("create course response ", response);
-              const queryRef = query(
-                collection(db, "users"),
-                where("uid", "==", res.uid)
-              );
-              await getDocs(queryRef)
-                .then(async (userSnapshot) => {
-                  console.log(userSnapshot, "usersnapshot");
-                  const userCollectionRef = collection(db, "users");
-                  if (userSnapshot.docs[0].exists()) {
-                    const userData = userSnapshot.docs[0].data();
-                    const enrolledCourses = userData?.enrolledCourses || [];
-                    enrolledCourses.push(response.id);
+    //       await setDoc(coursesDocRef, {
+    //         uid: uuid.v4(),
+    //         courseTitle: courseTitle,
+    //         courseCode: courseCode,
+    //         courseLinkCode: courseLinkCode,
+    //         creatorId: res?.uid,
+    //         lecturerName: res?.firstName + " " + res?.lastName,
+    //         enrolledStudents: [],
+    //         teachers: [],
+    //         courseClasses: [],
+    //       })
+    //         .then(async (response: any) => {
+    //           console.log("create course response ", response);
+    //           const queryRef = query(
+    //             collection(db, "users"),
+    //             where("uid", "==", res.uid)
+    //           );
+    //           await getDocs(queryRef)
+    //             .then(async (userSnapshot) => {
+    //               console.log(userSnapshot, "usersnapshot");
+    //               const userCollectionRef = collection(db, "users");
+    //               if (userSnapshot.docs[0].exists()) {
+    //                 const userData = userSnapshot.docs[0].data();
+    //                 const enrolledCourses = userData?.enrolledCourses || [];
+    //                 enrolledCourses.push(response.id);
 
-                    const userDocRef = doc(
-                      userCollectionRef,
-                      userSnapshot.docs[0].id
-                    );
-                    await updateDoc(userDocRef, { enrolledCourses })
-                      .then((res) => {
-                        const enrolledCoursesPromises = enrolledCourses.map(
-                          async (courseId: string) => {
-                            const courseDoc = doc(db, "courses", courseId);
-                            const courseSnapshot = await getDoc(courseDoc);
-                            return courseSnapshot.data();
-                          }
-                        );
-                        Promise.all(enrolledCoursesPromises).then(
-                          async (enrolledCourses: any) => {
-                            console.log("enrolled courses", enrolledCourses);
-                            setEnrolledCoursesData(enrolledCourses);
-                            const courseDoc = doc(db, "courses", response.id);
-                            await getDoc(courseDoc)
-                              .then((res) => {
-                                console.log("yes o");
-                                navigation.navigate("CourseDetails", {
-                                  screen: "Classes",
-                                  params: res.data(),
-                                });
-                                setTimeout(() => {
-                                  navigation.pop();
-                                  console.log("doneeee ");
-                                }, 4000);
-                                setIsLoading(false);
-                              })
-                              .catch((error) => {
-                                console.log(error);
-                                console.log("say error");
-                                setIsLoading(false);
-                              });
-                          }
-                        );
-                      })
-                      .catch((e) => {
-                        setIsLoading(false);
-                        console.log(e);
-                        Alert.alert("Error updating doc, try again later");
-                      });
-                  }
-                })
-                .catch((error) => {
-                  setIsLoading(false);
-                  Alert.alert("Something unexpected happened");
-                  console.log(error);
-                });
-            })
-            .catch((e) => {
-              Alert.alert("Something unexpected happened, try again later");
-              setIsLoading(false);
-              console.log(e);
-            });
-        })
-        .catch((e) =>
-          Alert.alert("Something unexpected happeneddd. Try again later")
-        );
-    } catch (e) {
-      setIsLoading(false);
-      Alert.alert("Something unexpected happenedd. Try again later.");
-    }
+    //                 const userDocRef = doc(
+    //                   userCollectionRef,
+    //                   userSnapshot.docs[0].id
+    //                 );
+    //                 await updateDoc(userDocRef, { enrolledCourses })
+    //                   .then((res) => {
+    //                     const enrolledCoursesPromises = enrolledCourses.map(
+    //                       async (courseId: string) => {
+    //                         const courseDoc = doc(db, "courses", courseId);
+    //                         const courseSnapshot = await getDoc(courseDoc);
+    //                         return courseSnapshot.data();
+    //                       }
+    //                     );
+    //                     Promise.all(enrolledCoursesPromises).then(
+    //                       async (enrolledCourses: any) => {
+    //                         console.log("enrolled courses", enrolledCourses);
+    //                         setEnrolledCoursesData(enrolledCourses);
+    //                         const courseDoc = doc(db, "courses", response.id);
+    //                         await getDoc(courseDoc)
+    //                           .then((res) => {
+    //                             console.log("yes o");
+    //                             navigation.navigate("CourseDetails", {
+    //                               screen: "Classes",
+    //                               params: res.data(),
+    //                             });
+    //                             setTimeout(() => {
+    //                               navigation.pop();
+    //                               console.log("doneeee ");
+    //                             }, 4000);
+    //                             setIsLoading(false);
+    //                           })
+    //                           .catch((error) => {
+    //                             console.log(error);
+    //                             console.log("say error");
+    //                             setIsLoading(false);
+    //                           });
+    //                       }
+    //                     );
+    //                   })
+    //                   .catch((e) => {
+    //                     setIsLoading(false);
+    //                     console.log(e);
+    //                     Alert.alert("Error updating doc, try again later");
+    //                   });
+    //               }
+    //             })
+    //             .catch((error) => {
+    //               setIsLoading(false);
+    //               Alert.alert("Something unexpected happened");
+    //               console.log(error);
+    //             });
+    //         })
+    //         .catch((e) => {
+    //           Alert.alert("Something unexpected happened, try again later");
+    //           setIsLoading(false);
+    //           console.log(e);
+    //         });
+    //     })
+    //     .catch((e) =>
+    //       Alert.alert("Something unexpected happeneddd. Try again later")
+    //     );
+    // } catch (e) {
+    //   setIsLoading(false);
+    //   Alert.alert("Something unexpected happenedd. Try again later.");
+    // }
   };
 
   useEffect(() => {
     console.log("class location changed to ", classLocation);
   }, [classLocation]);
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>
-        Enter the following details to create a course
-      </Text>
-      <View style={styles.inputContainer}>
-        <InputField
-          keyboardType="default"
-          secure={false}
-          placeholder="Course Title"
-          placeholderTextColor="gray"
-          value={courseTitle}
-          setValue={handleCourseTitleChange}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <InputField
-          keyboardType="default"
-          secure={false}
-          placeholder="Course Code"
-          placeholderTextColor="gray"
-          value={courseCode}
-          setValue={handleCourseCodeChange}
-        />
-      </View>
-      {/* <View style={[styles.inputContainer, styles.marginVertical]}>
-        <InputField
-          placeholder="Class Location"
-          placeholderTextColor="gray"
-          secure={false}
-          keyboardType="default"
-          value={classLocationSearch}
-          setValue={handleClassLocChange}
-        />
-        {!(isPlacesLoading || isItemSelected) && (
-          <FlatList
-            data={places}
-            renderItem={({ item }: any) => (
-              <TouchableOpacity
-                onPress={() => {
-                  setClassLocation(item);
-                  setClassLocationSearch(
-                    item.name.split(",").slice(0, 2).join(",")
-                  );
-                  setIsItemSelected(true);
-                }}
-                style={[
-                  {
-                    backgroundColor: theme === "light" ? "#fff" : "#121212",
-                    padding: 10,
-                  },
-                ]}
-              >
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item: any) => item.id.toString()}
+    <SafeAreaView
+      style={styles.container}
+      lightColor={Colors.light.background}
+      darkColor={Colors.dark.primaryGrey}
+    >
+      <View style={[styles.contentContainer, styles.transBg]}>
+        <View style={[styles.smy, styles.transBg]}>
+          <Text style={[styles.bold, styles.largeText]}>Create Course</Text>
+          <Text style={[styles.my]}>Enter the details of the course you would like to create</Text>
+        </View>
+        <View style={styles.mmy}>
+          <StyledInput
+            value={courseTitle}
+            setValue={handleCourseTitleChange}
+            secure={false}
+            keyboardType="default"
+            placeholder="Course Title"
+            placeholderTextColor="gray"
+            valid={courseTitle.length > 1}
           />
-        )}
-        {isPlacesLoading && (
-          <View
-            style={[
-              {
-                height: 80,
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 8,
-              },
-            ]}
-          >
-            <Text>Loading...</Text>
-          </View>
-        )}
+        </View>
+        <View style={styles.mmy}>
+          <StyledInput
+            value={courseCode}
+            setValue={handleCourseCodeChange}
+            secure={false}
+            keyboardType="default"
+            placeholder="Course Code"
+            placeholderTextColor="gray"
+            valid={courseCode.length > 1}
+          />
+        </View>
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}></View> */}
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  header: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  inputContainer: {
-    marginTop: 30,
-  },
-  marginVertical: {
-    marginVertical: 0,
-  },
-  dropdown: {
-    height: 50,
-    borderColor: "gray",
-    borderBottomWidth: 0.5,
-    marginBottom: 10,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: "absolute",
-    backgroundColor: "red",
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-  },
-  placeholderStyle: {
-    fontSize: 14,
-    color: "gray",
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-    color: "white",
-  },
-  itemContainerStyle: {
-    borderWidth: 1,
-    color: "white",
-  },
-  containerStyle: {
-    backgroundColor: "#000",
-  },
-  itemTextStyle: {
-    color: "white",
-    padding: 4,
-  },
-  option: {
-    padding: 10,
-    borderBottomWidth: 1,
-    color: "#000",
-    borderBottomColor: "gray",
-  },
-});

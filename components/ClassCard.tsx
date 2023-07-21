@@ -38,7 +38,7 @@ export default function ClassCard({
                 : Colors.light.primaryGrey,
           },
         ]}
-        onPress={() => navigation.navigate("CourseDetails", courseClass)}
+        onPress={() => navigation.navigate("ClassDetails", courseClass)}
       >
         <View
           style={[

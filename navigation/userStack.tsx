@@ -4,13 +4,9 @@ import { useColorScheme } from "react-native";
 import { HomeScreen } from "../screens/HomeScreen";
 import {
   CourseTabParamList,
-  CourseTabScreenProps,
-  ICourseDetails,
+
   UserDrawerParamList,
   UserStackParamList,
-  UserStackScreenProps,
-  UserTabParamList,
-  UserTabScreenProps,
 } from "../types";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -30,7 +26,12 @@ import {
 } from "@expo/vector-icons";
 import SettingsScreen from "../screens/SettingsScreen";
 import JoinCourse from "../screens/JoinCourse";
-import { InvTouchableOpacity, TouchableOpacity } from "../components/Themed";
+import {
+  InvTouchableOpacity,
+  Text,
+  TouchableOpacity,
+  View,
+} from "../components/Themed";
 import CreateCourse from "../screens/CreateCourse";
 import CourseDetails from "../screens/CourseDetails";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -50,170 +51,22 @@ export default function UserStack() {
   const theme = useColorScheme();
 
   return (
-    // <Drawer.Navigator
-    //   screenOptions={{
-    //     headerShown: false,
-    //   }}
-    //   drawerContent={(props) => <CustomDrawer {...props} />}
-    //   useLegacyImplementation={false}
-    // >
-    //   <Drawer.Screen
-    //     name="Root"
-    //     component={StackNavigator}
-    //     options={{
-    //       drawerLabel: () => null,
-    //     }}
-    //   />
-    //   <Drawer.Screen
-    //     name="Profile"
-    //     component={ProfileScreen}
-    //     options={{
-    //       drawerIcon: () => (
-    //         <AntDesign name="hourglass" color="#008be3" size={20} />
-    //       ),
-    //       drawerLabel: "Upcoming classes",
-    //       drawerLabelStyle: {
-    //         color: theme === "dark" ? "#fff" : "#737171",
-    //       },
-    //     }}
-    //   />
-    //   <Drawer.Screen
-    //     name="Settings"
-    //     component={SettingsScreen}
-    //     options={{
-    //       drawerIcon: () => (
-    //         <AntDesign name="setting" color="#008be3" size={20} />
-    //       ),
-    //       drawerLabel: "Settings",
-    //       drawerLabelStyle: {
-    //         color: theme === "dark" ? "#fff" : "#737171",
-    //       },
-    //     }}
-    //   />
-    // </Drawer.Navigator>
-    // <Stack.Navigator
-    //   screenOptions={{
-    //     gestureEnabled: true,
-    //     gestureDirection: "horizontal",
-    //     headerLeft: () => {
-    //       return <Button />;
-    //     },
-    //   }}
-    //   initialRouteName="Home"
-    // >
-    //   <Stack.Screen
-    //     name="Home"
-    //     component={HomeScreen}
-    //     options={(navigation: UserStackScreenProps<"Home">) => ({
-    //       header: () => null,
-    //     })}
-    //   />
-    //   <Stack.Group screenOptions={{ presentation: "modal" }}>
-    //     <Stack.Screen
-    //       name="JoinCourse"
-    //       component={JoinCourse}
-    //       options={({ navigation }: UserStackScreenProps<"JoinCourse">) => ({
-    //         headerLeft: () => {
-    //           return (
-    //             <InvTouchableOpacity onPress={() => navigation.goBack()}>
-    //               <MaterialCommunityIcons
-    //                 name="window-close"
-    //                 size={25}
-    //                 color={
-    //                   theme !== (null || undefined)
-    //                     ? Colors[theme !== null ? theme : "light"].text
-    //                     : "white"
-    //                 }
-    //               />
-    //             </InvTouchableOpacity>
-    //           );
-    //         },
-    //         title: "Join Course",
-    //         headerTitleStyle: {
-    //           fontSize: 16,
-    //         },
-    //       })}
-    //     />
-    //     <Stack.Screen
-    //       name="CreateCourse"
-    //       component={CreateCourse}
-    //       options={({ navigation }: UserStackScreenProps<"CreateCourse">) => ({
-    //         headerLeft: () => {
-    //           return (
-    //             <InvTouchableOpacity onPress={() => navigation.goBack()}>
-    //               <MaterialCommunityIcons
-    //                 name="window-close"
-    //                 size={25}
-    //                 color={
-    //                   theme !== (null || undefined)
-    //                     ? Colors[theme !== null ? theme : "light"].text
-    //                     : "white"
-    //                 }
-    //               />
-    //             </InvTouchableOpacity>
-    //           );
-    //         },
-    //         title: "Create Course",
-    //         headerTitleStyle: {
-    //           fontSize: 16,
-    //         },
-    //       })}
-    //     />
-    //     <Stack.Screen
-    //       name="CreateClass"
-    //       component={CreateClass}
-    //       options={({ navigation }: UserStackScreenProps<"CreateClass">) => ({
-    //         headerLeft: () => {
-    //           return (
-    //             <InvTouchableOpacity onPress={() => navigation.goBack()}>
-    //               <MaterialCommunityIcons
-    //                 name="window-close"
-    //                 size={25}
-    //                 color={
-    //                   theme !== (null || undefined)
-    //                     ? Colors[theme !== null ? theme : "light"].text
-    //                     : "white"
-    //                 }
-    //               />
-    //             </InvTouchableOpacity>
-    //           );
-    //         },
-    //         title: "Create Class",
-    //         headerTitleStyle: {
-    //           fontSize: 16,
-    //         },
-    //       })}
-    //     />
-    //   </Stack.Group>
-    //   <Stack.Screen
-    //     name="CourseDetails"
-    //     component={BottomTabNavigator}
-    //     options={{ header: () => null }}
-    //   />
-    //   <Stack.Screen
-    //     name="ClassDetails"
-    //     component={ClassDetails}
-    //     options={{ header: () => null }}
-    //   />
-    //   <Stack.Screen
-    //     name="ClockScreen"
-    //     component={ClockInScreen}
-    //     options={{ header: () => null }}
-    //   />
-    // </Stack.Navigator>  );
     <MainStackNavigator />
   );
 }
 
-const MainStack = createNativeStackNavigator();
+const MainStack = createNativeStackNavigator<UserStackParamList>();
 
 function MainStackNavigator() {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="Main" component={UserBottomTabNavigator} />
       <MainStack.Screen name="CourseDetails" component={CourseDetails} />
+      <MainStack.Screen name="ClassDetails" component={ClassDetails} />
       <MainStack.Group screenOptions={{ presentation: "modal" }}>
         <MainStack.Screen name="JoinCourse" component={JoinCourse} />
+        <MainStack.Screen name="CreateCourse" component={CreateCourse} />
+        <MainStack.Screen name="CreateClass" component={CreateClass} />
       </MainStack.Group>
     </MainStack.Navigator>
   );
@@ -289,7 +142,7 @@ function TabBarIcon(props: {
   return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
 }
 
-const Stack = createNativeStackNavigator<UserStackParamList>();
+const Stack = createNativeStackNavigator();
 
 function StackNavigator() {
   const theme = useColorScheme();
@@ -308,9 +161,9 @@ function StackNavigator() {
       <Stack.Screen
         name="Root"
         component={HomeScreen}
-        options={(navigation: UserStackScreenProps<"Root">) => ({
+        options={{
           header: () => null,
-        })}
+        }}
       />
 
       <Stack.Screen

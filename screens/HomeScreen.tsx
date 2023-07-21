@@ -313,7 +313,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 },
               ]}
               onPress={() => {
-                navigation.navigate("CourseDetails");
+                navigation.navigate("JoinCourse");
                 setModalVisible(false);
               }}
             >
@@ -331,6 +331,35 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 }}
               >
                 Join Course
+              </Text>
+            </InvTouchableOpacity>
+            <InvTouchableOpacity
+              style={[
+                {
+                  flexDirection: "row",
+                  height: 50,
+                  alignItems: "center",
+                },
+              ]}
+              onPress={() => {
+                navigation.navigate("CreateCourse");
+                setModalVisible(false);
+              }}
+            >
+              <AntDesign
+                name="addusergroup"
+                size={20}
+                color={theme === "dark" ? "white" : "#424242"}
+              />
+              <Text
+                style={{
+                  marginLeft: 15,
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: theme === "dark" ? "#fff" : "#424242",
+                }}
+              >
+                Create Course
               </Text>
             </InvTouchableOpacity>
           </View>
