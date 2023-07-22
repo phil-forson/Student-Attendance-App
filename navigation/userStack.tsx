@@ -4,7 +4,6 @@ import { useColorScheme } from "react-native";
 import { HomeScreen } from "../screens/HomeScreen";
 import {
   CourseTabParamList,
-
   UserDrawerParamList,
   UserStackParamList,
 } from "../types";
@@ -50,20 +49,41 @@ const Drawer = createDrawerNavigator<UserDrawerParamList>();
 export default function UserStack() {
   const theme = useColorScheme();
 
-  return (
-    <MainStackNavigator />
-  );
+  return <MainStackNavigator />;
 }
 
 const MainStack = createNativeStackNavigator<UserStackParamList>();
 
 function MainStackNavigator() {
+  const theme = useColorScheme();
   return (
-    <MainStack.Navigator screenOptions={{ headerShown: false }}>
-      <MainStack.Screen name="Main" component={UserBottomTabNavigator} />
-      <MainStack.Screen name="CourseDetails" component={CourseDetails} />
-      <MainStack.Screen name="ClassDetails" component={ClassDetails} />
-      <MainStack.Group screenOptions={{ presentation: "modal" }}>
+    <MainStack.Navigator>
+      <MainStack.Group screenOptions={{ headerShown: false }}>
+        <MainStack.Screen name="Main" component={UserBottomTabNavigator} />
+        <MainStack.Screen name="CourseDetails" component={CourseDetails} />
+        <MainStack.Screen name="ClassDetails" component={ClassDetails} />
+      </MainStack.Group>
+      <MainStack.Group
+        screenOptions={({ navigation }) => ({
+          presentation: "modal",
+          headerLeft: () => {
+            return (
+              <TouchableOpacity
+                lightColor="#fff"
+                darkColor="#121212"
+                onPress={() => navigation.goBack()}
+                style={{}}
+              >
+                <AntDesign
+                  name="close"
+                  size={20}
+                  color={Colors.danger}
+                />
+              </TouchableOpacity>
+            );
+          },
+        })}
+      >
         <MainStack.Screen name="JoinCourse" component={JoinCourse} />
         <MainStack.Screen name="CreateCourse" component={CreateCourse} />
         <MainStack.Screen name="CreateClass" component={CreateClass} />
