@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ListRenderItem,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import {
@@ -41,8 +42,12 @@ import BottomSheet, {
 import FullWidthButton from "../components/FullWidthButton";
 import ClassCard from "../components/ClassCard";
 import { convertToDayString, convertToHHMM } from "../utils/utils";
-import { IClassDetails } from "../types";
+import { IClassDetails, UserData } from "../types";
 import Colors from "../constants/Colors";
+import useUser from "../hooks/useUser";
+import Loading from "../components/Loading";
+import { UserContext } from "../contexts/UserContext";
+import GetStarted from "../components/GetStarted";
 
 var width = Dimensions.get("window").width;
 
@@ -84,16 +89,17 @@ const data: IClassDetails[] = [
 export const HomeScreen = ({ navigation, route }: any) => {
   const theme = useColorScheme();
 
+
+
+  const { userData, isLoading: isUserDataLoading } = useUser() 
+
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
 
   const [isStudent, setIsStudent] = useState<boolean>(true);
 
   const onRefresh = useCallback(() => {}, []);
 
-  const createCourse = () => {
-    setModalVisible(false);
-    setTimeout(() => navigation.navigate("CreateCourse"), 800);
-  };
+
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -116,6 +122,12 @@ export const HomeScreen = ({ navigation, route }: any) => {
     date: convertToHHMM(new Date(Date.now())),
     duration: "7h 50m",
   };
+
+
+
+  if (isUserDataLoading) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -160,7 +172,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 darkColor={Colors.dark.text}
                 style={[styles.smy, styles.semiBold, styles.bigText]}
               >
-                Philemon Forson
+                {userData?.firstName}
               </Text>
             </View>
           </View>
@@ -189,69 +201,40 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 </View>
               </View>
             )}
-            {false && (
-              <View
-                style={[
-                  styles.justifyBetween,
-                  styles.my,
-                  {
-                    marginVertical: 40,
-                    marginHorizontal: 30,
-                  },
-                ]}
-                darkColor="#121212"
-              >
-                <Image
-                  source={require("../assets/course.png")}
-                  style={[
-                    { resizeMode: "contain", width: "auto", height: 250 },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.textCenter,
-                    styles.semiBold,
-                    styles.mediumText,
-                    styles.my,
-                  ]}
-                >
-                  Join a course to get started
-                </Text>
-                <FullWidthButton
-                  text={"Join Course"}
-                  style={[
-                    styles.fullWidth,
-                    {
-                      backgroundColor: theme === "dark" ? "#121212" : "#fff",
-                    },
-                  ]}
-                />
-              </View>
+            {(userData?.status === "Student" && !userData?.enrolledCourses?.length) || (userData?.status==="Teacher" && !userData?.createdCourses?.length) && (
+              <GetStarted userStatus={userData?.status} navigation={navigation}/>
             )}
 
-            <Text style={[styles.bold, styles.smy]}>Log Files</Text>
+            {false && (
+              <>
+                <Text style={[styles.bold, styles.smy]}>Log Files</Text>
 
-            <View
-              style={[styles.flexRow, styles.justifyBetween]}
-              darkColor={Colors.dark.secondaryGrey}
-            >
-              <TouchableOpacity style={[{ height: 50 }]}></TouchableOpacity>
-              <TouchableOpacity></TouchableOpacity>
-            </View>
-
+                <View
+                  style={[styles.flexRow, styles.justifyBetween]}
+                  darkColor={Colors.dark.secondaryGrey}
+                >
+                  <TouchableOpacity style={[{ height: 50 }]}></TouchableOpacity>
+                  <TouchableOpacity></TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+          {false && (
             <Text style={[styles.bold, styles.my, styles.transBg]}>
               Upcoming Classes
             </Text>
-          </View>
-          <BottomSheetFlatList
-            data={data}
-            keyExtractor={(courseClass: IClassDetails) => courseClass.id}
-            renderItem={renderItem}
-            ItemSeparatorComponent={() => (
-              <CardSeparator viewStyle={[styles.transBg]} />
-            )}
-            contentContainerStyle={[styles.contentContainer, styles.transBg]}
-          />
+          )}
+          {false && (
+            <BottomSheetFlatList
+              data={data}
+              keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+              renderItem={renderItem}
+              ItemSeparatorComponent={() => (
+                <CardSeparator viewStyle={[styles.transBg]} />
+              )}
+              contentContainerStyle={[styles.contentContainer, styles.transBg]}
+            />
+          )}
           <InvTouchableOpacity
             style={[
               styles.addCourseIcon,
@@ -261,7 +244,13 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 shadowColor: theme === "dark" ? "#0a2e3d" : "#000",
               },
             ]}
-            onPress={() => setModalVisible(true)}
+            onPress={() => {
+              navigation.navigate(
+                userData.status === "Student"
+                  ? "JoinCourse"
+                  : "CreateCourse"
+              );
+            }}
             darkColor="#0c0c0c"
           >
             <AntDesign
@@ -273,98 +262,6 @@ export const HomeScreen = ({ navigation, route }: any) => {
           </InvTouchableOpacity>
         </BottomSheet>
       </SafeAreaView>
-      {isModalVisible && (
-        <Modal
-          isVisible={isModalVisible}
-          hasBackdrop={true}
-          backdropColor={theme === "dark" ? "#000" : "#121212"}
-          backdropOpacity={0.5}
-          onBackdropPress={() => setModalVisible(false)}
-          style={[
-            {
-              padding: 0,
-              margin: 0,
-            },
-          ]}
-        >
-          <View
-            style={[
-              {
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
-                overflow: "hidden",
-                height: "auto",
-                paddingHorizontal: 20,
-                paddingTop: 10,
-                paddingBottom: Platform.OS === "ios" ? 60 : 20,
-              },
-            ]}
-          >
-            <InvTouchableOpacity
-              style={[
-                {
-                  flexDirection: "row",
-                  height: 50,
-                  alignItems: "center",
-                },
-              ]}
-              onPress={() => {
-                navigation.navigate("JoinCourse");
-                setModalVisible(false);
-              }}
-            >
-              <AntDesign
-                name="addusergroup"
-                size={20}
-                color={theme === "dark" ? "white" : "#424242"}
-              />
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 15,
-                  fontWeight: "600",
-                  color: theme === "dark" ? "#fff" : "#424242",
-                }}
-              >
-                Join Course
-              </Text>
-            </InvTouchableOpacity>
-            <InvTouchableOpacity
-              style={[
-                {
-                  flexDirection: "row",
-                  height: 50,
-                  alignItems: "center",
-                },
-              ]}
-              onPress={() => {
-                navigation.navigate("CreateCourse");
-                setModalVisible(false);
-              }}
-            >
-              <AntDesign
-                name="addusergroup"
-                size={20}
-                color={theme === "dark" ? "white" : "#424242"}
-              />
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 15,
-                  fontWeight: "600",
-                  color: theme === "dark" ? "#fff" : "#424242",
-                }}
-              >
-                Create Course
-              </Text>
-            </InvTouchableOpacity>
-          </View>
-        </Modal>
-      )}
       <StatusBar style={"auto"} />
     </>
   );

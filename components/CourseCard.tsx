@@ -1,6 +1,6 @@
 import useColorScheme from "../hooks/useColorScheme";
 import { styles } from "../styles/styles";
-import { IClassDetails } from "../types";
+import { IClassDetails, ICourse } from "../types";
 import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
 import React, { useEffect } from "react";
 import {
@@ -9,7 +9,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
-import { convertToDayString, convertToHHMM } from "../utils/utils";
+import { convertToDayString, convertToHHMM, truncateTextWithEllipsis } from "../utils/utils";
 import {
   AntDesign,
   Ionicons,
@@ -21,7 +21,7 @@ export default function CourseCard({
   course,
   navigation,
 }: {
-  course: IClassDetails;
+  course: ICourse;
   navigation: any;
 }) {
   const theme = useColorScheme();
@@ -29,12 +29,12 @@ export default function CourseCard({
 
   useEffect(() => {
     console.log("width ", width);
+    console.log('course ', course)
   }, []);
   return (
     <>
       <Pressable
         style={[
-          ,
           {
             height: 180,
             borderRadius: 10,
@@ -61,9 +61,9 @@ export default function CourseCard({
         >
           <View style={[styles.transBg]}>
             <Text style={[styles.semiBold, styles.largeText]}>
-              {course.courseName}
+              {truncateTextWithEllipsis(course.courseTitle, 17)}
             </Text>
-            <Text style={[styles.semiBold]}>Mr. John Doe</Text>
+            <Text style={[styles.semiBold]}>{course.lecturerName}</Text>
           </View>
           <View style={[styles.transBg, styles.flexRow, styles.itemsCenter]}>
             <Ionicons
@@ -71,7 +71,7 @@ export default function CourseCard({
               size={30}
               color={theme === "dark" ? "white" : "black"}
             />
-            <Text style={[{ paddingRight: 10 }]}>127 members</Text>
+            <Text style={[{ paddingRight: 10 }]}>{course.enrolledStudents.length} students</Text>
           </View>
         </View>
       </Pressable>

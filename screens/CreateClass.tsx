@@ -38,6 +38,7 @@ import { db } from "../config/firebase";
 import uuid from "react-native-uuid";
 import { ClassContext } from "../contexts/ClassContext";
 import { StretchOutY } from "react-native-reanimated";
+import StyledInput from "../components/StyledInput";
 
 export default function CreateClass({ navigation }: any) {
   const [classTitle, setClassTitle] = useState("");
@@ -202,84 +203,7 @@ export default function CreateClass({ navigation }: any) {
       setIsLoading(false);
       return;
     }
-    try {
-      await addDoc(collection(db, "classes"), {
-        courseId: course.uid,
-        className: classTitle,
-        classId: uuid.v4(),
-        classLocation: classLocation,
-        classDate: classDate,
-        classStartTime: classStartTime,
-        classEndTime: classEndTime,
-        classStatus: "upcoming",
-      })
-        .catch((error) => {
-          setIsLoading(false);
-          console.log(error);
-        })
-        .then(async (res: any) => {
-          const classId = res.id;
-
-          const courseQuery = query(
-            collection(db, "courses"),
-            where("uid", "==", course.uid)
-          );
-          await getDocs(courseQuery)
-            .then(async (snapshot) => {
-              const courseDocRef = snapshot.docs[0].ref;
-              const courseDocData = snapshot.docs[0].data();
-
-              const courseClasses = courseDocData?.courseClasses || [];
-              courseClasses.push(classId);
-              setCourseClassesIds(courseClasses);
-              console.log("course classes ", courseClasses);
-              await updateDoc(courseDocRef, {
-                courseClasses: courseClasses,
-              })
-                .then((res) => {
-                  console.log("response after updating ", res);
-                  const courseClassesPromises = courseClasses.map(
-                    async (classId: string) => {
-                      const classDoc = doc(db, "classes", classId);
-                      const classSnapshot = await getDoc(classDoc);
-                      return classSnapshot.data();
-                    }
-                  );
-
-                  Promise.all(courseClassesPromises)
-                    .then(async (courseClasses: any) => {
-                      console.log("enrolled courses", courseClasses);
-                      setCourseClassesData(courseClasses);
-                      // console.log("res from then ", res);
-                      const userData = snapshot.docs[0].data();
-                      // userData?.courseClasses.append(classId);
-                      userData.courseClasses = courseClassesIds;
-                      console.log("user data... ", userData?.courseClasses);
-                      navigation.navigate("CourseDetails", {
-                        screen: "Classes",
-                        params: snapshot.docs[0].data(),
-                      });
-                      setIsLoading(false);
-                    })
-                    .then((res) => {})
-                    .catch((error) => {
-                      console.log(error);
-                      setIsLoading(false);
-                    });
-                })
-                .catch((error) => {
-                  console.log(error);
-                  setIsLoading(false);
-                });
-            })
-            .catch((error) => {
-              console.log(error);
-              setIsLoading(false);
-            });
-        });
-    } catch (error) {
-      console.log(error);
-    }
+    
     // navigation.goBack();
   };
 
@@ -357,25 +281,7 @@ export default function CreateClass({ navigation }: any) {
     classEndTimeError,
   ]);
 
-  useEffect(() => {
-    if (classStartTime) {
-      const newDate = new Date(classDate || Date.now());
-      newDate.setHours(classStartTime.getHours());
-      newDate.setMinutes(classStartTime.getMinutes());
-      setClassStartTime(newDate);
-    }
-    if (classEndTime) {
-      const newDate = new Date(classDate || Date.now());
-      newDate.setHours(classEndTime.getHours());
-      newDate.setMinutes(classEndTime.getMinutes());
-      setClassEndTime(newDate);
-    }
-  }, [classDate]);
-  useEffect(() => {
-    console.log("class date changed to ", classDate);
-    console.log("class start time changed to ", classStartTime);
-    console.log("class end time changed to ", classEndTime);
-  }, [classDate, classStartTime, classEndTime]);
+
 
   return (
     <View style={styles.container}>
@@ -383,7 +289,7 @@ export default function CreateClass({ navigation }: any) {
         Enter the following details to create a class
       </Text>
       <View style={styles.inputContainer}>
-        <InputField
+        <StyledInput
           keyboardType="default"
           secure={false}
           placeholder="Class Title eg. Lecture 1"
@@ -393,7 +299,7 @@ export default function CreateClass({ navigation }: any) {
         />
       </View>
       <View style={[styles.inputContainer, styles.marginVertical]}>
-        <InputField
+        <StyledInput
           placeholder="Class Location"
           placeholderTextColor="gray"
           secure={false}

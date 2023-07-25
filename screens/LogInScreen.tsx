@@ -81,6 +81,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
       } else if (error.code === "auth/email-already-in-use") {
         Alert.alert("An account with this email already exists");
       } else {
+        console.log(error)
         Alert.alert("There was a problem with your request");
       }
       setIsLoading(false);

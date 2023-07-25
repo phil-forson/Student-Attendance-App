@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { UserContext } from "../contexts/UserContext";
 
 export default function useAuth() {
   const [user, setUser] = useState<User | undefined>();
   const [isUserLoading, setIsUserLoading] = useState(false);
+  const { userLoggedIn, setUserLoggedIn } = useContext(UserContext);
 
   useEffect(() => {
     let isMounted = true;
@@ -18,6 +20,9 @@ export default function useAuth() {
             if (isMounted) {
               setUser(user);
               setIsUserLoading(false);
+              if (user.emailVerified) {
+                setUserLoggedIn(true);
+              }
             }
           } else {
             if (isMounted) {

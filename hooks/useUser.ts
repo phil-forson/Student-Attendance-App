@@ -1,72 +1,58 @@
 import React, { useEffect, useState } from "react";
 import useAuth from "./useAuth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  DocumentData,
+  Unsubscribe,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import { UserData } from "../types";
 
 export default function useUser() {
   const { authPromise } = useAuth();
-  const [userData, setUserData] = useState<UserData>({});
+  const [userData, setUserData] = useState<any>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const getUserData = async () => {
-    setIsLoading(true);
-
-    await authPromise
-      .then(async (response) => {
-        try {
-          const queryRef = query(
-            collection(db, "users"),
-            where("uid", "==", response?.uid)
-          );
-
-          const querySnapshot = await getDocs(queryRef);
-
-          const userData = querySnapshot.docs[0].data();
-          setUserData(userData.firstName);
-        } catch (error) {
-        } finally {
-          setIsLoading(false);
-        }
-      })
-      .catch((error: any) => {
-        console.log("error resolving promise", error);
-        setIsLoading(false);
-      });
-  };
-
   useEffect(() => {
-    getUserData();
+    let unsubscribe: Unsubscribe; // Define a variable to store the unsubscribe function
+
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      try {
+        const authUser = await authPromise;
+        const userRef = doc(db, "users", authUser.uid);
+
+        // Subscribe to the snapshot and store the unsubscribe function in the variable
+        unsubscribe = onSnapshot(userRef, (doc) => {
+          const userData = doc.data();
+          console.log(userData);
+          setUserData(userData);
+          setIsLoading(false);
+        });
+      } catch (error) {
+        console.log("error resolving promise");
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
-  const userDataPromise = new Promise(async (resolve, reject) => {
-    await authPromise
-      .then(async (response) => {
-        try {
-          const queryRef = query(
-            collection(db, "users"),
-            where("uid", "==", response?.uid)
-          );
-
-          const querySnapshot = await getDocs(queryRef);
-
-          const userData = querySnapshot.docs[0].data();
-          resolve(userData)
-        } catch (error) {
-          reject(new Error("User does not exist"))
-          console.log("use user error ", error)
-        } 
-      })
-      .catch((error: any) => {
-        console.log("error resolving promise");
-        reject(new Error("User not found"))
-
-      });
-  })
-
   return {
-    userData,
     isLoading,
-    userDataPromise
+    userData,
   };
 }

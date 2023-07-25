@@ -81,22 +81,24 @@ export default function AccountDetailsScreen({
   const createAccount = async (data: any) => {
     const { firstName, lastName, university, userStatus, email } = data;
     try {
-      navigation.navigate("EmailVerification");
       setIsLoading(true);
       createUserWithEmailAndPassword(auth, email, pwd)
-        .then(async (res) => {
-
-          setIsLoading(false);
-          await setDoc(doc(db, "users", res.user.uid), {
-            email: email,
-            firstName: capitalizeFirstLetter(firstName),
-            lastName: capitalizeFirstLetter(lastName),
-            status: userStatus,
-            university: university,
-            verified: false,
-          });
-          await sendEmailVerification(res.user)
-            .then((res) => {
+      .then(async (res) => {
+        
+        setIsLoading(false);
+        await setDoc(doc(db, "users", res.user.uid), {
+          uid: res.user.uid,
+          email: email,
+          firstName: capitalizeFirstLetter(firstName),
+          lastName: capitalizeFirstLetter(lastName),
+          status: userStatus,
+          university: university,
+          verified: false,
+          enrolledCourses: []
+        });
+        await sendEmailVerification(res.user)
+        .then((res) => {
+              navigation.navigate("EmailVerification");
             })
             .catch((err) => {
             });

@@ -101,6 +101,9 @@ export interface UserData {
   firstName?: string;
   lastName?: string;
   email?: string;
+  status?: "Student"|"Lecturer"
+  university?: any;
+  verified?: boolean;
   enrolledCourses?: Array<any>;
 }
 

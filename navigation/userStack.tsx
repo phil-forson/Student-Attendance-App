@@ -10,34 +10,14 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Colors from "../constants/Colors";
-import { Pressable } from "react-native/Libraries/Components/Pressable/Pressable";
-import { ProfileScreen } from "../screens/ProfileScreen";
-import { FontAwesome } from "@expo/vector-icons";
-import Header from "../components/Header";
-import UserHeader from "../components/UserHeader";
 import { Button } from "react-native-elements";
-import CustomDrawer from "../components/CustomDrawer";
-import {
-  AntDesign,
-  MaterialIcons,
-  MaterialCommunityIcons,
-  Ionicons,
-} from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import SettingsScreen from "../screens/SettingsScreen";
 import JoinCourse from "../screens/JoinCourse";
-import {
-  InvTouchableOpacity,
-  Text,
-  TouchableOpacity,
-  View,
-} from "../components/Themed";
+import { TouchableOpacity } from "../components/Themed";
 import CreateCourse from "../screens/CreateCourse";
 import CourseDetails from "../screens/CourseDetails";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import ClassHeader from "../components/ClassHeader";
-import MyTabBar from "../components/MyTabBar";
 import CreateClass from "../screens/CreateClass";
-import CourseMembersScreen from "../screens/CourseMembersScreen";
 import { useNavigation } from "@react-navigation/native";
 import ClassDetails from "../screens/ClassDetails";
 import ClockInScreen from "../screens/ClockInScreen";
@@ -74,11 +54,7 @@ function MainStackNavigator() {
                 onPress={() => navigation.goBack()}
                 style={{}}
               >
-                <AntDesign
-                  name="close"
-                  size={20}
-                  color={Colors.danger}
-                />
+                <AntDesign name="close" size={20} color={Colors.danger} />
               </TouchableOpacity>
             );
           },

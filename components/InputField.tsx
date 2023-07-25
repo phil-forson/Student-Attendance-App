@@ -97,7 +97,6 @@ export const InputField = ({
         onBlur={() => {
           setIsFocused(false);
           setIsBlur(true);
-          console.log('blurred')
         }}
         value={value}
         onChangeText={(text) => {

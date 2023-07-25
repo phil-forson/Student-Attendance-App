@@ -24,10 +24,9 @@ import CardSeparator from "../components/CardSeparator";
 import ClassCard from "../components/ClassCard";
 import { useSwipe } from "../hooks/useSwipe";
 import Modal from "react-native-modal";
-import BottomSheet, {
-  BottomSheetFlatList,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Image } from "react-native";
+import useUser from "../hooks/useUser";
 
 const data: IClassDetails[] = [
   {
@@ -64,16 +63,7 @@ const data: IClassDetails[] = [
   },
 ];
 
-const upcomingData: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
+const upcomingData: IClassDetails[] = [];
 
 const pastData: IClassDetails[] = [
   {
@@ -111,6 +101,8 @@ export default function CourseDetails({ navigation, route }: any) {
 
   const [isModalVisible, setModalVisible] = useState(false);
 
+  const { userData, isLoading: isUserDataLoading } = useUser();
+
   const [isBottomSheetVisible, setIsBottomSheetVisible] =
     useState<boolean>(false);
 
@@ -130,8 +122,8 @@ export default function CourseDetails({ navigation, route }: any) {
 
   const handleSheetChange = useCallback((index: number) => {
     console.log("handleSheetChange", index);
-    if(index === -1){
-        setIsBottomSheetVisible(false)
+    if (index === -1) {
+      setIsBottomSheetVisible(false);
     }
   }, []);
 
@@ -185,19 +177,22 @@ export default function CourseDetails({ navigation, route }: any) {
   const renderBottomSheetItem = useCallback(
     ({ item }: any) => (
       <View style={[styles.transBg, styles.flexRow, styles.itemsCenter]}>
-        <Image source={require('../assets/profile.jpg')} style={[{
-            borderRadius: 100,
-            marginRight: 30,
-            width: 50, 
-            height: 50
-
-        }]} />
+        <Image
+          source={require("../assets/profile.jpg")}
+          style={[
+            {
+              borderRadius: 100,
+              marginRight: 30,
+              width: 50,
+              height: 50,
+            },
+          ]}
+        />
         <Text>{item}</Text>
       </View>
     ),
     []
   );
-
 
   return (
     <SafeAreaView
@@ -232,7 +227,7 @@ export default function CourseDetails({ navigation, route }: any) {
               darkColor={Colors.dark.text}
               style={[styles.bold, styles.largeText]}
             >
-              {course?.courseName}
+              {course?.courseTitle}
             </Text>
           </View>
         </View>
@@ -262,9 +257,10 @@ export default function CourseDetails({ navigation, route }: any) {
             ]}
           >
             <Text
-              style={[styles.light, { fontSize: 12 }]}
-              darkColor={Colors.light.secondaryGrey}
-              lightColor={Colors.dark.tetiary}
+              style={[
+                styles.light,
+                { fontSize: 12, color: Colors.dark.tetiary },
+              ]}
             >
               Total Attendance Time
             </Text>
@@ -294,9 +290,10 @@ export default function CourseDetails({ navigation, route }: any) {
             ]}
           >
             <Text
-              style={[styles.light, { fontSize: 12 }]}
-              darkColor={Colors.light.secondaryGrey}
-              lightColor={Colors.dark.tetiary}
+              style={[
+                styles.light,
+                { fontSize: 12, color: Colors.dark.tetiary },
+              ]}
             >
               Total Attendance Time
             </Text>
@@ -376,17 +373,27 @@ export default function CourseDetails({ navigation, route }: any) {
             </Pressable>
           </View>
         </View>
-        <FlatList
-          data={classData}
-          keyExtractor={(courseClass: IClassDetails) => courseClass.id}
-          renderItem={renderItem}
-          ItemSeparatorComponent={() => (
-            <CardSeparator viewStyle={[styles.transBg]} />
-          )}
-          contentContainerStyle={[styles.transBg, { minHeight: 500 }]}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        />
+        {classData.length > 0 ? (
+          <FlatList
+            data={classData}
+            keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => (
+              <CardSeparator viewStyle={[styles.transBg]} />
+            )}
+            contentContainerStyle={[styles.transBg, { minHeight: 500 }]}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          />
+        ) : (
+          <View
+            style={[{ height: 350 }, styles.justifyCenter, styles.itemsCenter]}
+            onTouchEnd={onTouchEnd}
+            onTouchStart={onTouchStart}
+          >
+            <Text style={[styles.mediumText]}>No classes available</Text>
+          </View>
+        )}
         {isModalVisible && (
           <Modal
             isVisible={isModalVisible}
@@ -427,7 +434,7 @@ export default function CourseDetails({ navigation, route }: any) {
                   },
                 ]}
                 onPress={() => {
-                  navigation.navigate("CreateClass")
+                  navigation.navigate("CreateClass");
                 }}
               >
                 <Ionicons
@@ -487,21 +494,25 @@ export default function CourseDetails({ navigation, route }: any) {
             style={[styles.contentContainer]}
             enablePanDownToClose={true}
             backgroundStyle={{
-                backgroundColor:
-                  theme === "dark" ? "#1b1b1b" : Colors.light.background,
-              }}
+              backgroundColor:
+                theme === "dark" ? "#1b1b1b" : Colors.light.background,
+            }}
           >
-            <Text style={[styles.bigText, styles.my, styles.bold]}>Members</Text>
+            <Text style={[styles.bigText, styles.my, styles.bold]}>
+              Members
+            </Text>
             <BottomSheetFlatList
               data={flatlistData}
               keyExtractor={(i: any) => i}
               renderItem={renderBottomSheetItem}
-              ItemSeparatorComponent={() => <CardSeparator viewStyle={[styles.transBg]}/>}
+              ItemSeparatorComponent={() => (
+                <CardSeparator viewStyle={[styles.transBg]} />
+              )}
             />
           </BottomSheet>
         )}
       </View>
-      {!isBottomSheetVisible && (
+      {!isBottomSheetVisible && userData && (
         <InvTouchableOpacity
           style={[
             styles.courseDeetsIcon,
@@ -512,11 +523,17 @@ export default function CourseDetails({ navigation, route }: any) {
               zIndex: 10,
             },
           ]}
-          onPress={() => setModalVisible(true)}
+          onPress={() => {
+            if (userData.status === "Student") {
+              setIsBottomSheetVisible(true);
+            } else if (userData.status === "Teacher") {
+              setModalVisible(true);
+            }
+          }}
           darkColor="#0c0c0c"
         >
           <AntDesign
-            name="plus"
+            name={userData.status === "student" ? "eye" : "plus"}
             color={"#007bff"}
             size={18}
             style={{ fontWeight: "bold" }}

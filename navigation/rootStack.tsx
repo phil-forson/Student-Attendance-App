@@ -1,8 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React from "react";
-import Header from "../components/Header";
+import React, { useContext, useEffect } from "react";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
-import LandingScreen from "../screens/LandingScreen";
 import { LogInScreen } from "../screens/LogInScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
@@ -14,19 +12,25 @@ import Onboarding from "../screens/Onboarding";
 import PersonalInfo from "../screens/PersonalInfo";
 import UniversityDetails from "../screens/UniversityDetails";
 import UserStatus from "../screens/UserStatus";
-import EmailScreen from "../screens/AccountDetails";
 import AccountDetailsScreen from "../screens/AccountDetails";
 import EmailVerificationSent from "../screens/EmailVerificationSent";
+import { UserContext } from "../contexts/UserContext";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
+  const { previouslyLoggedIn } = useContext(UserContext);
+
+  useEffect(()=> {
+    console.log('previously logged in ', previouslyLoggedIn)
+  },  [])
   return (
     <Stack.Navigator
       screenOptions={{
         gestureEnabled: true,
         gestureDirection: "horizontal",
       }}
+      initialRouteName={previouslyLoggedIn ? "LogIn" : "Root"}
     >
       <Stack.Screen
         name="Root"

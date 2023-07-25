@@ -18,3 +18,15 @@ export const convertToHHMM = (date: Date) => {
 export const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 };
+
+export const truncateTextWithEllipsis = (
+  text: string,
+  limit: number
+): string => {
+  if (text.length <= limit) {
+    return text;
+  }
+
+  const truncatedText = text.slice(0, limit).trim();
+  return truncatedText + "...";
+};

@@ -1,17 +1,39 @@
-import React from "react";
+import React, { useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { InvTouchableOpacity, Text, View } from "../components/Themed";
 import useColorScheme from "../hooks/useColorScheme";
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
-import { Dimensions, Image, Pressable, ScrollView } from "react-native";
+import { Alert, Dimensions, Image, Pressable, ScrollView } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import FullWidthButton from "../components/FullWidthButton";
+import { UserContext } from "../contexts/UserContext";
+import Loading from "../components/Loading";
+import { auth } from "../config/firebase";
+import useUser from "../hooks/useUser";
 
 const SettingsScreen = ({ navigation }: any) => {
   const theme = useColorScheme();
+  const {
+    setUserLoggedIn,
+    setPreviouslyLoggedIn,
+  } = useContext(UserContext);
+
+  const { userData, isLoading: isUserDataLoading } = useUser() 
+
   const width = Dimensions.get("screen").width;
+
+  const handleSignOut = () => {
+    setPreviouslyLoggedIn(true);
+    auth.signOut();
+    setUserLoggedIn(false);
+
+  };
+
+  if (isUserDataLoading) {
+    return <Loading />;
+  }
   return (
     <View style={[{}, styles.container]}>
       <View
@@ -30,10 +52,10 @@ const SettingsScreen = ({ navigation }: any) => {
         ]}
       >
         <Text style={[styles.bold, styles.bigText, styles.textCenter, {}]}>
-          John Doe
+          {userData.firstName + "  " + userData.lastName}
         </Text>
         <Text style={[styles.textCenter, styles.semiBold, styles.smy]}>
-          Student
+          {userData.status}
         </Text>
         <View
           style={[
@@ -150,13 +172,12 @@ const SettingsScreen = ({ navigation }: any) => {
                 style={[
                   {
                     paddingVertical: 5,
+                    color: Colors.dark.tetiary,
                   },
                   styles.light,
                 ]}
-                darkColor={Colors.light.secondaryGrey}
-                lightColor={Colors.dark.tetiary}
               >
-                Student Email Address
+                {userData?.status} Email Address
               </Text>
               <Text
                 style={[
@@ -166,7 +187,7 @@ const SettingsScreen = ({ navigation }: any) => {
                   },
                 ]}
               >
-                johndoe@st.ug.edu.gh
+                {userData?.email}
               </Text>
             </View>
           </View>
@@ -192,26 +213,17 @@ const SettingsScreen = ({ navigation }: any) => {
                 styles.transBg,
               ]}
             >
-              <AntDesign
-                name="mail"
-                size={20}
-                color={
-                  theme === "dark"
-                    ? Colors.light.secondaryGrey
-                    : Colors.dark.tetiary
-                }
-              />
+              <AntDesign name="mail" size={20} color={Colors.dark.tetiary} />
             </View>
             <View style={[styles.transBg]}>
               <Text
                 style={[
                   {
                     paddingVertical: 5,
+                    color: Colors.dark.tetiary,
                   },
                   styles.light,
                 ]}
-                darkColor={Colors.light.secondaryGrey}
-                lightColor={Colors.dark.tetiary}
               >
                 University
               </Text>
@@ -223,13 +235,27 @@ const SettingsScreen = ({ navigation }: any) => {
                   },
                 ]}
               >
-                University Of Ghana
+                {userData.university.name}
               </Text>
             </View>
           </View>
         </View>
 
-        <FullWidthButton text={"Sign Out"} />
+        <FullWidthButton
+          text={"Sign Out"}
+          onPress={() => {
+            Alert.alert("Sign Out", "Do you want to continue to sign out?", [
+              {
+                text: "No",
+              },
+              {
+                text: "Yes",
+                style: "destructive",
+                onPress: handleSignOut,
+              },
+            ]);
+          }}
+        />
       </ScrollView>
       <View
         style={[
@@ -246,17 +272,20 @@ const SettingsScreen = ({ navigation }: any) => {
         lightColor={Colors.light.tetiary}
         darkColor={Colors.dark.secondaryGrey}
       >
-        <View style={[{
-          width: '100%',
-          height: '100%'
-        }]}>
+        <View
+          style={[
+            {
+              width: "100%",
+              height: "100%",
+            },
+          ]}
+        >
           <Image
             source={require("../assets/profile.jpg")}
             style={[
               styles.fullImage,
               {
                 zIndex: 10,
-                
               },
             ]}
           />
