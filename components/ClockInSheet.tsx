@@ -10,13 +10,13 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { styles } from "../styles/styles";
 import { Alert, useColorScheme } from "react-native";
 import Colors from "../constants/Colors";
-import ProgressCircle from "./ProgressCircle";
 import CircularProgress from "react-native-circular-progress-indicator";
 import { useSharedValue, withTiming } from "react-native-reanimated";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { calculateDuration, calculateDurationInSeconds, convertToHHMM } from "../utils/utils";
+import { userClockOut } from "../utils/helpers";
 
-export default function ClockInSheet({startTime, endTime}: {startTime: Date, endTime: Date}) {
+export default function ClockInSheet({startTime, endTime, userId, classId}: {startTime: Date, endTime: Date, userId: string, classId: string}) {
   const theme = useColorScheme();
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -40,7 +40,9 @@ export default function ClockInSheet({startTime, endTime}: {startTime: Date, end
     }, 1000);
 
     // Clear the interval when the component unmounts
-    return () => clearInterval(interval);
+    return () => {
+        userClockOut(userId, classId)
+        clearInterval(interval)};
   }, []);
 
 

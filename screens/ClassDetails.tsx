@@ -31,6 +31,8 @@ import useClass from "../hooks/useClass";
 import Loading from "../components/Loading";
 import useUser from "../hooks/useUser";
 import ClockInSheet from "../components/ClockInSheet";
+import { userClockIn } from "../utils/helpers";
+import useAuth from "../hooks/useAuth";
 
 export default function ClassDetails({ navigation, route }: any) {
   const [courseClass, setCourseClass] = useState<any>();
@@ -39,9 +41,13 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const { userData, isLoading: isUserDataLoading } = useUser();
 
+  const { user } = useAuth()
+
   const { classData, isLoading: isClassDataLoading } = useClass(
     route.params.uid
   );
+
+  const [clockIn, setClockIn] = useState<boolean>(false);
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -66,6 +72,26 @@ export default function ClassDetails({ navigation, route }: any) {
       setIsBottomSheetVisible(false);
     }
   }, []);
+
+  const onClockIn = async () => {
+    setModalVisible(false);
+    if(user){
+
+      try {
+  
+        console.log('user data ', userData.uid, 'class id ', route.params)
+        await userClockIn(user?.uid, route.params.uid).then(() => {
+          setClockIn(true);
+        })
+      }
+      catch (error) {
+        setClockIn(false)
+      }
+      finally {
+  
+      }
+    }
+  };
 
   useLayoutEffect(() => {
     setCourseClass(route.params);
@@ -102,6 +128,8 @@ export default function ClassDetails({ navigation, route }: any) {
     if (isUserDataLoading) {
       return;
     }
+
+    console.log('user data... ', userData)
   }, [isUserDataLoading, userData]);
 
   if (isClassDataLoading) {
@@ -181,7 +209,8 @@ export default function ClassDetails({ navigation, route }: any) {
                 { color: Colors.dark.tetiary },
               ]}
             >
-              {courseClass && convertToDayString(courseClass?.classDate.toDate())}
+              {courseClass &&
+                convertToDayString(courseClass?.classDate.toDate())}
             </Text>
           </View>
           <View
@@ -224,7 +253,8 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {courseClass && convertToHHMM(courseClass?.classStartTime.toDate())}
+              {courseClass &&
+                convertToHHMM(courseClass?.classStartTime.toDate())}
             </Text>
             <Text
               style={[
@@ -400,9 +430,7 @@ export default function ClassDetails({ navigation, route }: any) {
                         alignItems: "center",
                       },
                     ]}
-                    onPress={() => {
-                      setModalVisible(false);
-                    }}
+                    onPress={onClockIn}
                   >
                     <AntDesign
                       name="clockcircle"
@@ -450,7 +478,7 @@ export default function ClassDetails({ navigation, route }: any) {
             </BottomSheet>
           )}
         </View>
-        {!isBottomSheetVisible && (
+        {!isBottomSheetVisible && !clockIn && (
           <InvTouchableOpacity
             style={[
               styles.courseDeetsIcon,
@@ -472,7 +500,14 @@ export default function ClassDetails({ navigation, route }: any) {
             />
           </InvTouchableOpacity>
         )}
-        <ClockInSheet startTime={route.params.classStartTime.toDate()} endTime={route.params.classEndTime.toDate()}/>
+        {clockIn && user && (
+          <ClockInSheet
+            startTime={route.params.classStartTime.toDate()}
+            endTime={route.params.classEndTime.toDate()}
+            classId={route.params.uid}
+            userId={user.uid}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

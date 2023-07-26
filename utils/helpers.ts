@@ -1,6 +1,7 @@
 import {
   DocumentSnapshot,
   QuerySnapshot,
+  Timestamp,
   Unsubscribe,
   addDoc,
   arrayRemove,
@@ -239,6 +240,47 @@ export async function updateClassDetails(
     throw error;
   }
 }
+
+export const userClockIn = async (userId: string, classId: string) => {
+  try {
+    const attendanceData = {
+      clockIn: Timestamp.now(), // Assuming you have imported Timestamp from firebase/firestore
+      clockOut: null,
+    };
+
+    // Save the clock in time in the attendance document
+    await setDoc(doc(db, "classes", classId, "attendance", userId), attendanceData, { merge: true });
+    console.log("Clocked in successfully!");
+  } catch (error) {
+    console.error("Error clocking in:", error);
+  }
+};
+
+export const userClockOut = async (userId: string, classId: string) => {
+  try {
+    // Fetch the existing attendance data
+    const attendanceDoc = await getDoc(doc(db, "classes", classId, "attendance", userId));
+    const attendanceData = attendanceDoc.data();
+
+    // If there is no existing attendance data, do not proceed with clocking out
+    if (!attendanceData) {
+      console.error("No attendance data found for this user and class!");
+      return;
+    }
+
+    // Check if the user is already clocked out
+    if (attendanceData.clockOut) {
+      console.log("You are already clocked out for this class.");
+      return;
+    }
+
+    // Save the clock out time in the attendance document
+    await setDoc(doc(db, "classes", classId, "attendance", userId), { clockOut: Timestamp.now() }, { merge: true });
+    console.log("Clocked out successfully!");
+  } catch (error) {
+    console.error("Error clocking out:", error);
+  }
+};
 
 export const isCourseCodeUnique = async (
   courseCode: string
