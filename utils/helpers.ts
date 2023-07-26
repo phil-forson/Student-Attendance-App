@@ -1,7 +1,24 @@
-import { DocumentSnapshot, QuerySnapshot, addDoc, arrayUnion, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  DocumentSnapshot,
+  QuerySnapshot,
+  Unsubscribe,
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import React from "react";
 import { IAttendance, IClass } from "../types";
+import useClass from "../hooks/useClass";
 
 const fetchCourseData = async (courseId: string) => {
   const courseDoc = doc(db, "courses", courseId);
@@ -9,10 +26,11 @@ const fetchCourseData = async (courseId: string) => {
   return courseSnapshot.data();
 };
 
-const fetchClassData = async (classId: string) => {
-  const classDoc = doc(db, "classes", classId);
-  const classSnapshot = await getDoc(classDoc);
-  return classSnapshot.data();
+const fetchClassData = async (classId: string): Promise<IClass> => {
+  const classDocRef = doc(db, "classes", classId);
+  const classSnapshot = await getDoc(classDocRef);
+
+  return classSnapshot.data() as IClass;
 };
 
 export const getAllCoursesData = async (
@@ -24,12 +42,9 @@ export const getAllCoursesData = async (
     fetchCourseData(courseId)
   );
 
-  console.log("courses promises ", enrolledCoursesPromises);
-
   return Promise.all(enrolledCoursesPromises)
     .then((enrolledCourses: any) => {
       setIsLoading(false);
-      console.log("enrolled courses in enrolled courses ", enrolledCourses);
       return enrolledCourses;
     })
     .catch((error) => {
@@ -40,25 +55,22 @@ export const getAllCoursesData = async (
 };
 
 export const getAllClassesData = async (
-  enrolledClassIds: Array<any>,
+  enrolledClassIds: Array<string>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<IClass[]> => {
+): Promise<{ enrolledClasses: IClass[] }> => {
   setIsLoading(true);
-  const enrolledClassesPromises = enrolledClassIds.map((classId: string) =>
-    fetchClassData(classId)
+
+  const enrolledClassesPromises = enrolledClassIds.map(
+    async (classId: string) => {
+      return await fetchClassData(classId);
+    }
   );
 
-  return Promise.all(enrolledClassesPromises)
-    .then((enrolledClasses: any) => {
-      setIsLoading(false);
-      console.log("enrolled courses in enrolled courses ", enrolledClasses);
-      return enrolledClasses;
-    })
-    .catch((error) => {
-      setIsLoading(false);
-      console.log(error);
-      throw new Error("Error obtaining enrolled courses");
-    });
+  const enrolledClasses: IClass[] = await Promise.all(enrolledClassesPromises);
+
+  setIsLoading(false);
+
+  return { enrolledClasses };
 };
 
 export const enrollUserInCourse = async (userId: string, courseId: string) => {
@@ -73,15 +85,21 @@ export const enrollUserInCourse = async (userId: string, courseId: string) => {
   });
 };
 
-export const joinCourse = (userId: string, courseCode: string): Promise<{ success: boolean; message: string }> => {
+export const joinCourse = (
+  userId: string,
+  courseCode: string
+): Promise<{ success: boolean; message: string }> => {
   return new Promise(async (resolve) => {
     try {
       // Find the course with the given course code
 
-      const coursesQuery = query(collection(db, "courses"), where("courseCode", "==", courseCode));
+      const coursesQuery = query(
+        collection(db, "courses"),
+        where("courseCode", "==", courseCode)
+      );
       const coursesSnapshot = await getDocs(coursesQuery);
 
-      console.log('no course found ', coursesSnapshot.empty)
+      console.log("no course found ", coursesSnapshot.empty);
 
       // Check if a matching course is found
       if (!coursesSnapshot.empty) {
@@ -96,59 +114,148 @@ export const joinCourse = (userId: string, courseCode: string): Promise<{ succes
           if (!enrolledCourses.includes(courseId)) {
             // If the user is not enrolled, enroll them in the course
             await enrollUserInCourse(userId, courseId);
-            resolve({ success: true, message: "Successfully joined the course!" });
+            resolve({
+              success: true,
+              message: "Successfully joined the course!",
+            });
           } else {
-            resolve({ success: false, message: "You are already enrolled in this course!" });
+            resolve({
+              success: false,
+              message: "You are already enrolled in this course!",
+            });
           }
         }
       }
 
-      resolve({ success: false, message: "Course not found with the given code!" });
+      resolve({
+        success: false,
+        message: "Course not found with the given code!",
+      });
     } catch (error) {
       console.error("Error joining course:", error);
-      resolve({ success: false, message: "An error occurred while joining the course!" });
+      resolve({
+        success: false,
+        message: "An error occurred while joining the course!",
+      });
     }
   });
-}
+};
 
-export const createClassInCourse = async (courseId: string, classData: IClass) => {
+export const createClassInCourse = async (
+  courseId: string,
+  classData: IClass
+) => {
   const courseDocRef = doc(db, "courses", courseId);
-  const classDocRef = await addDoc(collection(db, "classes"), classData);
+  await setDoc(doc(db, "classes", classData.uid), classData);
 
   // Update the classes array in the course document
   const courseDoc = await getDoc(courseDocRef);
   if (courseDoc.exists()) {
     const courseClasses: Array<string> = courseDoc.data()?.courseClasses || [];
-    courseClasses.push(classDocRef.id);
+    courseClasses.push(classData.uid);
     await setDoc(courseDocRef, { courseClasses }, { merge: true });
   }
 
   // Fetch the list of enrolled users in the course
-  const courseQuery = query(collection(db, "users"), where("enrolledCourses", "array-contains", courseId));
+  const courseQuery = query(
+    collection(db, "users"),
+    where("enrolledCourses", "array-contains", courseId)
+  );
   const courseUsersSnapshot: QuerySnapshot = await getDocs(courseQuery);
 
   // Create attendance entries for each enrolled user
   courseUsersSnapshot.forEach(async (userDoc: DocumentSnapshot) => {
     const attendanceData: IAttendance = {
       clockIn: null,
-      clockOut: null
+      clockOut: null,
     };
-    const attendanceDocRef = doc(db, "classes", classDocRef.id, "attendance", userDoc.id);
+    const attendanceDocRef = doc(
+      db,
+      "classes",
+      classData.uid,
+      "attendance",
+      userDoc.id
+    );
     await setDoc(attendanceDocRef, attendanceData);
   });
 };
-export const isCourseCodeUnique = async(courseCode: string): Promise<boolean> => {
+
+export const removeClassFromCourse = async (
+  classId: string,
+  courseId: string
+) => {
+  try {
+    // Get the course document
+    const courseDocRef = doc(db, "courses", courseId);
+    const courseDoc = await getDoc(courseDocRef);
+
+    // Check if the course document exists
+    if (courseDoc.exists()) {
+      // Get the classes array from the course document
+      const classes = courseDoc.data()?.courseClasses || [];
+
+      console.log("class id", classId);
+
+      console.log("classes ", classes);
+
+      // Find the index of the class in the classes array
+      const classIndex = classes.indexOf(classId);
+
+      console.log("class index ", classIndex);
+
+      // If the class is found in the array, remove it
+      if (classIndex !== -1) {
+        classes.splice(classIndex, 1);
+
+        // Update the course document with the updated classes array
+        await updateDoc(courseDocRef, { courseClasses: arrayRemove(classId) });
+
+        return { success: true, message: "Class removed from the course!" };
+      } else {
+        return { success: false, message: "Class not found in the course!" };
+      }
+    } else {
+      return { success: false, message: "Course not found!" };
+    }
+  } catch (error) {
+    console.error("Error removing class from course:", error);
+    return {
+      success: false,
+      message: "An error occurred while removing the class from the course!",
+    };
+  }
+};
+
+export async function updateClassDetails(
+  classId: string,
+  classData: IClass
+): Promise<void> {
+  try {
+    const classDocRef = doc(db, "classes", classId);
+    await updateDoc(classDocRef, classData as any);
+    console.log("Class details updated successfully!");
+  } catch (error) {
+    console.error("Error updating class details:", error);
+    throw error;
+  }
+}
+
+export const isCourseCodeUnique = async (
+  courseCode: string
+): Promise<boolean> => {
   const coursesRef = collection(db, "courses");
 
   // Use the 'where' clause to filter courses with the given course code
-  const querySnapshot = await getDocs(query(coursesRef, where("courseCode", "==", courseCode)));
+  const querySnapshot = await getDocs(
+    query(coursesRef, where("courseCode", "==", courseCode))
+  );
 
-  console.log(querySnapshot)
+  console.log(querySnapshot);
 
-  console.log('is course code unique ', querySnapshot.empty)
+  console.log("is course code unique ", querySnapshot.empty);
 
-  const isCodeUnique = querySnapshot.empty
+  const isCodeUnique = querySnapshot.empty;
 
   // If the query returns any documents, the course code is not unique
   return isCodeUnique;
-}
+};

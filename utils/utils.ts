@@ -77,28 +77,92 @@ export const calculateDuration = (startDate: Timestamp, endDate: Timestamp) =>  
   return durationString;
 }
 
-export const groupAndSortClasses = (classes: IClass[]): GroupedClasses => {
+export function groupAndSortClasses(classes: IClass[]): {
+  upcoming: IClass[];
+  ongoing: IClass[];
+  past: IClass[];
+} {
   const now = new Date();
-  const upcomingClasses: IClass[] = [];
-  const pastClasses: IClass[] = [];
+  const upcoming: IClass[] = [];
+  const ongoing: IClass[] = [];
+  const past: IClass[] = [];
 
-  classes.forEach((classItem) => {
+  console.log('classes ', classes)
+
+  classes.forEach((classItem: IClass) => {
+    console.log(classItem)
     const classStartTime = new Date(classItem?.classStartTime.toDate());
+    const classEndTime = new Date(classItem?.classEndTime.toDate());
+
+    console.log('class start time ', classStartTime)
+
     if (classStartTime > now) {
-      upcomingClasses.push(classItem);
+      upcoming.push(classItem);
+      console.log('upcoming ', classItem)
+    } else if (classStartTime <= now && classEndTime >= now) {
+      ongoing.push(classItem);
+      console.log('ongoing ', classItem)
+
     } else {
-      pastClasses.push(classItem);
+      past.push(classItem);
+      console.log('past ', classItem)
+
     }
   });
 
-  upcomingClasses.sort((classA, classB) => {
-    const dateA = new Date(classA?.classStartTime.toDate());
-    const dateB = new Date(classB?.classStartTime.toDate());
-    return Math.abs(dateA.getTime() - now.getTime()) - Math.abs(dateB.getTime() - now.getTime());
+  // Sort the arrays by classStartTime in ascending order
+  upcoming.sort((a, b) => new Date(a.classStartTime.toDate()).getTime() - new Date(b.classStartTime.toDate()).getTime());
+  ongoing.sort((a, b) => new Date(a.classStartTime.toDate()).getTime() - new Date(b.classStartTime.toDate()).getTime());
+  past.sort((a, b) => new Date(a.classStartTime.toDate()).getTime() - new Date(b.classStartTime.toDate()).getTime());
+
+  return { upcoming, ongoing, past };
+}
+
+export function isStartTimeGreater(startTime: Date, endTime: Date ) {
+  const startHours = startTime.getHours();
+  const startMinutes = startTime.getMinutes();
+  const endHours = endTime.getHours();
+  const endMinutes = endTime.getMinutes();
+
+  if (startHours > endHours || (startHours === endHours && startMinutes > endMinutes)) {
+    return true; // Start time is greater than end time
+  } else {
+    return false; // Start time is not greater than end time
+  }
+}
+
+export function add30MinutesToTime(originalTime: Date) {
+  const updatedTime = new Date(originalTime);
+  const currentMinutes = updatedTime.getMinutes();
+  updatedTime.setMinutes(currentMinutes + 30);
+  return updatedTime;
+}
+
+export function subtract30MinutesFromTime(originalTime: Date) {
+  const updatedTime = new Date(originalTime);
+  const currentMinutes = updatedTime.getMinutes();
+  updatedTime.setMinutes(currentMinutes - 30);
+  return updatedTime;
+}
+
+export const getClassesTodayAndFuture = (classes: IClass[]): IClass[] => {
+  const now = new Date().getTime(); // Get the current time in milliseconds
+  const today = new Date(); // Get the start of today in milliseconds
+
+  const filteredClasses = classes.filter((classItem) => {
+    const classStartTime = new Date(classItem?.classStartTime.toDate()).toDateString();
+    return classStartTime === today.toDateString();
   });
 
-  return {
-    upcomingClasses,
-    pastClasses,
-  };
+  console.log('classes ', classes[0].classStartTime.toDate().toDateString() >= today.toDateString())
+  console.log('filtered classes ', filteredClasses)
+
+  // Sort the filtered classes by their proximity to the current time
+  filteredClasses.sort((a, b) => {
+    const timeDifferenceA = Math.abs(new Date(a.classStartTime.toDate()).getTime() - now);
+    const timeDifferenceB = Math.abs(new Date(b.classStartTime.toDate()).getTime() - now);
+    return timeDifferenceA - timeDifferenceB;
+  });
+
+  return filteredClasses;
 };

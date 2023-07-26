@@ -15,11 +15,17 @@ import Colors from "../constants/Colors";
 export default function ClassCard({
   courseClass,
   navigation,
+  onPress
 }: {
   courseClass: IClass;
   navigation: any;
+  onPress?: () => void
 }) {
   const theme = useColorScheme();
+
+  const navigateToClassDetails = () => {
+    navigation.navigate("ClassDetails", courseClass)
+  }
   return (
     <>
       <Pressable
@@ -38,7 +44,7 @@ export default function ClassCard({
                 : Colors.light.primaryGrey,
           },
         ]}
-        onPress={() => navigation.navigate("ClassDetails", courseClass)}
+        onPress={onPress ?? navigateToClassDetails}
       >
         <View
           style={[

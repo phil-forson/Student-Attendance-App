@@ -1,6 +1,7 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
 import {
   ActivityIndicator,
+  Alert,
   ListRenderItem,
   Platform,
   Pressable,
@@ -17,7 +18,7 @@ import React, {
 } from "react";
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { convertToHHMM, groupAndSortClasses } from "../utils/utils";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
@@ -28,26 +29,36 @@ import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Image } from "react-native";
 import useUser from "../hooks/useUser";
 import useCourse from "../hooks/useCourse";
-import { getAllClassesData } from "../utils/helpers";
+import { getAllClassesData, removeClassFromCourse } from "../utils/helpers";
 import { IClass } from "../types";
-import Loading from "../components/Loading";
+import { Unsubscribe } from "firebase/firestore";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function CourseDetails({ navigation, route }: any) {
   const [course, setCourse] = useState<any>();
 
-  
-  const [classesData, setClassesData] = useState<IClass[]>();
+  const [classesData, setClassesData] = useState<IClass[]>([]);
 
-  const [pastClasses, setPastClassesData] = useState<IClass[]>([])
+  const [allClasses, setAllClassesData] = useState<IClass[]>([]);
 
-  const [upcomingClasses, setUpcomingClassesData] = useState<IClass[]>([])
+  const [pastClasses, setPastClassesData] = useState<IClass[]>([]);
 
+  const [upcomingClasses, setUpcomingClassesData] = useState<IClass[]>([]);
+
+  const [ongoingClasses, setOngoingClassesData] = useState<IClass[]>([]);
 
   const [activeTab, setActiveTab] = useState<string>("All");
 
   const [isModalVisible, setModalVisible] = useState(false);
 
+  const [isClassModalVisible, setIsClassModalVisible] =
+    useState<boolean>(false);
+
   const [areClassesLoading, setClassesLoading] = useState<boolean>(false);
+
+  const [activeClass, setActiveClass] = useState<IClass>();
+
+  const [unsubscribe, setUnsubscribe] = useState<Unsubscribe>();
 
   const { userData, isLoading: isUserDataLoading } = useUser();
 
@@ -79,6 +90,22 @@ export default function CourseDetails({ navigation, route }: any) {
     }
   }, []);
 
+  const handleDeleteClass = async () => {
+    console.log("deleting class...");
+
+    if (activeClass) {
+      const res = await removeClassFromCourse(
+        activeClass.uid,
+        activeClass?.courseId
+      );
+      if (res.success) {
+        Alert.alert("Success.", res.message);
+      } else {
+        Alert.alert("Failed.", res.message);
+      }
+    }
+  };
+
   function onSwipeLeft() {
     console.log("SWIPE_LEFT");
 
@@ -89,6 +116,9 @@ export default function CourseDetails({ navigation, route }: any) {
       setActiveTab("Upcoming");
     }
     if (activeTab === "Upcoming") {
+      setActiveTab("Ongoing");
+    }
+    if (activeTab === "Ongoing") {
       setActiveTab("Past");
     }
   }
@@ -102,6 +132,9 @@ export default function CourseDetails({ navigation, route }: any) {
       setActiveTab("All");
     }
     if (activeTab === "Past") {
+      setActiveTab("Ongoing");
+    }
+    if (activeTab === "Ongoing") {
       setActiveTab("Upcoming");
     }
   }
@@ -112,46 +145,61 @@ export default function CourseDetails({ navigation, route }: any) {
   }, []);
 
   useEffect(() => {
-    if (isCourseDataLoading) {
-      return;
-    }
 
-    setClassesLoading(true)
+      setClassesLoading(true);
 
-    const classes = courseData?.courseClasses ?? [];
+      const classes = courseData?.courseClasses ?? [];
 
-    if (classes?.length > 0) {
-      getAllClassesData(classes, setClassesLoading)
-        .then((classesData: IClass[]) => {
-          console.log("Classes data ", classesData);
-          setClassesData(classesData);
-          const {pastClasses, upcomingClasses} = groupAndSortClasses(classesData)
-          setPastClassesData(pastClasses)
-          setUpcomingClassesData(upcomingClasses)
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+      if (!(classes?.length > 0)) {
+        setClassesLoading(false);
+        setClassesData([]);
+        setAllClassesData([]);
+        setPastClassesData([]);
+        setUpcomingClassesData([]);
+      }
+
+      if (classes?.length > 0) {
+        getAllClassesData(classes, setClassesLoading)
+          .then(({ enrolledClasses}) => {
+            setAllClassesData(enrolledClasses);
+            setClassesData(enrolledClasses);
+            const groupedClasses = groupAndSortClasses(enrolledClasses);
+            setPastClassesData(groupedClasses.past);
+            setUpcomingClassesData(groupedClasses.upcoming);
+            setOngoingClassesData(groupedClasses.ongoing);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
   }, [isCourseDataLoading, courseData]);
 
   useEffect(() => {
-    console.log('past classes ', pastClasses)
-    console.log('upcoming classes ', upcomingClasses)
-    if(activeTab === "All"){
-      setClassesData(classesData)
-    }
-    else if(activeTab === "Past"){
-      setClassesData(pastClasses)
-    }
-    else if(activeTab === "Upcoming"){
-      setClassesData(upcomingClasses)
+    console.log("past classes ", pastClasses);
+    console.log("upcoming classes ", upcomingClasses);
+    if (activeTab === "All") {
+      setClassesData(allClasses);
+    } else if (activeTab === "Past") {
+      setClassesData(pastClasses);
+    } else if (activeTab === "Upcoming") {
+      setClassesData(upcomingClasses);
+    } else if (activeTab === "Ongoing") {
+      setClassesData(ongoingClasses);
     }
   }, [activeTab]);
   const theme = useColorScheme();
 
   const renderItem: ListRenderItem<IClass> = ({ item }) => {
-    return <ClassCard courseClass={item} navigation={navigation} />;
+    return (
+      <ClassCard
+        courseClass={item}
+        navigation={navigation}
+        onPress={() => {
+          setIsClassModalVisible(true);
+          setActiveClass(item);
+        }}
+      />
+    );
   };
 
   const renderBottomSheetItem = useCallback(
@@ -338,6 +386,26 @@ export default function CourseDetails({ navigation, route }: any) {
                 {
                   borderBottomColor:
                     theme === "dark"
+                      ? activeTab === "Ongoing"
+                        ? Colors.dark.tetiary
+                        : Colors.dark.primaryGrey
+                      : activeTab === "Ongoing"
+                      ? Colors.light.secondaryGrey
+                      : Colors.light.primaryGrey,
+                  borderBottomWidth: 3,
+                },
+              ]}
+              onPress={() => setActiveTab("Ongoing")}
+            >
+              <Text style={[{ textAlign: "center" }]}>Ongoing</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.h30,
+                styles.flexOne,
+                {
+                  borderBottomColor:
+                    theme === "dark"
                       ? activeTab === "Past"
                         ? Colors.dark.tetiary
                         : Colors.dark.primaryGrey
@@ -474,6 +542,111 @@ export default function CourseDetails({ navigation, route }: any) {
                   }}
                 >
                   View Members
+                </Text>
+              </InvTouchableOpacity>
+            </View>
+          </Modal>
+        )}
+        {isClassModalVisible && (
+          <Modal
+            isVisible={isClassModalVisible}
+            hasBackdrop={true}
+            backdropColor={theme === "dark" ? "#000" : "#121212"}
+            backdropOpacity={0.5}
+            onBackdropPress={() => setIsClassModalVisible(false)}
+            style={[
+              {
+                padding: 0,
+                margin: 0,
+              },
+            ]}
+          >
+            <View
+              style={[
+                {
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  overflow: "hidden",
+                  height: "auto",
+                  paddingHorizontal: 20,
+                  paddingTop: 10,
+                  paddingBottom: Platform.OS === "ios" ? 60 : 20,
+                },
+              ]}
+            >
+              <InvTouchableOpacity
+                style={[
+                  {
+                    flexDirection: "row",
+                    height: 50,
+                    alignItems: "center",
+                  },
+                ]}
+                onPress={() => {
+                  setIsClassModalVisible(false);
+                  navigation.navigate("EditClass", activeClass);
+                }}
+              >
+                <FontAwesome
+                  name="edit"
+                  size={20}
+                  color={theme === "dark" ? "white" : "#424242"}
+                />
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 15,
+                    fontWeight: "600",
+                    color: theme === "dark" ? "#fff" : "#424242",
+                  }}
+                >
+                  Edit Class
+                </Text>
+              </InvTouchableOpacity>
+              <InvTouchableOpacity
+                style={[
+                  {
+                    flexDirection: "row",
+                    height: 50,
+                    alignItems: "center",
+                  },
+                ]}
+                onPress={() => {
+                  setIsClassModalVisible(false);
+                  Alert.alert(
+                    "Delete Class",
+                    `Do you want to continue to delete the class '${activeClass?.classTitle}'`,
+                    [
+                      {
+                        text: "No",
+                      },
+                      {
+                        text: "Yes",
+                        style: "destructive",
+                        onPress: handleDeleteClass,
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Ionicons
+                  name="ios-trash-bin"
+                  size={20}
+                  color={Colors.danger}
+                />
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 15,
+                    fontWeight: "600",
+                    color: Colors.danger,
+                  }}
+                >
+                  Delete Class
                 </Text>
               </InvTouchableOpacity>
             </View>

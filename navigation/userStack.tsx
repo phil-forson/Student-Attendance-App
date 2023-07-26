@@ -23,6 +23,7 @@ import ClassDetails from "../screens/ClassDetails";
 import ClockInScreen from "../screens/ClockInScreen";
 import AttendanceScreen from "../screens/AttendanceScreen";
 import MyCourses from "../screens/MyCourses";
+import EditClass from "../screens/EditClass";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -63,6 +64,7 @@ function MainStackNavigator() {
         <MainStack.Screen name="JoinCourse" component={JoinCourse} />
         <MainStack.Screen name="CreateCourse" component={CreateCourse} />
         <MainStack.Screen name="CreateClass" component={CreateClass} />
+        <MainStack.Screen name="EditClass" component={EditClass} />
       </MainStack.Group>
     </MainStack.Navigator>
   );

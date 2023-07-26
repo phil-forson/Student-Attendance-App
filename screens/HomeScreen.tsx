@@ -11,7 +11,14 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   InvTouchableOpacity,
   Text,
@@ -41,17 +48,24 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import FullWidthButton from "../components/FullWidthButton";
 import ClassCard from "../components/ClassCard";
-import { convertToDayString, convertToHHMM } from "../utils/utils";
+import {
+  convertToDayString,
+  convertToHHMM,
+  getClassesTodayAndFuture,
+  groupAndSortClasses,
+} from "../utils/utils";
 import { IClass, UserData } from "../types";
 import Colors from "../constants/Colors";
 import useUser from "../hooks/useUser";
 import Loading from "../components/Loading";
 import { UserContext } from "../contexts/UserContext";
 import GetStarted from "../components/GetStarted";
+import { getAllClassesData, getAllCoursesData } from "../utils/helpers";
+import CourseClassCard from "../components/CourseClassCard";
 
 var width = Dimensions.get("window").width;
 
-const data: any[]= [
+const data: any[] = [
   {
     id: "1",
     courseName: "Agriculture",
@@ -89,17 +103,21 @@ const data: any[]= [
 export const HomeScreen = ({ navigation, route }: any) => {
   const theme = useColorScheme();
 
+  const { userData, isLoading: isUserDataLoading } = useUser();
 
+  const [areCoursesLoading, setAreCoursesLoading] = useState<boolean>(false);
 
-  const { userData, isLoading: isUserDataLoading } = useUser() 
+  const [areClassesLoading, setAreClassesLoading] = useState<boolean>(false);
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
 
   const [isStudent, setIsStudent] = useState<boolean>(true);
 
+  const [todaysClasses, setTodaysClasses] = useState<IClass[]>([]);
+
+  const [onGoingClasses, setOngoingClasses] = useState<IClass[]>([]);
+
   const onRefresh = useCallback(() => {}, []);
-
-
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -112,7 +130,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
   }, []);
 
   const renderItem: ListRenderItem<IClass> = ({ item }) => {
-    return <ClassCard courseClass={item} navigation={navigation} />;
+    return <CourseClassCard courseClass={item} navigation={navigation} />;
   };
 
   const courseClassDeets = {
@@ -123,7 +141,41 @@ export const HomeScreen = ({ navigation, route }: any) => {
     duration: "7h 50m",
   };
 
+  useEffect(() => {
+    if (isUserDataLoading) {
+      return;
+    }
 
+    const courses =
+      userData.status === "Student"
+        ? userData.enrolledCourses
+        : userData.createdCourses;
+
+    console.log("user courses ", courses);
+    console.log("user data courses ", userData.enrolledCourses);
+
+    if (courses.length > 0) {
+      getAllCoursesData(courses, setAreCoursesLoading).then((res) => {
+        console.log("res ", res);
+        const coursesClasses = res.flatMap((item) => item?.courseClasses);
+        console.log("resss ", coursesClasses);
+
+        if (coursesClasses.length > 0) {
+          getAllClassesData(coursesClasses, setAreClassesLoading).then(
+            ({ enrolledClasses }) => {
+              const todaysClasses = getClassesTodayAndFuture(enrolledClasses);
+              console.log("today's classes ", todaysClasses);
+              const { ongoing, past, upcoming } =
+                groupAndSortClasses(todaysClasses);
+              setTodaysClasses(todaysClasses);
+              setOngoingClasses(ongoing);
+            }
+          );
+        }
+      });
+    }
+    // const classesHappeningToday = getClassesTodayAndFuture(userData.courseClasses)
+  }, [isUserDataLoading, userData]);
 
   if (isUserDataLoading) {
     return <Loading />;
@@ -201,40 +253,115 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 </View>
               </View>
             )}
-            {(userData?.status === "Student" && !userData?.enrolledCourses?.length) || (userData?.status==="Teacher" && !userData?.createdCourses?.length) && (
-              <GetStarted userStatus={userData?.status} navigation={navigation}/>
-            )}
-
-            {false && (
-              <>
-                <Text style={[styles.bold, styles.smy]}>Log Files</Text>
-
-                <View
-                  style={[styles.flexRow, styles.justifyBetween]}
-                  darkColor={Colors.dark.secondaryGrey}
-                >
-                  <TouchableOpacity style={[{ height: 50 }]}></TouchableOpacity>
-                  <TouchableOpacity></TouchableOpacity>
-                </View>
-              </>
-            )}
+            {(userData?.status === "Student" &&
+              !userData?.enrolledCourses?.length) ||
+              (userData?.status === "Teacher" &&
+                !userData?.createdCourses?.length && (
+                  <GetStarted
+                    userStatus={userData?.status}
+                    navigation={navigation}
+                  />
+                ))}
           </View>
-          {false && (
-            <Text style={[styles.bold, styles.my, styles.transBg]}>
-              Upcoming Classes
-            </Text>
-          )}
-          {false && (
-            <BottomSheetFlatList
-              data={data}
-              keyExtractor={(courseClass: IClass) => courseClass.uid}
-              renderItem={renderItem}
-              ItemSeparatorComponent={() => (
-                <CardSeparator viewStyle={[styles.transBg]} />
+          {onGoingClasses?.length > 0 && (
+            <>
+              <Text
+                style={[styles.bold, styles.transBg, styles.contentContainer]}
+              >
+                Ongoing
+              </Text>
+              {!areClassesLoading ? (
+                <View style={[styles.transBg]}>
+                  <FlatList
+                    data={onGoingClasses}
+                    keyExtractor={(courseClass: IClass) => courseClass.uid}
+                    renderItem={renderItem}
+                    ItemSeparatorComponent={() => (
+                      <CardSeparator viewStyle={[styles.transBg]} />
+                    )}
+                    contentContainerStyle={[
+                      styles.contentContainer,
+                      styles.transBg,
+                    ]}
+                  />
+                </View>
+              ) : (
+                <View
+                  style={[
+                    styles.transBg,
+                    styles.justifyCenter,
+                    styles.itemsCenter,
+                    { height: 100 },
+                  ]}
+                >
+                  <ActivityIndicator />
+                </View>
               )}
-              contentContainerStyle={[styles.contentContainer, styles.transBg]}
-            />
+            </>
           )}
+
+          {(userData?.status === "Student" &&
+            userData?.enrolledCourses?.length) ||
+            (userData?.status === "Teacher" &&
+              userData?.createdCourses?.length && (
+                <>
+                  <Text
+                    style={[
+                      styles.bold,
+                      styles.transBg,
+                      styles.contentContainer,
+                    ]}
+                  >
+                    Today
+                  </Text>
+                  {!areClassesLoading ? (
+                    todaysClasses?.length > 0 ? (
+                      <View style={[styles.transBg]}>
+                        <FlatList
+                          data={todaysClasses}
+                          keyExtractor={(courseClass: IClass) =>
+                            courseClass.uid
+                          }
+                          renderItem={renderItem}
+                          ItemSeparatorComponent={() => (
+                            <CardSeparator viewStyle={[styles.transBg]} />
+                          )}
+                          contentContainerStyle={[
+                            styles.contentContainer,
+                            styles.transBg,
+                          ]}
+                        />
+                      </View>
+                    ) : (
+                      <View
+                        style={[
+                          styles.transBg,
+                          styles.contentContainer,
+                          styles.justifyCenter,
+                          styles.itemsCenter,
+                          { height: 100 },
+                        ]}
+                      >
+                        <Text style={[styles.semiBold]}>
+                          No classes for today
+                        </Text>
+                      </View>
+                    )
+                  ) : (
+                    <View
+                      style={[
+                        styles.transBg,
+                        styles.justifyCenter,
+                        styles.itemsCenter,
+                        { height: 100 },
+                      ]}
+                    >
+                      <ActivityIndicator />
+                    </View>
+                  )}
+                </>
+              ))}
+
           <InvTouchableOpacity
             style={[
               styles.addCourseIcon,
@@ -246,9 +373,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
             ]}
             onPress={() => {
               navigation.navigate(
-                userData.status === "Student"
-                  ? "JoinCourse"
-                  : "CreateCourse"
+                userData.status === "Student" ? "JoinCourse" : "CreateCourse"
               );
             }}
             darkColor="#0c0c0c"

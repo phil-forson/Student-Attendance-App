@@ -38,6 +38,7 @@ export type UserStackParamList = {
   CreateClass: undefined;
   CourseDetails: undefined;
   ClassDetails: undefined;
+  EditClass: undefined
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -124,8 +125,9 @@ export interface IClass {
 }
 
 export interface GroupedClasses {
-  upcomingClasses: IClass[];
-  pastClasses: IClass[];
+  upcoming: IClass[];
+  ongoing: IClass[];
+  past: IClass[];
 }
 
 export interface IAttendance {

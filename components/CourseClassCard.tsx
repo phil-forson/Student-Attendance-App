@@ -1,19 +1,30 @@
-import { Pressable, useColorScheme } from 'react-native';
-import { styles } from '../styles/styles'
-import { IClass } from '../types';
-import { calculateDuration, convertToDayString, convertToHHMM } from '../utils/utils'
-import { View, Text } from './Themed'
-import React from 'react'
-import Colors from '../constants/Colors';
-import { MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons"
+import { Pressable, useColorScheme } from "react-native";
+import { styles } from "../styles/styles";
+import { IClass } from "../types";
+import {
+  calculateDuration,
+  convertToDayString,
+  convertToHHMM,
+  truncateTextWithEllipsis,
+} from "../utils/utils";
+import { View, Text } from "./Themed";
+import React from "react";
+import Colors from "../constants/Colors";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 
-export default function CourseClassCard({  courseClass,
-    navigation,
-  }: {
-    courseClass: IClass;
-    navigation: any;
-  }) {
-    const theme = useColorScheme()
+export default function CourseClassCard({
+  courseClass,
+  navigation,
+  onPress,
+}: {
+  courseClass: IClass;
+  navigation: any;
+  onPress?: () => void;
+}) {
+  const theme = useColorScheme();
+  const navigateToClassDetails = () => {
+    navigation.navigate("ClassDetails", courseClass);
+  };
   return (
     <>
       <Pressable
@@ -32,7 +43,7 @@ export default function CourseClassCard({  courseClass,
                 : Colors.light.primaryGrey,
           },
         ]}
-        onPress={() => navigation.navigate("ClassDetails", courseClass)}
+        onPress={onPress ?? navigateToClassDetails}
       >
         <View
           style={[
@@ -46,8 +57,10 @@ export default function CourseClassCard({  courseClass,
           ]}
         >
           <View style={[styles.transBg]}>
-            <Text style={[styles.semiBold]}>{courseClass.classTitle}</Text>
-            <Text style={[styles.semiBold]}>{convertToDayString(courseClass.classDate.toDate())}</Text>
+            <Text style={[styles.semiBold]}>{truncateTextWithEllipsis(courseClass.courseTitle, 21) + "- " + courseClass.classTitle}</Text>
+            <Text style={[styles.semiBold]}>
+              {convertToDayString(courseClass.classDate.toDate())}
+            </Text>
           </View>
           <View style={[styles.flexRow, styles.justifyBetween, styles.transBg]}>
             <View
@@ -97,7 +110,12 @@ export default function CourseClassCard({  courseClass,
                 color="#2f95dc"
               />
 
-              <Text>{calculateDuration(courseClass.classStartTime, courseClass.classEndTime)}</Text>
+              <Text>
+                {calculateDuration(
+                  courseClass.classStartTime,
+                  courseClass.classEndTime
+                )}
+              </Text>
             </View>
           </View>
         </View>
@@ -109,5 +127,5 @@ export default function CourseClassCard({  courseClass,
         ]}
       /> */}
     </>
-  )
+  );
 }

@@ -12,12 +12,9 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import useColorScheme from "../hooks/useColorScheme";
 import axios from "axios";
 import { CourseContext } from "../contexts/CourseContext";
-import {
-  Timestamp,
-} from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import { db } from "../config/firebase";
 import uuid from "react-native-uuid";
-import { ClassContext } from "../contexts/ClassContext";
 import StyledInput from "../components/StyledInput";
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
@@ -28,12 +25,12 @@ import {
   isStartTimeGreater,
   subtract30MinutesFromTime,
 } from "../utils/utils";
-import { createClassInCourse } from "../utils/helpers";
+import { createClassInCourse, updateClassDetails } from "../utils/helpers";
 import { IClass } from "../types";
+import useClass from "../hooks/useClass";
 
-export default function CreateClass({ navigation, route }: any) {
+export default function EditClass({ navigation, route }: {navigation: any, route: any}) {
   const [classTitle, setClassTitle] = useState("");
-  const [courseClassesIds, setCourseClassesIds] = useState([]);
   const [classStartTime, setClassStartTime] = useState<Date | null>(null);
   const [classEndTime, setClassEndTime] = useState<Date | null>(null);
   const [classStartTimeError, setClassStartTimeError] =
@@ -42,8 +39,6 @@ export default function CreateClass({ navigation, route }: any) {
   const [classLocation, setClassLocation] = useState("");
   const [classLocationSearch, setClassLocationSearch] = useState<string>("");
   const [classDate, setClassDate] = useState<Date>();
-  const [showDate, setShowDate] = useState(false);
-  const [showTime, setShowTime] = useState(false);
   const [places, setPlaces] = useState([]);
   const [isItemSelected, setIsItemSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,15 +48,24 @@ export default function CreateClass({ navigation, route }: any) {
     useState(false);
   const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
 
-  const { course } = useContext(CourseContext);
-
-  const { setCourseClassesData } = useContext(ClassContext);
-
   const theme = useColorScheme();
 
+  // const { classData, isLoading: isClassDataLoading} = useClass(route.params)
+
   useLayoutEffect(() => {
-    console.log(route.params);
+    console.log('params ', route.params);
+    const classData: IClass = route.params;
+    console.log('logging class data ', classData)
+        setClassTitle(classData?.classTitle)
+        setClassLocation(classData.classLocation)
+        setClassLocationSearch(classData?.classLocation.name.split(',').slice(0,2).join(','))
+        setIsItemSelected(true)
+        setClassDate(classData?.classDate.toDate())
+        setClassStartTime(classData?.classStartTime.toDate())
+        setClassEndTime(classData?.classEndTime.toDate())
   }, []);
+
+ 
   const showDatePicker = () => {
     console.log("opening modal");
     setDatePickerVisibility(true);
@@ -210,7 +214,7 @@ export default function CreateClass({ navigation, route }: any) {
     setClassTitle(title);
   };
 
-  const createClass = async () => {
+  const editClass = async () => {
     setIsLoading(true);
     if (
       !(
@@ -225,12 +229,12 @@ export default function CreateClass({ navigation, route }: any) {
       return;
     }
 
+    console.log("yeyee");
 
     try {
-      const uid = generateUid();
       const data: IClass = {
-        uid: uid.toString(),
-        courseId: route.params.uid,
+        uid: route.params.uid,
+        courseId: route.params.courseId,
         courseTitle: route.params.courseTitle,
         classTitle: classTitle,
         classLocation: classLocation,
@@ -240,7 +244,9 @@ export default function CreateClass({ navigation, route }: any) {
         classStatus: "upcoming",
       };
 
-      await createClassInCourse(route.params.uid, data);
+      console.log('data ', data)
+      await updateClassDetails(route.params.uid, data)
+      //   await createClassInCourse(route.params.uid, data);
       navigation.goBack();
     } catch (error) {
       console.log(error);
@@ -262,7 +268,7 @@ export default function CreateClass({ navigation, route }: any) {
           <TouchableOpacity
             lightColor="#fff"
             darkColor="#121212"
-            onPress={() => createClass()}
+            onPress={() => editClass()}
             style={{}}
             disabled={
               !(
@@ -311,7 +317,7 @@ export default function CreateClass({ navigation, route }: any) {
                 fontSize: 16,
               }}
             >
-              Create
+              Edit
             </Text>
           </TouchableOpacity>
         );
