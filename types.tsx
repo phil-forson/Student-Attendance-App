@@ -87,14 +87,7 @@ export interface ICourseDetails {
   teachers: Array<any>;
 }
 
-export interface IClassDetails {
-  id: string;
-  courseName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
-}
+
 
 export interface UserData {
   uid?: string;
@@ -119,12 +112,23 @@ export interface ICourse {
 }
 
 export interface IClass {
-  className: string;
-  classId: string;
+  classTitle: string;
+  uid: string;
   classLocation: any;
   classStartTime: Timestamp;
   classEndTime: Timestamp;
   classDate: Timestamp;
   courseId: string;
+  courseTitle: string;
   classStatus: string;
+}
+
+export interface GroupedClasses {
+  upcomingClasses: IClass[];
+  pastClasses: IClass[];
+}
+
+export interface IAttendance {
+  clockIn: Date | null
+  clockOut: Date | null
 }

@@ -17,7 +17,6 @@ import React, {
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import { AntDesign, Ionicons, Fontisto } from "@expo/vector-icons";
-import { IClassDetails } from "../types";
 import { convertToDayString, convertToHHMM } from "../utils/utils";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
@@ -26,93 +25,25 @@ import { useSwipe } from "../hooks/useSwipe";
 import Modal from "react-native-modal";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Image } from "react-native";
-
-const data: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "2",
-    courseName: "Physics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "3",
-    courseName: "Chemistry",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "4",
-    courseName: "Mathematics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
-
-const upcomingData: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
-
-const pastData: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "2",
-    courseName: "Physics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "3",
-    courseName: "Chemistry",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
+import { IClass } from "../types";
+import useCourse from "../hooks/useCourse";
+import useClass from "../hooks/useClass";
+import Loading from "../components/Loading";
 
 export default function ClassDetails({ navigation, route }: any) {
   const [courseClass, setCourseClass] = useState<any>();
 
-  const [classData, setClassData] = useState(data);
-
   const [activeTab, setActiveTab] = useState<string>("All");
+
+  const { classData, isLoading: isClassDataLoading } = useClass(
+    route.params.uid
+  );
 
   const [isModalVisible, setModalVisible] = useState(false);
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] =
     useState<boolean>(false);
 
-  const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 6);
 
   const sheetRef = useRef<BottomSheet>(null);
 
@@ -133,50 +64,16 @@ export default function ClassDetails({ navigation, route }: any) {
     }
   }, []);
 
-  function onSwipeLeft() {
-    console.log("SWIPE_LEFT");
 
-    if (activeTab === "Past") {
-      return;
-    }
-    if (activeTab === "All") {
-      setActiveTab("Upcoming");
-    }
-    if (activeTab === "Upcoming") {
-      setActiveTab("Past");
-    }
-  }
-
-  function onSwipeRight() {
-    console.log("SWIPE_RIGHT");
-    if (activeTab === "All") {
-      return;
-    }
-    if (activeTab === "Upcoming") {
-      setActiveTab("All");
-    }
-    if (activeTab === "Past") {
-      setActiveTab("Upcoming");
-    }
-  }
 
   useLayoutEffect(() => {
     setCourseClass(route.params);
     console.log("class details ", route.params);
   }, []);
 
-  useEffect(() => {
-    if (activeTab === "All") {
-      setClassData(data);
-    } else if (activeTab === "Upcoming") {
-      setClassData(upcomingData);
-    } else if (activeTab === "Past") {
-      setClassData(pastData);
-    }
-  }, [activeTab]);
   const theme = useColorScheme();
 
-  const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
+  const renderItem: ListRenderItem<IClass> = ({ item }) => {
     return <ClassCard courseClass={item} navigation={navigation} />;
   };
 
@@ -199,6 +96,10 @@ export default function ClassDetails({ navigation, route }: any) {
     ),
     []
   );
+
+  if(isClassDataLoading){
+    return <Loading />
+  }
 
   return (
     <SafeAreaView
@@ -244,11 +145,17 @@ export default function ClassDetails({ navigation, route }: any) {
                 darkColor={Colors.dark.text}
                 style={[styles.bold, styles.largeText]}
               >
-                {courseClass?.courseName}
+                {classData?.classTitle}
               </Text>
             </View>
           </View>
-          <View style={[styles.flexRow, styles.itemsCenter, {marginBottom: 20, marginTop: 10}]}>
+          <View
+            style={[
+              styles.flexRow,
+              styles.itemsCenter,
+              { marginBottom: 20, marginTop: 10 },
+            ]}
+          >
             <Fontisto
               name="date"
               size={20}
@@ -264,11 +171,11 @@ export default function ClassDetails({ navigation, route }: any) {
                 { color: Colors.dark.tetiary },
               ]}
             >
-              {convertToDayString(new Date(Date.now()))}
+              {classData && convertToDayString(classData?.classDate.toDate())}
             </Text>
           </View>
           <View
-            style={[styles.flexRow, styles.itemsCenter, { marginBottom: 40 }]}
+            style={[styles.flexRow, styles.itemsCenter, { marginBottom: 20 }]}
           >
             <Ionicons
               name="location"
@@ -277,15 +184,15 @@ export default function ClassDetails({ navigation, route }: any) {
               style={[{ paddingRight: 20 }]}
             />
             <Text
-              style={[styles.bold, styles.mediumText, styles.my]}
+              style={[styles.bold, styles.mediumText]}
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              JB Danquah Hall
+              {classData?.classLocation.name.split(",").slice(0, 2).join(",")}
             </Text>
           </View>
           <View
-            style={[styles.flexRow, styles.itemsCenter, { marginBottom: 40 }]}
+            style={[styles.flexRow, styles.itemsCenter, { marginBottom: 20, marginTop: 10 }]}
           >
             <Ionicons
               name="md-book"
@@ -303,7 +210,7 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {convertToHHMM(new Date(Date.now()))}
+              {classData && convertToHHMM(classData?.classStartTime.toDate())}
             </Text>
             <Text
               style={[
@@ -327,7 +234,7 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {convertToHHMM(new Date(Date.now()))}
+              {classData && convertToHHMM(classData?.classEndTime.toDate())}
             </Text>
           </View>
 

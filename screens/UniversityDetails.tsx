@@ -13,6 +13,7 @@ import { useSafeAreaFrame } from "react-native-safe-area-context";
 import axios from "axios";
 import { RootStackScreenProps } from "../types";
 import FullWidthButton from "../components/FullWidthButton";
+import Colors from "../constants/Colors";
 
 export default function UniversityDetails({
   navigation,
@@ -66,10 +67,15 @@ export default function UniversityDetails({
 
     console.log(data);
 
-    navigation.navigate("UserStatus", data)
+    navigation.navigate("UserStatus", data);
   };
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme === "dark" ? "#000" : "#fff" }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: theme === "dark" ? "#000" : "#fff" },
+      ]}
+    >
       <View
         style={[
           styles.subContainer,
@@ -111,10 +117,10 @@ export default function UniversityDetails({
                           setUniversitySearch(item.name);
                           setIsItemSelected(true);
                         }}
+                        darkColor={Colors.dark.secondaryGrey}
+                        lightColor={Colors.light.secondaryGrey}
                         style={[
                           {
-                            backgroundColor:
-                              theme === "light" ? "#fff" : "#121212",
                             padding: 10,
                             height: 55,
                             justifyContent: "center",

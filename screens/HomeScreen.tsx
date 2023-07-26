@@ -42,7 +42,7 @@ import BottomSheet, {
 import FullWidthButton from "../components/FullWidthButton";
 import ClassCard from "../components/ClassCard";
 import { convertToDayString, convertToHHMM } from "../utils/utils";
-import { IClassDetails, UserData } from "../types";
+import { IClass, UserData } from "../types";
 import Colors from "../constants/Colors";
 import useUser from "../hooks/useUser";
 import Loading from "../components/Loading";
@@ -51,7 +51,7 @@ import GetStarted from "../components/GetStarted";
 
 var width = Dimensions.get("window").width;
 
-const data: IClassDetails[] = [
+const data: any[]= [
   {
     id: "1",
     courseName: "Agriculture",
@@ -111,7 +111,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
     console.log("handleSheetChanges", index);
   }, []);
 
-  const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
+  const renderItem: ListRenderItem<IClass> = ({ item }) => {
     return <ClassCard courseClass={item} navigation={navigation} />;
   };
 
@@ -227,7 +227,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           {false && (
             <BottomSheetFlatList
               data={data}
-              keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+              keyExtractor={(courseClass: IClass) => courseClass.uid}
               renderItem={renderItem}
               ItemSeparatorComponent={() => (
                 <CardSeparator viewStyle={[styles.transBg]} />

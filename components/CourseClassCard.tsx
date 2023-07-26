@@ -1,25 +1,19 @@
-import useColorScheme from "../hooks/useColorScheme";
-import { styles } from "../styles/styles";
-import { IClass} from "../types";
-import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
-import React from "react";
-import { Pressable, StyleSheet } from "react-native";
-import { calculateDuration, convertToDayString, convertToHHMM } from "../utils/utils";
-import {
-  AntDesign,
-  MaterialIcons,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import Colors from "../constants/Colors";
+import { Pressable, useColorScheme } from 'react-native';
+import { styles } from '../styles/styles'
+import { IClass } from '../types';
+import { calculateDuration, convertToDayString, convertToHHMM } from '../utils/utils'
+import { View, Text } from './Themed'
+import React from 'react'
+import Colors from '../constants/Colors';
+import { MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons"
 
-export default function ClassCard({
-  courseClass,
-  navigation,
-}: {
-  courseClass: IClass;
-  navigation: any;
-}) {
-  const theme = useColorScheme();
+export default function CourseClassCard({  courseClass,
+    navigation,
+  }: {
+    courseClass: IClass;
+    navigation: any;
+  }) {
+    const theme = useColorScheme()
   return (
     <>
       <Pressable
@@ -115,5 +109,5 @@ export default function ClassCard({
         ]}
       /> */}
     </>
-  );
+  )
 }

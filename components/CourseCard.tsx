@@ -1,6 +1,6 @@
 import useColorScheme from "../hooks/useColorScheme";
 import { styles } from "../styles/styles";
-import { IClassDetails, ICourse } from "../types";
+import {  ICourse } from "../types";
 import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
 import React, { useEffect } from "react";
 import {
@@ -61,9 +61,9 @@ export default function CourseCard({
         >
           <View style={[styles.transBg]}>
             <Text style={[styles.semiBold, styles.largeText]}>
-              {truncateTextWithEllipsis(course.courseTitle, 17)}
+              {truncateTextWithEllipsis(course?.courseTitle, 17)}
             </Text>
-            <Text style={[styles.semiBold]}>{course.lecturerName}</Text>
+            <Text style={[styles.semiBold]}>{course?.lecturerName}</Text>
           </View>
           <View style={[styles.transBg, styles.flexRow, styles.itemsCenter]}>
             <Ionicons
@@ -71,7 +71,7 @@ export default function CourseCard({
               size={30}
               color={theme === "dark" ? "white" : "black"}
             />
-            <Text style={[{ paddingRight: 10 }]}>{course.enrolledStudents.length} students</Text>
+            <Text style={[{ paddingRight: 10 }]}>{course?.enrolledStudents?.length} student{course?.enrolledStudents.length > 1 ? "s": ""}</Text>
           </View>
         </View>
       </Pressable>

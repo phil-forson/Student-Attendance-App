@@ -30,7 +30,6 @@ import { db } from "../config/firebase";
 import useUser from "../hooks/useUser";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
-import uuid from "react-native-uuid";
 import { CourseContext } from "../contexts/CourseContext";
 import Colors from "../constants/Colors";
 import StyledInput from "../components/StyledInput";
@@ -38,6 +37,8 @@ import { styles } from "../styles/styles";
 import useUserData from "../hooks/useUserData";
 import useAuth from "../hooks/useAuth";
 import { UserContext } from "../contexts/UserContext";
+import {  formatStringToCourseCode, generateUid } from "../utils/utils";
+import { isCourseCodeUnique } from "../utils/helpers";
 
 export default function CreateCourse({ navigation }: any) {
   const { user } = useAuth();
@@ -86,10 +87,6 @@ export default function CreateCourse({ navigation }: any) {
     });
   }, [courseTitle, courseCode, isLoading, navigation]);
 
-  const generateCourseCode = () => {
-    return uuid.v4(); // Generate a 6-character unique code using nanoid library
-  };
-
   const handleCourseTitleChange = (title: string) => {
     setCourseTitle(title);
   };
@@ -110,15 +107,23 @@ export default function CreateCourse({ navigation }: any) {
       return;
     }
     try {
-      const uid = generateCourseCode();
-      const courseLinkCode = generateCourseCode();
+
+      const formattedCourseCode = formatStringToCourseCode(courseCode)
+      const isCodeUnique = await isCourseCodeUnique(formattedCourseCode)
+      if(!isCodeUnique){
+        Alert.alert("There is already a course with this course code")
+        console.log('code is not unqiue')
+        return ;
+      }
+
+      console.log('code unique ', isCodeUnique)
+      const uid = generateUid();
       const coursesDocRef = doc(db, "courses", uid.toString());
 
       await setDoc(coursesDocRef, {
         uid: uid,
         courseTitle: courseTitle,
-        courseCode: courseCode,
-        courseLinkCode: courseLinkCode,
+        courseCode: formattedCourseCode,
         creatorId: user?.uid,
         lecturerName: userData?.firstName + " " + userData?.lastName,
         enrolledStudents: [],

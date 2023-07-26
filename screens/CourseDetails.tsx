@@ -1,5 +1,6 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
 import {
+  ActivityIndicator,
   ListRenderItem,
   Platform,
   Pressable,
@@ -17,8 +18,7 @@ import React, {
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { IClassDetails } from "../types";
-import { convertToHHMM } from "../utils/utils";
+import { convertToHHMM, groupAndSortClasses } from "../utils/utils";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
 import ClassCard from "../components/ClassCard";
@@ -27,81 +27,33 @@ import Modal from "react-native-modal";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Image } from "react-native";
 import useUser from "../hooks/useUser";
-
-const data: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "2",
-    courseName: "Physics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "3",
-    courseName: "Chemistry",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "4",
-    courseName: "Mathematics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
-
-const upcomingData: IClassDetails[] = [];
-
-const pastData: IClassDetails[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "2",
-    courseName: "Physics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "3",
-    courseName: "Chemistry",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
+import useCourse from "../hooks/useCourse";
+import { getAllClassesData } from "../utils/helpers";
+import { IClass } from "../types";
+import Loading from "../components/Loading";
 
 export default function CourseDetails({ navigation, route }: any) {
   const [course, setCourse] = useState<any>();
 
-  const [classData, setClassData] = useState(data);
+  
+  const [classesData, setClassesData] = useState<IClass[]>();
+
+  const [pastClasses, setPastClassesData] = useState<IClass[]>([])
+
+  const [upcomingClasses, setUpcomingClassesData] = useState<IClass[]>([])
+
 
   const [activeTab, setActiveTab] = useState<string>("All");
 
   const [isModalVisible, setModalVisible] = useState(false);
 
+  const [areClassesLoading, setClassesLoading] = useState<boolean>(false);
+
   const { userData, isLoading: isUserDataLoading } = useUser();
+
+  const { courseData, isLoading: isCourseDataLoading } = useCourse(
+    route.params.uid
+  );
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] =
     useState<boolean>(false);
@@ -160,17 +112,45 @@ export default function CourseDetails({ navigation, route }: any) {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "All") {
-      setClassData(data);
-    } else if (activeTab === "Upcoming") {
-      setClassData(upcomingData);
-    } else if (activeTab === "Past") {
-      setClassData(pastData);
+    if (isCourseDataLoading) {
+      return;
+    }
+
+    setClassesLoading(true)
+
+    const classes = courseData?.courseClasses ?? [];
+
+    if (classes?.length > 0) {
+      getAllClassesData(classes, setClassesLoading)
+        .then((classesData: IClass[]) => {
+          console.log("Classes data ", classesData);
+          setClassesData(classesData);
+          const {pastClasses, upcomingClasses} = groupAndSortClasses(classesData)
+          setPastClassesData(pastClasses)
+          setUpcomingClassesData(upcomingClasses)
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [isCourseDataLoading, courseData]);
+
+  useEffect(() => {
+    console.log('past classes ', pastClasses)
+    console.log('upcoming classes ', upcomingClasses)
+    if(activeTab === "All"){
+      setClassesData(classesData)
+    }
+    else if(activeTab === "Past"){
+      setClassesData(pastClasses)
+    }
+    else if(activeTab === "Upcoming"){
+      setClassesData(upcomingClasses)
     }
   }, [activeTab]);
   const theme = useColorScheme();
 
-  const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
+  const renderItem: ListRenderItem<IClass> = ({ item }) => {
     return <ClassCard courseClass={item} navigation={navigation} />;
   };
 
@@ -373,10 +353,21 @@ export default function CourseDetails({ navigation, route }: any) {
             </Pressable>
           </View>
         </View>
-        {classData.length > 0 ? (
+
+        {areClassesLoading && (
+          <View
+            style={[{ height: 350 }, styles.justifyCenter, styles.itemsCenter]}
+            onTouchEnd={onTouchEnd}
+            onTouchStart={onTouchStart}
+          >
+            <ActivityIndicator />
+          </View>
+        )}
+
+        {classesData && !areClassesLoading && classesData?.length > 0 && (
           <FlatList
-            data={classData}
-            keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+            data={classesData}
+            keyExtractor={(courseClass: IClass) => courseClass.uid}
             renderItem={renderItem}
             ItemSeparatorComponent={() => (
               <CardSeparator viewStyle={[styles.transBg]} />
@@ -385,7 +376,8 @@ export default function CourseDetails({ navigation, route }: any) {
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           />
-        ) : (
+        )}
+        {classesData && !areClassesLoading && classesData?.length === 0 && (
           <View
             style={[{ height: 350 }, styles.justifyCenter, styles.itemsCenter]}
             onTouchEnd={onTouchEnd}
@@ -434,7 +426,8 @@ export default function CourseDetails({ navigation, route }: any) {
                   },
                 ]}
                 onPress={() => {
-                  navigation.navigate("CreateClass");
+                  navigation.navigate("CreateClass", course);
+                  setModalVisible(false);
                 }}
               >
                 <Ionicons
@@ -533,7 +526,7 @@ export default function CourseDetails({ navigation, route }: any) {
           darkColor="#0c0c0c"
         >
           <AntDesign
-            name={userData.status === "student" ? "eye" : "plus"}
+            name={userData.status === "Student" ? "eye" : "plus"}
             color={"#007bff"}
             size={18}
             style={{ fontWeight: "bold" }}

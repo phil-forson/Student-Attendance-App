@@ -5,20 +5,9 @@ import {
   TouchableOpacity,
   InvTouchableOpacity,
 } from "../components/Themed";
-import React, { useEffect, useState, useContext } from "react";
-import {
-  StyleSheet,
-  Platform,
-  KeyboardAvoidingView,
-  Dimensions,
-  DatePickerIOSComponent,
-  FlatList,
-  Alert,
-} from "react-native";
-import DateTimePicker, {
-  DateTimePickerAndroid,
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
+import React, { useEffect, useState, useContext, useLayoutEffect } from "react";
+import { FlatList, Alert } from "react-native";
+
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import useColorScheme from "../hooks/useColorScheme";
 import axios from "axios";
@@ -33,14 +22,19 @@ import {
   setDoc,
   updateDoc,
   where,
+  Timestamp
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import uuid from "react-native-uuid";
 import { ClassContext } from "../contexts/ClassContext";
-import { StretchOutY } from "react-native-reanimated";
 import StyledInput from "../components/StyledInput";
+import { styles } from "../styles/styles";
+import Colors from "../constants/Colors";
+import { generateUid } from "../utils/utils";
+import { createClassInCourse } from "../utils/helpers";
+import { IClass } from "../types";
 
-export default function CreateClass({ navigation }: any) {
+export default function CreateClass({ navigation, route }: any) {
   const [classTitle, setClassTitle] = useState("");
   const [courseClassesIds, setCourseClassesIds] = useState([]);
   const [classStartTime, setClassStartTime] = useState<Date | null>(null);
@@ -68,6 +62,9 @@ export default function CreateClass({ navigation }: any) {
 
   const theme = useColorScheme();
 
+  useLayoutEffect(() => {
+    console.log(route.params);
+  }, []);
   const showDatePicker = () => {
     console.log("opening modal");
     setDatePickerVisibility(true);
@@ -173,7 +170,10 @@ export default function CreateClass({ navigation }: any) {
           setPlaces(placesData);
           setIsPlacesLoading(false);
         })
-        .catch((e) => console.log("places error ", e));
+        .catch((e) => {
+          setIsPlacesLoading(false);
+          console.log("places error ", e);
+        });
     } catch (error) {
       setIsPlacesLoading(false);
       // Handle error
@@ -203,8 +203,37 @@ export default function CreateClass({ navigation }: any) {
       setIsLoading(false);
       return;
     }
-    
-    // navigation.goBack();
+
+    console.log("yeyee");
+    setIsLoading(false);
+
+    try {
+      const uid = generateUid();
+      const data: IClass = {
+        uid: uid.toString(),
+        courseId: route.params.uid,
+        courseTitle: route.params.courseTitle,
+        classTitle: classTitle,
+        classLocation: classLocation,
+        classDate: Timestamp.fromDate(classDate),
+        classStartTime: Timestamp.fromDate(classStartTime),
+        classEndTime: Timestamp.fromDate(classEndTime),
+        classStatus: "upcoming",
+      }
+
+      await createClassInCourse(route.params.uid, data)
+      navigation.goBack()
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDropdownItemPressed = (item: any) => {
+    setClassLocation(item);
+    setClassLocationSearch(item?.name?.split(",").slice(0, 2).join(","));
+    setIsItemSelected(true);
   };
 
   useEffect(() => {
@@ -281,14 +310,12 @@ export default function CreateClass({ navigation }: any) {
     classEndTimeError,
   ]);
 
-
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>
+    <View style={[styles.container, styles.contentContainer]}>
+      <Text style={styles.mediumText}>
         Enter the following details to create a class
       </Text>
-      <View style={styles.inputContainer}>
+      <View style={styles.mmy}>
         <StyledInput
           keyboardType="default"
           secure={false}
@@ -298,7 +325,7 @@ export default function CreateClass({ navigation }: any) {
           setValue={handleClassTitleChange}
         />
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
+      <View style={[styles.mmy]}>
         <StyledInput
           placeholder="Class Location"
           placeholderTextColor="gray"
@@ -313,16 +340,15 @@ export default function CreateClass({ navigation }: any) {
             renderItem={({ item }: any) => (
               <TouchableOpacity
                 onPress={() => {
-                  setClassLocation(item);
-                  setClassLocationSearch(
-                    item.name.split(",").slice(0, 2).join(",")
-                  );
-                  setIsItemSelected(true);
+                  handleDropdownItemPressed(item);
                 }}
+                darkColor={Colors.dark.secondaryGrey}
+                lightColor={Colors.light.secondaryGrey}
                 style={[
                   {
-                    backgroundColor: theme === "light" ? "#fff" : "#121212",
                     padding: 10,
+                    height: 55,
+                    justifyContent: "center",
                   },
                 ]}
               >
@@ -347,14 +373,19 @@ export default function CreateClass({ navigation }: any) {
           </View>
         )}
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
+      <View style={[styles.mmy]}>
         <InvTouchableOpacity
-          style={{
-            borderBottomColor: "#C7C7CD",
-            borderBottomWidth: 1,
-            borderRadius: 4,
-            paddingVertical: 12,
-          }}
+          style={[
+            {
+              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+              borderWidth: classDate ? 1 : 0,
+              borderColor: "#C7c7c7",
+              borderRadius: 4,
+              height: 50,
+              paddingHorizontal: 20,
+            },
+            styles.justifyCenter,
+          ]}
           onPress={showDatePicker}
         >
           <Text
@@ -381,14 +412,20 @@ export default function CreateClass({ navigation }: any) {
           </Text>
         </InvTouchableOpacity>
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
+      <View style={[styles.mmy]}>
         <InvTouchableOpacity
-          style={{
-            borderBottomColor: !classStartTimeError ? "#C7C7CD" : "red",
-            borderBottomWidth: 1,
-            borderRadius: 4,
-            paddingVertical: 12,
-          }}
+          style={[
+            {
+              borderColor: !classStartTimeError ? "#C7C7CD" : "red",
+              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+              borderWidth: classStartTimeError || classStartTime ? 1 : 0,
+              height: 50,
+              paddingHorizontal: 20,
+              borderRadius: 4,
+              paddingVertical: 12,
+            },
+            styles.justifyCenter,
+          ]}
           onPress={showStartTimePicker}
         >
           <Text
@@ -419,14 +456,20 @@ export default function CreateClass({ navigation }: any) {
           </Text>
         )}
       </View>
-      <View style={[styles.inputContainer, styles.marginVertical]}>
+      <View style={[styles.mmy]}>
         <InvTouchableOpacity
-          style={{
-            borderBottomColor: !classEndTimeError ? "#C7C7CD" : "red",
-            borderBottomWidth: 1,
-            borderRadius: 4,
-            paddingVertical: 12,
-          }}
+          style={[
+            {
+              borderColor: !classEndTimeError ? "#C7C7CD" : "red",
+              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+              borderWidth: classEndTimeError || classEndTime ? 1 : 0,
+              height: 50,
+              paddingHorizontal: 20,
+              borderRadius: 4,
+              paddingVertical: 12,
+            },
+            styles.justifyCenter,
+          ]}
           onPress={showEndTimePicker}
         >
           <Text
@@ -481,21 +524,3 @@ export default function CreateClass({ navigation }: any) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  header: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  inputContainer: {
-    marginTop: 30,
-  },
-  marginVertical: {
-    marginVertical: 0,
-  },
-});
