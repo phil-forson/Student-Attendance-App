@@ -36,12 +36,10 @@ export default function MyCourses({ navigation, route }: any) {
   const [coursesData, setCoursesData] = useState<Array<ICourse>>([]);
 
   useEffect(() => {
-    if (isUserDataLoading) {
+
+    if(isUserDataLoading){
       return;
     }
-
-    const createdCourses = userData.createdCourses
-    const enrolledCourses = userData.enrolledCourses 
     const courses =
       userData.status === "Student"
         ? userData.enrolledCourses

@@ -54,7 +54,7 @@ export default function CourseDetails({ navigation, route }: any) {
   const [isClassModalVisible, setIsClassModalVisible] =
     useState<boolean>(false);
 
-  const [areClassesLoading, setClassesLoading] = useState<boolean>(false);
+  const [areClassesLoading, setClassesLoading] = useState<boolean>(true);
 
   const [activeClass, setActiveClass] = useState<IClass>();
 
@@ -145,33 +145,32 @@ export default function CourseDetails({ navigation, route }: any) {
   }, []);
 
   useEffect(() => {
+    setClassesLoading(true);
 
-      setClassesLoading(true);
+    const classes = courseData?.courseClasses ?? [];
 
-      const classes = courseData?.courseClasses ?? [];
+    if (!(classes?.length > 0)) {
+      setClassesLoading(false);
+      setClassesData([]);
+      setAllClassesData([]);
+      setPastClassesData([]);
+      setUpcomingClassesData([]);
+    }
 
-      if (!(classes?.length > 0)) {
-        setClassesLoading(false);
-        setClassesData([]);
-        setAllClassesData([]);
-        setPastClassesData([]);
-        setUpcomingClassesData([]);
-      }
-
-      if (classes?.length > 0) {
-        getAllClassesData(classes, setClassesLoading)
-          .then(({ enrolledClasses}) => {
-            setAllClassesData(enrolledClasses);
-            setClassesData(enrolledClasses);
-            const groupedClasses = groupAndSortClasses(enrolledClasses);
-            setPastClassesData(groupedClasses.past);
-            setUpcomingClassesData(groupedClasses.upcoming);
-            setOngoingClassesData(groupedClasses.ongoing);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
+    if (classes?.length > 0) {
+      getAllClassesData(classes, setClassesLoading)
+        .then(({ enrolledClasses }) => {
+          setAllClassesData(enrolledClasses);
+          setClassesData(enrolledClasses);
+          const groupedClasses = groupAndSortClasses(enrolledClasses);
+          setPastClassesData(groupedClasses.past);
+          setUpcomingClassesData(groupedClasses.upcoming);
+          setOngoingClassesData(groupedClasses.ongoing);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }, [isCourseDataLoading, courseData]);
 
   useEffect(() => {
@@ -190,16 +189,20 @@ export default function CourseDetails({ navigation, route }: any) {
   const theme = useColorScheme();
 
   const renderItem: ListRenderItem<IClass> = ({ item }) => {
-    return (
-      <ClassCard
-        courseClass={item}
-        navigation={navigation}
-        onPress={() => {
-          setIsClassModalVisible(true);
-          setActiveClass(item);
-        }}
-      />
-    );
+    if (userData.status === "Teacher") {
+      return (
+        <ClassCard
+          courseClass={item}
+          navigation={navigation}
+          onPress={() => {
+            setIsClassModalVisible(true);
+            setActiveClass(item);
+          }}
+        />
+      );
+    } else {
+      return <ClassCard courseClass={item} navigation={navigation} />;
+    }
   };
 
   const renderBottomSheetItem = useCallback(
@@ -445,7 +448,7 @@ export default function CourseDetails({ navigation, route }: any) {
             onTouchEnd={onTouchEnd}
           />
         )}
-        {classesData && !areClassesLoading && classesData?.length === 0 && (
+        {!areClassesLoading && classesData?.length === 0 && (
           <View
             style={[{ height: 350 }, styles.justifyCenter, styles.itemsCenter]}
             onTouchEnd={onTouchEnd}
@@ -458,7 +461,11 @@ export default function CourseDetails({ navigation, route }: any) {
           <Modal
             isVisible={isModalVisible}
             hasBackdrop={true}
-            backdropColor={theme === "dark" ? "#000" : "#121212"}
+            backdropColor={
+              theme === "dark"
+                ? Colors.dark.primaryGrey
+                : Colors.light.background
+            }
             backdropOpacity={0.5}
             onBackdropPress={() => setModalVisible(false)}
             style={[
@@ -551,7 +558,11 @@ export default function CourseDetails({ navigation, route }: any) {
           <Modal
             isVisible={isClassModalVisible}
             hasBackdrop={true}
-            backdropColor={theme === "dark" ? "#000" : "#121212"}
+            backdropColor={
+              theme === "dark"
+                ? Colors.dark.primaryGrey
+                : Colors.light.background
+            }
             backdropOpacity={0.5}
             onBackdropPress={() => setIsClassModalVisible(false)}
             style={[
@@ -578,6 +589,35 @@ export default function CourseDetails({ navigation, route }: any) {
                 },
               ]}
             >
+              <InvTouchableOpacity
+                style={[
+                  {
+                    flexDirection: "row",
+                    height: 50,
+                    alignItems: "center",
+                  },
+                ]}
+                onPress={() => {
+                  setIsClassModalVisible(false);
+                  navigation.navigate("ClassDetails", activeClass);
+                }}
+              >
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={Colors.light.tabIconSelected}
+                />
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 15,
+                    fontWeight: "600",
+                    color: Colors.light.tabIconSelected,
+                  }}
+                >
+                  View Class Details
+                </Text>
+              </InvTouchableOpacity>
               <InvTouchableOpacity
                 style={[
                   {

@@ -166,3 +166,21 @@ export const getClassesTodayAndFuture = (classes: IClass[]): IClass[] => {
 
   return filteredClasses;
 };
+
+export function calculateDurationInSeconds(startDate: Date, endDate: Date) {
+  // Calculate the difference in milliseconds between the two dates
+  const durationInMilliseconds = endDate.getTime() - startDate.getTime();
+
+  // Convert the milliseconds to seconds
+  const durationInSeconds = Math.floor(durationInMilliseconds / 1000);
+
+  return durationInSeconds;
+}
+
+export const isClassOngoing = (classItem: IClass): boolean => {
+  const now = new Date();
+  const classStartTime = new Date(classItem.classStartTime.toDate());
+  const classEndTime = new Date(classItem.classEndTime.toDate());
+
+  return now >= classStartTime && now <= classEndTime;
+};

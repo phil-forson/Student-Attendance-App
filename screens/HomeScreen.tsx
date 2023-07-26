@@ -63,43 +63,6 @@ import GetStarted from "../components/GetStarted";
 import { getAllClassesData, getAllCoursesData } from "../utils/helpers";
 import CourseClassCard from "../components/CourseClassCard";
 
-var width = Dimensions.get("window").width;
-
-const data: any[] = [
-  {
-    id: "1",
-    courseName: "Agriculture",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "2",
-    courseName: "Physics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "3",
-    courseName: "Chemistry",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-  {
-    id: "4",
-    courseName: "Mathematics",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    duration: "1h 50m",
-    date: convertToHHMM(new Date(Date.now())),
-  },
-];
-
 export const HomeScreen = ({ navigation, route }: any) => {
   const theme = useColorScheme();
 
@@ -242,7 +205,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
           handleIndicatorStyle={{ display: "none" }}
           backgroundStyle={{
             backgroundColor:
-              theme === "dark" ? "#1b1b1b" : Colors.light.background,
+              theme === "dark" ? Colors.dark.primaryGrey : Colors.light.background,
           }}
         >
           <View style={[styles.contentContainer, styles.transBg]}>
@@ -300,67 +263,113 @@ export const HomeScreen = ({ navigation, route }: any) => {
             </>
           )}
 
-          {(userData?.status === "Student" &&
-            userData?.enrolledCourses?.length) ||
-            (userData?.status === "Teacher" &&
-              userData?.createdCourses?.length && (
-                <>
-                  <Text
-                    style={[
-                      styles.bold,
-                      styles.transBg,
-                      styles.contentContainer,
-                    ]}
-                  >
-                    Today
-                  </Text>
-                  {!areClassesLoading ? (
-                    todaysClasses?.length > 0 ? (
-                      <View style={[styles.transBg]}>
-                        <FlatList
-                          data={todaysClasses}
-                          keyExtractor={(courseClass: IClass) =>
-                            courseClass.uid
-                          }
-                          renderItem={renderItem}
-                          ItemSeparatorComponent={() => (
-                            <CardSeparator viewStyle={[styles.transBg]} />
-                          )}
-                          contentContainerStyle={[
-                            styles.contentContainer,
-                            styles.transBg,
-                          ]}
-                        />
-                      </View>
-                    ) : (
-                      <View
-                        style={[
-                          styles.transBg,
+          {userData?.status === "Student" &&
+            userData?.enrolledCourses?.length > 0 && (
+              <>
+                <Text
+                  style={[styles.bold, styles.transBg, styles.contentContainer]}
+                >
+                  Today
+                </Text>
+                {!areClassesLoading ? (
+                  todaysClasses.length > 0 ? (
+                    <View style={[styles.transBg]}>
+                      <FlatList
+                        data={todaysClasses}
+                        keyExtractor={(courseClass: IClass) => courseClass.uid}
+                        renderItem={renderItem}
+                        ItemSeparatorComponent={() => (
+                          <CardSeparator viewStyle={[styles.transBg]} />
+                        )}
+                        contentContainerStyle={[
                           styles.contentContainer,
-                          styles.justifyCenter,
-                          styles.itemsCenter,
-                          { height: 100 },
+                          styles.transBg,
                         ]}
-                      >
-                        <Text style={[styles.semiBold]}>
-                          No classes for today
-                        </Text>
-                      </View>
-                    )
+                      />
+                    </View>
                   ) : (
                     <View
                       style={[
                         styles.transBg,
+                        styles.contentContainer,
                         styles.justifyCenter,
                         styles.itemsCenter,
                         { height: 100 },
                       ]}
                     >
-                      <ActivityIndicator />
+                      <Text style={[styles.semiBold]}>
+                        No classes for today
+                      </Text>
                     </View>
-                  )}
-                </>
-              ))}
+                  )
+                ) : (
+                  <View
+                    style={[
+                      styles.transBg,
+                      styles.justifyCenter,
+                      styles.itemsCenter,
+                      { height: 100 },
+                    ]}
+                  >
+                    <ActivityIndicator />
+                  </View>
+                )}
+              </>
+            )}
+
+          {userData?.status === "Teacher" &&
+            userData?.createdCourses?.length > 0 && (
+              <>
+                <Text
+                  style={[styles.bold, styles.transBg, styles.contentContainer]}
+                >
+                  Today
+                </Text>
+                {!areClassesLoading ? (
+                  todaysClasses.length > 0 ? (
+                    <View style={[styles.transBg]}>
+                      <FlatList
+                        data={todaysClasses}
+                        keyExtractor={(courseClass: IClass) => courseClass.uid}
+                        renderItem={renderItem}
+                        ItemSeparatorComponent={() => (
+                          <CardSeparator viewStyle={[styles.transBg]} />
+                        )}
+                        contentContainerStyle={[
+                          styles.contentContainer,
+                          styles.transBg,
+                        ]}
+                      />
+                    </View>
+                  ) : (
+                    <View
+                      style={[
+                        styles.transBg,
+                        styles.contentContainer,
+                        styles.justifyCenter,
+                        styles.itemsCenter,
+                        { height: 100 },
+                      ]}
+                    >
+                      <Text style={[styles.semiBold]}>
+                        No classes for today
+                      </Text>
+                    </View>
+                  )
+                ) : (
+                  <View
+                    style={[
+                      styles.transBg,
+                      styles.justifyCenter,
+                      styles.itemsCenter,
+                      { height: 100 },
+                    ]}
+                  >
+                    <ActivityIndicator />
+                  </View>
+                )}
+              </>
+            )}
 
           <InvTouchableOpacity
             style={[

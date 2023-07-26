@@ -19,7 +19,7 @@ export default function ClassCard({
 }: {
   courseClass: IClass;
   navigation: any;
-  onPress?: () => void
+  onPress?: any
 }) {
   const theme = useColorScheme();
 

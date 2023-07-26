@@ -29,11 +29,15 @@ import { IClass } from "../types";
 import useCourse from "../hooks/useCourse";
 import useClass from "../hooks/useClass";
 import Loading from "../components/Loading";
+import useUser from "../hooks/useUser";
+import ClockInSheet from "../components/ClockInSheet";
 
 export default function ClassDetails({ navigation, route }: any) {
   const [courseClass, setCourseClass] = useState<any>();
 
   const [activeTab, setActiveTab] = useState<string>("All");
+
+  const { userData, isLoading: isUserDataLoading } = useUser();
 
   const { classData, isLoading: isClassDataLoading } = useClass(
     route.params.uid
@@ -43,7 +47,6 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] =
     useState<boolean>(false);
-
 
   const sheetRef = useRef<BottomSheet>(null);
 
@@ -63,8 +66,6 @@ export default function ClassDetails({ navigation, route }: any) {
       setIsBottomSheetVisible(false);
     }
   }, []);
-
-
 
   useLayoutEffect(() => {
     setCourseClass(route.params);
@@ -97,10 +98,19 @@ export default function ClassDetails({ navigation, route }: any) {
     []
   );
 
-  if(isClassDataLoading){
-    return <Loading />
+  useEffect(() => {
+    if (isUserDataLoading) {
+      return;
+    }
+  }, [isUserDataLoading, userData]);
+
+  if (isClassDataLoading) {
+    return <Loading />;
   }
 
+  if (isUserDataLoading) {
+    return <Loading />;
+  }
   return (
     <SafeAreaView
       style={[
@@ -145,7 +155,7 @@ export default function ClassDetails({ navigation, route }: any) {
                 darkColor={Colors.dark.text}
                 style={[styles.bold, styles.largeText]}
               >
-                {classData?.classTitle}
+                {courseClass?.classTitle}
               </Text>
             </View>
           </View>
@@ -171,7 +181,7 @@ export default function ClassDetails({ navigation, route }: any) {
                 { color: Colors.dark.tetiary },
               ]}
             >
-              {classData && convertToDayString(classData?.classDate.toDate())}
+              {courseClass && convertToDayString(courseClass?.classDate.toDate())}
             </Text>
           </View>
           <View
@@ -188,11 +198,15 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {classData?.classLocation.name.split(",").slice(0, 2).join(",")}
+              {courseClass?.classLocation.name.split(",").slice(0, 2).join(",")}
             </Text>
           </View>
           <View
-            style={[styles.flexRow, styles.itemsCenter, { marginBottom: 20, marginTop: 10 }]}
+            style={[
+              styles.flexRow,
+              styles.itemsCenter,
+              { marginBottom: 20, marginTop: 10 },
+            ]}
           >
             <Ionicons
               name="md-book"
@@ -210,7 +224,7 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {classData && convertToHHMM(classData?.classStartTime.toDate())}
+              {courseClass && convertToHHMM(courseClass?.classStartTime.toDate())}
             </Text>
             <Text
               style={[
@@ -234,7 +248,7 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {classData && convertToHHMM(classData?.classEndTime.toDate())}
+              {courseClass && convertToHHMM(courseClass?.classEndTime.toDate())}
             </Text>
           </View>
 
@@ -346,36 +360,67 @@ export default function ClassDetails({ navigation, route }: any) {
                   },
                 ]}
               >
-                <InvTouchableOpacity
-                  style={[
-                    {
-                      flexDirection: "row",
-                      height: 50,
-                      alignItems: "center",
-                    },
-                  ]}
-                  onPress={() => {
-                    setModalVisible(false);
-                    setIsBottomSheetVisible(true);
-                    console.log("done");
-                  }}
-                >
-                  <Ionicons
-                    name="people"
-                    size={20}
-                    color={theme === "dark" ? "white" : "#424242"}
-                  />
-                  <Text
-                    style={{
-                      marginLeft: 15,
-                      fontSize: 15,
-                      fontWeight: "600",
-                      color: theme === "dark" ? "#fff" : "#424242",
+                {userData.status === "Teacher" ? (
+                  <InvTouchableOpacity
+                    style={[
+                      {
+                        flexDirection: "row",
+                        height: 50,
+                        alignItems: "center",
+                      },
+                    ]}
+                    onPress={() => {
+                      setModalVisible(false);
+                      setIsBottomSheetVisible(true);
+                      console.log("done");
                     }}
                   >
-                    View Members
-                  </Text>
-                </InvTouchableOpacity>
+                    <Ionicons
+                      name="people"
+                      size={20}
+                      color={theme === "dark" ? "white" : "#424242"}
+                    />
+                    <Text
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 15,
+                        fontWeight: "600",
+                        color: theme === "dark" ? "#fff" : "#424242",
+                      }}
+                    >
+                      View Active Members
+                    </Text>
+                  </InvTouchableOpacity>
+                ) : (
+                  <InvTouchableOpacity
+                    style={[
+                      {
+                        flexDirection: "row",
+                        height: 50,
+                        alignItems: "center",
+                      },
+                    ]}
+                    onPress={() => {
+                      setModalVisible(false);
+                    }}
+                  >
+                    <AntDesign
+                      name="clockcircle"
+                      size={20}
+                      color={theme === "dark" ? "white" : "#424242"}
+                    />
+                    <Text
+                      style={{
+                        marginLeft: 15,
+                        fontSize: 15,
+                        fontWeight: "600",
+                        color: theme === "dark" ? "#fff" : "#424242",
+                      }}
+                    >
+                      Clock In
+                    </Text>
+                  </InvTouchableOpacity>
+                )}
               </View>
             </Modal>
           )}
@@ -427,6 +472,7 @@ export default function ClassDetails({ navigation, route }: any) {
             />
           </InvTouchableOpacity>
         )}
+        <ClockInSheet startTime={route.params.classStartTime.toDate()} endTime={route.params.classEndTime.toDate()}/>
       </View>
     </SafeAreaView>
   );
