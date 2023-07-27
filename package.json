@@ -72,7 +72,8 @@
     "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.10",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "expo-secure-store": "~12.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

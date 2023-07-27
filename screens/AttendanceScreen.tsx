@@ -5,12 +5,11 @@ import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { convertToHHMM } from "../utils/utils";
-import { IClassDetails } from "../types";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
 import ClassCard from "../components/ClassCard";
 
-const data: IClassDetails[] = [
+const data: any[] = [
   {
     id: "1",
     courseName: "Agriculture",
@@ -48,7 +47,7 @@ const data: IClassDetails[] = [
 export default function AttendanceScreen({navigation}: any) {
   const theme = useColorScheme();
 
-  const renderItem: ListRenderItem<IClassDetails> = ({ item }) => {
+  const renderItem: ListRenderItem<any> = ({ item }) => {
     return <ClassCard courseClass={item} navigation={navigation} />;
   };
 
@@ -133,7 +132,7 @@ export default function AttendanceScreen({navigation}: any) {
         </View>
         <FlatList
           data={data}
-          keyExtractor={(courseClass: IClassDetails) => courseClass.id}
+          keyExtractor={(courseClass: an) => courseClass.id}
           renderItem={renderItem}
           ItemSeparatorComponent={() => (
             <CardSeparator viewStyle={[styles.transBg]} />

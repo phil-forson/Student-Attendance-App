@@ -60,13 +60,20 @@ import useUser from "../hooks/useUser";
 import Loading from "../components/Loading";
 import { UserContext } from "../contexts/UserContext";
 import GetStarted from "../components/GetStarted";
-import { getAllClassesData, getAllCoursesData } from "../utils/helpers";
+import {
+  getAllClassesData,
+  getAllCoursesData,
+  isUserClockedInAndNotClockedOut,
+} from "../utils/helpers";
 import CourseClassCard from "../components/CourseClassCard";
+import ClockedInCard from "../components/ClockedInCard";
 
 export const HomeScreen = ({ navigation, route }: any) => {
   const theme = useColorScheme();
 
   const { userData, isLoading: isUserDataLoading } = useUser();
+
+  const { user } = useAuth();
 
   const [areCoursesLoading, setAreCoursesLoading] = useState<boolean>(false);
 
@@ -74,7 +81,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
 
-  const [isStudent, setIsStudent] = useState<boolean>(true);
+  const [userClockedIn, setUserClockedIn] = useState<boolean>(false);
 
   const [todaysClasses, setTodaysClasses] = useState<IClass[]>([]);
 
@@ -137,6 +144,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
         }
       });
     }
+
+    console.log("user data================", userData);
+    setUserClockedIn(userData?.clockedIn);
+
     // const classesHappeningToday = getClassesTodayAndFuture(userData.courseClasses)
   }, [isUserDataLoading, userData]);
 
@@ -205,16 +216,17 @@ export const HomeScreen = ({ navigation, route }: any) => {
           handleIndicatorStyle={{ display: "none" }}
           backgroundStyle={{
             backgroundColor:
-              theme === "dark" ? Colors.dark.primaryGrey : Colors.light.background,
+              theme === "dark"
+                ? Colors.dark.primaryGrey
+                : Colors.light.background,
           }}
         >
           <View style={[styles.contentContainer, styles.transBg]}>
-            {false && (
-              <View darkColor="#121212">
-                <View darkColor="#121212">
-                  <Text style={[styles.bold, styles.mediumText]}>Today</Text>
-                </View>
-              </View>
+            {userClockedIn && (
+              <>
+                <Text style={[styles.bold, styles.smy]}>Clocked In</Text>
+                <ClockedInCard classId={userData?.classClockedIn}/>
+              </>
             )}
             {(userData?.status === "Student" &&
               !userData?.enrolledCourses?.length) ||

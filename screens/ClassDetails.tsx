@@ -17,7 +17,7 @@ import React, {
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import { AntDesign, Ionicons, Fontisto } from "@expo/vector-icons";
-import { convertToDayString, convertToHHMM } from "../utils/utils";
+import { convertToDayString, convertToHHMM, getValueFor, save } from "../utils/utils";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
 import ClassCard from "../components/ClassCard";
@@ -31,8 +31,9 @@ import useClass from "../hooks/useClass";
 import Loading from "../components/Loading";
 import useUser from "../hooks/useUser";
 import ClockInSheet from "../components/ClockInSheet";
-import { userClockIn } from "../utils/helpers";
+import { isUserClockedInAndNotClockedOut, userClockIn } from "../utils/helpers";
 import useAuth from "../hooks/useAuth";
+import * as SecureStore from 'expo-secure-store';
 
 export default function ClassDetails({ navigation, route }: any) {
   const [courseClass, setCourseClass] = useState<any>();
@@ -78,11 +79,14 @@ export default function ClassDetails({ navigation, route }: any) {
     if(user){
 
       try {
-  
-        console.log('user data ', userData.uid, 'class id ', route.params)
+        const res = await isUserClockedInAndNotClockedOut(route.params?.uid, user?.uid ?? "")
+        console.log('res ', res)
+        
         await userClockIn(user?.uid, route.params.uid).then(() => {
           setClockIn(true);
         })
+        
+
       }
       catch (error) {
         setClockIn(false)
@@ -93,16 +97,14 @@ export default function ClassDetails({ navigation, route }: any) {
     }
   };
 
+
   useLayoutEffect(() => {
     setCourseClass(route.params);
-    console.log("class details ", route.params);
+    getValueFor("clockIn")
+
   }, []);
 
   const theme = useColorScheme();
-
-  const renderItem: ListRenderItem<IClass> = ({ item }) => {
-    return <ClassCard courseClass={item} navigation={navigation} />;
-  };
 
   const renderBottomSheetItem = useCallback(
     ({ item }: any) => (

@@ -15,6 +15,7 @@ import { useSharedValue, withTiming } from "react-native-reanimated";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { calculateDuration, calculateDurationInSeconds, convertToHHMM } from "../utils/utils";
 import { userClockOut } from "../utils/helpers";
+import FullWidthButton from "./FullWidthButton";
 
 export default function ClockInSheet({startTime, endTime, userId, classId}: {startTime: Date, endTime: Date, userId: string, classId: string}) {
   const theme = useColorScheme();
@@ -34,6 +35,7 @@ export default function ClockInSheet({startTime, endTime, userId, classId}: {sta
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
+    
     // Start the timer when the component mounts
     const interval = setInterval(() => {
       setSeconds((prevSeconds) => prevSeconds + 1);
@@ -41,9 +43,12 @@ export default function ClockInSheet({startTime, endTime, userId, classId}: {sta
 
     // Clear the interval when the component unmounts
     return () => {
-        userClockOut(userId, classId)
         clearInterval(interval)};
   }, []);
+
+  const handleClockOut = () => {
+    userClockOut(userId, classId)
+  }
 
 
 
@@ -104,6 +109,8 @@ export default function ClockInSheet({startTime, endTime, userId, classId}: {sta
             }}
             progressFormatter={formatTime}
           />
+
+          <FullWidthButton text={"Clock Out"} onPress={handleClockOut}/>
         </View>
       </BottomSheet>
     </>

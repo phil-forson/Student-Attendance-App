@@ -16,6 +16,9 @@
       "bundleIdentifier": "com.philforson.presensa",
       "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "UIBackgroundModes": ["location", "fetch"]
       }

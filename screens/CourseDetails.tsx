@@ -174,8 +174,6 @@ export default function CourseDetails({ navigation, route }: any) {
   }, [isCourseDataLoading, courseData]);
 
   useEffect(() => {
-    console.log("past classes ", pastClasses);
-    console.log("upcoming classes ", upcomingClasses);
     if (activeTab === "All") {
       setClassesData(allClasses);
     } else if (activeTab === "Past") {

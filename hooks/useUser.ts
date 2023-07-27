@@ -31,7 +31,7 @@ export default function useUser() {
         // Subscribe to the snapshot and store the unsubscribe function in the variable
         unsubscribe = onSnapshot(userRef, (doc) => {
           const userData = doc.data();
-          console.log(userData);
+          console.log('snapshot.....................', userData);
           setUserData(userData);
           setIsLoading(false);
         });
@@ -46,6 +46,7 @@ export default function useUser() {
     // Clean up the subscription when the component unmounts
     return () => {
       if (unsubscribe) {
+        console.log('unsubscribing.........')
         unsubscribe();
       }
     };

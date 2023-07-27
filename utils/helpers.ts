@@ -20,6 +20,12 @@ import { db } from "../config/firebase";
 import React from "react";
 import { IAttendance, IClass } from "../types";
 import useClass from "../hooks/useClass";
+import {
+  convertToDayString,
+  getCurrentLocaleDateString,
+  getValueFor,
+  save,
+} from "./utils";
 
 const fetchCourseData = async (courseId: string) => {
   const courseDoc = doc(db, "courses", courseId);
@@ -243,13 +249,29 @@ export async function updateClassDetails(
 
 export const userClockIn = async (userId: string, classId: string) => {
   try {
+    const currentTime = new Date(Date.now()).toISOString();
+    console.log("current time ", currentTime);
+    await save("clockIn", currentTime);
+    const dateString = await getValueFor("clockIn");
+    console.log('today"s string ', dateString);
+    const clockInDate = new Date(dateString ?? Date.now());
     const attendanceData = {
-      clockIn: Timestamp.now(), // Assuming you have imported Timestamp from firebase/firestore
+      clockIn: clockInDate, // Assuming you have imported Timestamp from firebase/firestore
       clockOut: null,
     };
 
     // Save the clock in time in the attendance document
-    await setDoc(doc(db, "classes", classId, "attendance", userId), attendanceData, { merge: true });
+    await setDoc(
+      doc(db, "classes", classId, "attendance", userId),
+      attendanceData,
+      { merge: true }
+    );
+
+    await setDoc(
+      doc(db, "users", userId),
+      { clockedIn: true, classClockedIn: classId },
+      { merge: true }
+    );
     console.log("Clocked in successfully!");
   } catch (error) {
     console.error("Error clocking in:", error);
@@ -259,7 +281,9 @@ export const userClockIn = async (userId: string, classId: string) => {
 export const userClockOut = async (userId: string, classId: string) => {
   try {
     // Fetch the existing attendance data
-    const attendanceDoc = await getDoc(doc(db, "classes", classId, "attendance", userId));
+    const attendanceDoc = await getDoc(
+      doc(db, "classes", classId, "attendance", userId)
+    );
     const attendanceData = attendanceDoc.data();
 
     // If there is no existing attendance data, do not proceed with clocking out
@@ -275,12 +299,47 @@ export const userClockOut = async (userId: string, classId: string) => {
     }
 
     // Save the clock out time in the attendance document
-    await setDoc(doc(db, "classes", classId, "attendance", userId), { clockOut: Timestamp.now() }, { merge: true });
+    await setDoc(
+      doc(db, "classes", classId, "attendance", userId),
+      { clockOut: Timestamp.now() },
+      { merge: true }
+    );
+
+    await setDoc(
+      doc(db, "users", userId),
+      { clockedIn: false, classClockedIn: null },
+      { merge: true }
+    );
     console.log("Clocked out successfully!");
   } catch (error) {
     console.error("Error clocking out:", error);
   }
 };
+
+export async function isUserClockedInAndNotClockedOut(
+  classId: string,
+  userId: string
+) {
+  try {
+    // Get the class document from Firebase
+    const attendanceDoc = await getDoc(
+      doc(db, "classes", classId, "attendance", userId)
+    );
+    const attendanceData = attendanceDoc.data();
+
+    if (attendanceData?.clockIn && !attendanceData?.clockout) {
+      return true;
+    }
+
+    console.log("attendance data ", attendanceData);
+
+    // If class or attendance data for the user is not found, return false
+    return false;
+  } catch (error) {
+    console.error("Error checking user's clock-in status:", error);
+    return false;
+  }
+}
 
 export const isCourseCodeUnique = async (
   courseCode: string
