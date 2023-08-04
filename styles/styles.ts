@@ -4,6 +4,20 @@ export const width = Dimensions.get("screen").width;
 export const height = Dimensions.get("screen").height;
 
 export const styles = StyleSheet.create({
+  autocompleteContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  listView: {
+    position: 'relative',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    elevation: 3,
+    zIndex: 999,
+  },
   container: {
     flex: 1,
   },

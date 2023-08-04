@@ -251,3 +251,8 @@ export function getCurrentLocaleDateString() {
   });
   return localeDateString;
 }
+
+export function isTimePast(time: Date) {
+  const currentTime = new Date();
+  return time.getTime() < currentTime.getTime();
+}

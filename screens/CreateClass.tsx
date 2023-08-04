@@ -5,16 +5,20 @@ import {
   TouchableOpacity,
   InvTouchableOpacity,
 } from "../components/Themed";
-import React, { useEffect, useState, useContext, useLayoutEffect } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { FlatList, Alert } from "react-native";
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import useColorScheme from "../hooks/useColorScheme";
 import axios from "axios";
 import { CourseContext } from "../contexts/CourseContext";
-import {
-  Timestamp,
-} from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import { db } from "../config/firebase";
 import uuid from "react-native-uuid";
 import { ClassContext } from "../contexts/ClassContext";
@@ -30,6 +34,7 @@ import {
 } from "../utils/utils";
 import { createClassInCourse } from "../utils/helpers";
 import { IClass } from "../types";
+import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 export default function CreateClass({ navigation, route }: any) {
   const [classTitle, setClassTitle] = useState("");
@@ -39,8 +44,9 @@ export default function CreateClass({ navigation, route }: any) {
   const [classStartTimeError, setClassStartTimeError] =
     useState<boolean>(false);
   const [classEndTimeError, setClassEndTimeError] = useState<boolean>(false);
-  const [classLocation, setClassLocation] = useState("");
+  const [classLocation, setClassLocation] = useState<GooglePlaceData>();
   const [classLocationSearch, setClassLocationSearch] = useState<string>("");
+  const [classLocationDetails, setClassLocationDetails] = useState<any>();
   const [classDate, setClassDate] = useState<Date>();
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
@@ -175,37 +181,6 @@ export default function CreateClass({ navigation, route }: any) {
     }
   };
 
-  const handleClassLocChange = async (loc: string) => {
-    setIsItemSelected(false);
-    setClassLocationSearch(loc);
-    setIsPlacesLoading(true);
-    const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${loc}&countrycodes=GH`;
-    try {
-      console.log("trying");
-      await axios
-        .get(apiUrl)
-        .then((response) => {
-          const data = response.data;
-          console.log("data ", data);
-          const placesData = data.map((location: any) => ({
-            id: location.place_id,
-            name: location.display_name,
-            boundingBox: location.boundingbox,
-          }));
-          setPlaces(placesData);
-          setIsPlacesLoading(false);
-        })
-        .catch((e) => {
-          setIsPlacesLoading(false);
-          console.log("places error ", e);
-        });
-    } catch (error) {
-      setIsPlacesLoading(false);
-      // Handle error
-      console.error(error);
-    }
-  };
-
   const handleClassTitleChange = (title: string) => {
     setClassTitle(title);
   };
@@ -225,7 +200,6 @@ export default function CreateClass({ navigation, route }: any) {
       return;
     }
 
-
     try {
       const uid = generateUid();
       const data: IClass = {
@@ -234,6 +208,7 @@ export default function CreateClass({ navigation, route }: any) {
         courseTitle: route.params.courseTitle,
         classTitle: classTitle,
         classLocation: classLocation,
+        classLocationDetails: classLocationDetails,
         classDate: Timestamp.fromDate(classDate),
         classStartTime: Timestamp.fromDate(classStartTime),
         classEndTime: Timestamp.fromDate(classEndTime),
@@ -254,6 +229,8 @@ export default function CreateClass({ navigation, route }: any) {
     setClassLocationSearch(item?.name?.split(",").slice(0, 2).join(","));
     setIsItemSelected(true);
   };
+
+  const autoCompleteRef = useRef(null);
 
   useEffect(() => {
     navigation.setOptions({
@@ -320,6 +297,7 @@ export default function CreateClass({ navigation, route }: any) {
   }, [
     classTitle,
     classLocation,
+    classLocationDetails,
     classDate,
     classStartTime,
     classEndTime,
@@ -344,53 +322,53 @@ export default function CreateClass({ navigation, route }: any) {
           setValue={handleClassTitleChange}
         />
       </View>
-      <View style={[styles.mmy]}>
-        <StyledInput
-          placeholder="Class Location"
-          placeholderTextColor="gray"
-          secure={false}
-          keyboardType="default"
-          value={classLocationSearch}
-          setValue={handleClassLocChange}
-        />
-        {!(isPlacesLoading || isItemSelected) && (
-          <FlatList
-            data={places}
-            renderItem={({ item }: any) => (
-              <TouchableOpacity
-                onPress={() => {
-                  handleDropdownItemPressed(item);
-                }}
-                darkColor={Colors.dark.secondaryGrey}
-                lightColor={Colors.light.secondaryGrey}
-                style={[
-                  {
-                    padding: 10,
-                    height: 55,
-                    justifyContent: "center",
-                  },
-                ]}
-              >
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item: any) => item.id.toString()}
-          />
-        )}
-        {isPlacesLoading && (
-          <View
-            style={[
+      <View style={[styles.mmy, { paddingBottom: 200 }]}>
+        <GooglePlacesAutocomplete
+          placeholder="Search Class Location"
+          onPress={(data, details = null) => {
+            setIsItemSelected(true);
+            setClassLocation(data)
+            setClassLocationDetails(details);
+            setClassLocationSearch(data.description)
+            console.log("data ", data);
+            console.log("details ", details?.geometry)
+            // setClassLocation(data)
+          }}
+          ref={autoCompleteRef}
+          query={{
+            key: "AIzaSyAjJSMzeqfZBuoqAdx3bpAmezoIfGK5n1E",
+            language: "en", // language of the results
+          }}
+          listEmptyComponent={
+            <View
+              style={[styles.transBg, styles.justifyCenter, styles.itemsCenter, {height: 400}]}
+            >
+              <Text>No places available</Text>
+            </View>
+          }
+          
+          styles={{
+            textInput: [
+              styles.transBg,
               {
-                height: 80,
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 8,
+                height: 50,
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                color: theme === "dark" ? "white" : "black",
+                paddingHorizontal: 20,
               },
-            ]}
-          >
-            <Text>Loading...</Text>
-          </View>
-        )}
+            ],
+            container: [styles.autocompleteContainer],
+            listView: [
+              styles.listView,
+              {
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                color: theme === "dark" ? "white" : "black",
+              },
+            ],
+          }}
+          fetchDetails={true}
+          enablePoweredByContainer={false}
+        />
       </View>
       <View style={[styles.mmy]}>
         <InvTouchableOpacity

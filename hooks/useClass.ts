@@ -20,7 +20,6 @@ const useClass = (classId: string) => {
     const fetchClassData = async () => {
       try {
         const classDocRef = doc(db, "classes", classId);
-        const classSnapshot = await getDoc(classDocRef);
 
         unsubscribe = onSnapshot(classDocRef, (doc) => {
           const classData = doc.data() as IClass;

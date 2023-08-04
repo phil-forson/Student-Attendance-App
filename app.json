@@ -20,7 +20,12 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "UIBackgroundModes": ["location", "fetch"]
+        "UIBackgroundModes": ["location", "fetch"],
+        "isIosBackgroundLocationEnabled": true,
+        "NSLocationUsageDescription": "Uses location for attendance tracking",
+        "NSLocationWhenInUseUsageDescription": "Uses location for attendance tracking",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Uses location for attendance tracking",
+        "NSLocationAlwaysUsageDescription": "Uses location for attendance tracking"
       }
     },
     "android": {
@@ -47,6 +52,18 @@
         "expo-camera",
         {
           "cameraPermission": "Allow Presensa to access your camera."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Presensa to use Face ID."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ]
     ],

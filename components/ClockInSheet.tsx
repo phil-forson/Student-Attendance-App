@@ -7,22 +7,48 @@ import React, {
   useState,
 } from "react";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { styles } from "../styles/styles";
-import { Alert, useColorScheme } from "react-native";
+import { styles, width } from "../styles/styles";
+import {
+  Alert,
+  useColorScheme,
+  AppState,
+  AppStateEvent,
+  AppStateStatus,
+} from "react-native";
 import Colors from "../constants/Colors";
 import CircularProgress from "react-native-circular-progress-indicator";
 import { useSharedValue, withTiming } from "react-native-reanimated";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
-import { calculateDuration, calculateDurationInSeconds, convertToHHMM } from "../utils/utils";
+import {
+  calculateDuration,
+  calculateDurationInSeconds,
+  convertToHHMM,
+  getValueFor,
+  isTimePast,
+} from "../utils/utils";
 import { userClockOut } from "../utils/helpers";
 import FullWidthButton from "./FullWidthButton";
+import { useIsFocused } from "@react-navigation/native";
 
-export default function ClockInSheet({startTime, endTime, userId, classId}: {startTime: Date, endTime: Date, userId: string, classId: string}) {
+export default function ClockInSheet({
+  startTime,
+  endTime,
+  userId,
+  classId,
+  setClockIn,
+}: {
+  startTime: Date;
+  endTime: Date;
+  userId: string;
+  classId: string;
+  setClockIn: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const theme = useColorScheme();
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const duration = calculateDurationInSeconds(startTime, endTime)
+  const appState = useRef(AppState.currentState);
 
+  const duration = calculateDurationInSeconds(new Date(Date.now()), endTime);
 
   // variables
   const snapPoints = useMemo(() => ["25%", "50%", "75%"], []);
@@ -34,30 +60,99 @@ export default function ClockInSheet({startTime, endTime, userId, classId}: {sta
 
   const [seconds, setSeconds] = useState(0);
 
+  const [initialSeconds, setInitialSeconds] = useState(0);
+
+  const [timerActive, setTimerActive] = useState(true);
+
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    
+    const unsubscribe = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+    return () => unsubscribe.remove();
+  }, []);
+
+  useEffect(() => {
+    console.log("is focused ", isFocused);
+  }, [isFocused]);
+
+  useEffect(() => {
+
+    fetchAndSetClockInTime()
+
     // Start the timer when the component mounts
     const interval = setInterval(() => {
-      setSeconds((prevSeconds) => prevSeconds + 1);
+      setInitialSeconds((prevSeconds) => prevSeconds + 1);
     }, 1000);
 
     // Clear the interval when the component unmounts
     return () => {
-        clearInterval(interval)};
+      if (timerActive && endTime && isTimePast(endTime)) {
+        userClockOut(userId, classId, endTime);
+      }
+      clearInterval(interval);
+    };
   }, []);
 
-  const handleClockOut = () => {
-    userClockOut(userId, classId)
+  const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === "active"
+    ) {
+      console.log("background...");
+      // We just became active again: recalculate elapsed time based
+      // on what we stored in AsyncStorage when we started.
+      fetchAndSetClockInTime()
+    }
+    appState.current = nextAppState;
+  };
+
+  const getElapsedTime = async () => {
+    try {
+      const clockInDateStr = await getValueFor("clockIn");
+      if (clockInDateStr) {
+        const clockInDate = new Date(clockInDateStr);
+        const currentTime = new Date();
+        const elapsedSeconds = Math.floor(
+          (currentTime.getTime() - clockInDate.getTime()) / 1000
+        );
+        return elapsedSeconds;
+      }
+    } catch (err) {
+      // TODO: handle errors from setItem properly
+      console.warn(err);
+    }
+  };
+
+  const fetchAndSetClockInTime = async () => {
+
+    const elapsed = await getElapsedTime();
+
+    console.log('total seconds ', duration)
+
+    console.log("elapsed ", elapsed);
+    // Update the elapsed seconds state
+    setInitialSeconds(elapsed ?? 0);
   }
 
-
+  const handleClockOut = () => {
+    try {
+      userClockOut(userId, classId);
+      setClockIn(false)
+    } catch (error) {
+      Alert.alert("Error", "Something unexpected happened");
+    }
+  };
 
   const formatTime = (timeSeconds: number) => {
     "worklet";
 
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
+    const totalSeconds = initialSeconds;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const remainingSeconds = totalSeconds % 60;
 
     // Format the time as "hh:mm:ss" or "mm:ss" if hours is 0
     const formattedTime =
@@ -96,7 +191,7 @@ export default function ClockInSheet({startTime, endTime, userId, classId}: {sta
           ]}
         >
           <CircularProgress
-            value={seconds}
+            value={initialSeconds}
             maxValue={duration}
             radius={130}
             duration={duration} // 2 minutes in milliseconds
@@ -110,7 +205,21 @@ export default function ClockInSheet({startTime, endTime, userId, classId}: {sta
             progressFormatter={formatTime}
           />
 
-          <FullWidthButton text={"Clock Out"} onPress={handleClockOut}/>
+<View style={[styles.transBg, styles.mmy, {width: 200}]}>
+
+          <FullWidthButton text={"Clock Out"} onPress={() => {
+            Alert.alert("Clock Out", "Do you want to continue to clock out?", [
+              {
+                text: "No",
+              },
+              {
+                text: "Yes",
+                style: "destructive",
+                onPress: handleClockOut,
+              },
+            ]);
+          }} />
+</View>
         </View>
       </BottomSheet>
     </>

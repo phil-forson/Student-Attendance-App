@@ -67,6 +67,7 @@ import {
 } from "../utils/helpers";
 import CourseClassCard from "../components/CourseClassCard";
 import ClockedInCard from "../components/ClockedInCard";
+import ClockInSheet from "../components/ClockInSheet";
 
 export const HomeScreen = ({ navigation, route }: any) => {
   const theme = useColorScheme();
@@ -225,7 +226,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
             {userClockedIn && (
               <>
                 <Text style={[styles.bold, styles.smy]}>Clocked In</Text>
-                <ClockedInCard classId={userData?.classClockedIn}/>
+                <ClockedInCard classId={userData?.classClockedIn} navigation={navigation}/>
               </>
             )}
             {(userData?.status === "Student" &&

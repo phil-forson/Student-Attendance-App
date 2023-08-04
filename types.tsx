@@ -116,6 +116,7 @@ export interface IClass {
   classTitle: string;
   uid: string;
   classLocation: any;
+  classLocationDetails: any;
   classStartTime: Timestamp;
   classEndTime: Timestamp;
   classDate: Timestamp;

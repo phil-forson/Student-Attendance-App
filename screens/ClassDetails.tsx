@@ -1,5 +1,6 @@
 import { View, Text, InvTouchableOpacity } from "../components/Themed";
 import {
+  ActivityIndicator,
   ListRenderItem,
   Platform,
   Pressable,
@@ -17,7 +18,12 @@ import React, {
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import { AntDesign, Ionicons, Fontisto } from "@expo/vector-icons";
-import { convertToDayString, convertToHHMM, getValueFor, save } from "../utils/utils";
+import {
+  convertToDayString,
+  convertToHHMM,
+  getValueFor,
+  save,
+} from "../utils/utils";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
 import ClassCard from "../components/ClassCard";
@@ -33,7 +39,11 @@ import useUser from "../hooks/useUser";
 import ClockInSheet from "../components/ClockInSheet";
 import { isUserClockedInAndNotClockedOut, userClockIn } from "../utils/helpers";
 import useAuth from "../hooks/useAuth";
-import * as SecureStore from 'expo-secure-store';
+import * as LocalAuthentication from "expo-local-authentication";
+import { Alert } from "react-native";
+import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+
 
 export default function ClassDetails({ navigation, route }: any) {
   const [courseClass, setCourseClass] = useState<any>();
@@ -42,13 +52,21 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const { userData, isLoading: isUserDataLoading } = useUser();
 
-  const { user } = useAuth()
+  const [clockInLoading, setClockInLoading] = useState<boolean>(false);
+
+  const [biometricAvailable, setBiometricAvailable] = useState<boolean>(false);
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const { user } = useAuth();
 
   const { classData, isLoading: isClassDataLoading } = useClass(
     route.params.uid
   );
 
   const [clockIn, setClockIn] = useState<boolean>(false);
+
+  const [isAlreadyClockedIn, setIsAlreadyClockedIn] = useState<boolean>(false);
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -74,34 +92,146 @@ export default function ClassDetails({ navigation, route }: any) {
     }
   }, []);
 
-  const onClockIn = async () => {
-    setModalVisible(false);
-    if(user){
-
-      try {
-        const res = await isUserClockedInAndNotClockedOut(route.params?.uid, user?.uid ?? "")
-        console.log('res ', res)
-        
-        await userClockIn(user?.uid, route.params.uid).then(() => {
-          setClockIn(true);
-        })
-        
-
-      }
-      catch (error) {
-        setClockIn(false)
-      }
-      finally {
   
+
+  const isBiometricAvailable = async () => {
+    try {
+      const result = await LocalAuthentication.hasHardwareAsync();
+      return result && (await LocalAuthentication.isEnrolledAsync());
+    } catch (error) {
+      console.error("Error checking biometric availability:", error);
+      return false;
+    }
+  };
+
+  const authenticateWithBiometrics = async () => {
+    try {
+      return await LocalAuthentication.authenticateAsync({
+        
+      });
+    } catch (error) {
+      Alert.alert("An Error occured ")
+    }
+  };
+  const handleBiometricAuthentication = async () => {
+    if (biometricAvailable) {
+      return await authenticateWithBiometrics();
+    } else {
+      // Biometric authentication is not available on this device
+      Alert.alert("Biometric authentication is not available on this device.");
+    }
+  };
+
+  const onClockIn = async () => {
+    console.log("on clock in");
+    console.log("user ", user);
+    if (user) {
+      setClockInLoading(true);
+      try {
+        const res = await isUserClockedInAndNotClockedOut(
+          route.params?.uid,
+          user?.uid ?? ""
+        );
+        console.log(
+          "res =+++++++++++++++++++++++++++++++++++++++++++++++++++",
+          res
+        );
+
+        if (!res) {
+          await requestPermissionAsync()
+          setModalVisible(false);
+          // const result = await handleBiometricAuthentication();
+          // console.log('result from authenticating.... ', result)
+          // if(biometricAvailable){
+
+          //   if (result?.success) {
+          //     Alert.alert("User is authenticated hence can proceed");
+          //   } else {
+          //     Alert.alert("Already clocked out for class ");
+          //   }
+          // } else {
+          //   Alert.alert("Biometric not available ")
+          // }
+        } else {
+          await userClockIn(user?.uid, route.params.uid).then(() => {
+            setClockIn(true);
+            setModalVisible(false);
+          });
+        }
+      } catch (error) {
+        setClockIn(false);
+      } finally {
+        setClockInLoading(false);
       }
     }
   };
 
+  const getLocation = async () => {
+    try {
+      console.log('geting jskfldfl')
+      const { coords } = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = coords;
+      console.log("Current location:", latitude, longitude);
+      // Do something with the location data
+    } catch (error) {
+      console.warn("Location error:", error);
+    }
+  };
+
+  async function requestPermissionAsync(){
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    let res= await Location.requestBackgroundPermissionsAsync();
+
+    console.log('status ', status)
+      if (status !== 'granted' && res.status !== "granted") {
+        console.log('error')
+        return;
+      }
+
+      console.log('getting location++++ ')
+      await getLocation()
+  }
+
+ useEffect(() => {
+  const startGeofence = async () => {
+
+    await requestPermissionAsync()
+    let region: Location.LocationRegion = {identifier:"1", latitude:59.899489, longitude: 10.611103, radius:10}
+      Location.startGeofencingAsync("LOCATION_GEOFENCE", [region])
+  
+      TaskManager.defineTask("LOCATION_GEOFENCE", ({ data: { eventType, region }, error }) => {
+          if (error) {
+            console.log('error ', error)
+            // check `error.message` for more details.
+            return;
+          }
+          if (eventType === Location.GeofencingEventType.Enter) {
+            alert("enter in region!")
+            console.log("You've entered region:", region);
+          } else if (eventType === Location.GeofencingEventType.Exit) {
+            console.log("You've left region:", region);
+          }
+        });
+  }
+
+  startGeofence()
+ }, [])
+  
+  
+  
+  
+
+  useEffect(() => {
+    isBiometricAvailable().then((available) =>
+      setBiometricAvailable(available)
+    );
+
+  }, []);
 
   useLayoutEffect(() => {
     setCourseClass(route.params);
-    getValueFor("clockIn")
-
+    getValueFor("clockIn");
+    console.log("ye yeeee");
   }, []);
 
   const theme = useColorScheme();
@@ -131,7 +261,8 @@ export default function ClassDetails({ navigation, route }: any) {
       return;
     }
 
-    console.log('user data... ', userData)
+    setIsAlreadyClockedIn(userData?.clockedIn);
+    console.log("user data... ", userData);
   }, [isUserDataLoading, userData]);
 
   if (isClassDataLoading) {
@@ -229,7 +360,7 @@ export default function ClassDetails({ navigation, route }: any) {
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {courseClass?.classLocation.name.split(",").slice(0, 2).join(",")}
+              {courseClass?.classLocation.description}
             </Text>
           </View>
           <View
@@ -433,22 +564,43 @@ export default function ClassDetails({ navigation, route }: any) {
                       },
                     ]}
                     onPress={onClockIn}
+                    disabled={clockInLoading}
                   >
                     <AntDesign
                       name="clockcircle"
                       size={20}
-                      color={theme === "dark" ? "white" : "#424242"}
+                      color={
+                        theme === "dark"
+                          ? clockInLoading
+                            ? Colors.dark.tetiary
+                            : "white"
+                          : clockInLoading
+                          ? Colors.dark.tetiary
+                          : "#424242"
+                      }
                     />
                     <Text
                       style={{
                         marginLeft: 15,
                         fontSize: 15,
                         fontWeight: "600",
-                        color: theme === "dark" ? "#fff" : "#424242",
+                        color:
+                          theme === "dark"
+                            ? clockInLoading
+                              ? Colors.dark.tetiary
+                              : "#fff"
+                            : clockInLoading
+                            ? Colors.dark.tetiary
+                            : "#424242",
                       }}
                     >
-                      Clock In
+                      {isAlreadyClockedIn ? "View clocked in time" : "Clock In"}
                     </Text>
+                    {clockInLoading && (
+                      <View style={[styles.transBg, { paddingLeft: 30 }]}>
+                        <ActivityIndicator />
+                      </View>
+                    )}
                   </InvTouchableOpacity>
                 )}
               </View>
@@ -508,6 +660,7 @@ export default function ClassDetails({ navigation, route }: any) {
             endTime={route.params.classEndTime.toDate()}
             classId={route.params.uid}
             userId={user.uid}
+            setClockIn={setClockIn}
           />
         )}
       </View>

@@ -269,7 +269,7 @@ export const userClockIn = async (userId: string, classId: string) => {
 
     await setDoc(
       doc(db, "users", userId),
-      { clockedIn: true, classClockedIn: classId },
+      { clockedIn: true, classClockedIn: classId, clockInDate: clockInDate },
       { merge: true }
     );
     console.log("Clocked in successfully!");
@@ -278,7 +278,7 @@ export const userClockIn = async (userId: string, classId: string) => {
   }
 };
 
-export const userClockOut = async (userId: string, classId: string) => {
+export const userClockOut = async (userId: string, classId: string, endTime?: Date) => {
   try {
     // Fetch the existing attendance data
     const attendanceDoc = await getDoc(
@@ -299,9 +299,10 @@ export const userClockOut = async (userId: string, classId: string) => {
     }
 
     // Save the clock out time in the attendance document
+    
     await setDoc(
       doc(db, "classes", classId, "attendance", userId),
-      { clockOut: Timestamp.now() },
+      { clockOut: endTime ?? Timestamp.now() },
       { merge: true }
     );
 
@@ -327,11 +328,12 @@ export async function isUserClockedInAndNotClockedOut(
     );
     const attendanceData = attendanceDoc.data();
 
-    if (attendanceData?.clockIn && !attendanceData?.clockout) {
+    console.log("attendance data ", attendanceData);
+
+    if (attendanceData?.clockIn && !attendanceData?.clockOut) {
       return true;
     }
 
-    console.log("attendance data ", attendanceData);
 
     // If class or attendance data for the user is not found, return false
     return false;
