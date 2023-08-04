@@ -8,7 +8,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "backgroundColor": "green",
+      "backgroundColor": "#2f95dc",
       "image": "./assets/logo.png"
     },
     "assetBundlePatterns": ["**/*"],
@@ -19,6 +19,7 @@
       "config": {
         "usesNonExemptEncryption": false
       },
+
       "infoPlist": {
         "UIBackgroundModes": ["location", "fetch"],
         "isIosBackgroundLocationEnabled": true,
@@ -34,7 +35,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -138,6 +138,7 @@ export default function ClassDetails({ navigation, route }: any) {
         );
 
         if (!res) {
+          console.log('yesss')
           await requestPermissionAsync()
           setModalVisible(false);
           // const result = await handleBiometricAuthentication();
@@ -166,6 +167,12 @@ export default function ClassDetails({ navigation, route }: any) {
     }
   };
 
+  // Define the same task name as in app.js
+const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
+
+// Start the background task after successful login
+
+
   const getLocation = async () => {
     try {
       console.log('geting jskfldfl')
@@ -178,44 +185,61 @@ export default function ClassDetails({ navigation, route }: any) {
     }
   };
 
+  async function requestBackgroundPermissions(){
+    try {
+    const [status, requestPermission] = Location.useBackgroundPermissions();
+    }
+    catch(error){
+      console.log(error)
+    }
+
+  }
   async function requestPermissionAsync(){
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    let res= await Location.requestBackgroundPermissionsAsync();
+    try {
 
-    console.log('status ', status)
-      if (status !== 'granted' && res.status !== "granted") {
-        console.log('error')
-        return;
-      }
-
-      console.log('getting location++++ ')
-      await getLocation()
-  }
-
- useEffect(() => {
-  const startGeofence = async () => {
-
-    await requestPermissionAsync()
-    let region: Location.LocationRegion = {identifier:"1", latitude:59.899489, longitude: 10.611103, radius:10}
-      Location.startGeofencingAsync("LOCATION_GEOFENCE", [region])
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      let res = await Location.requestBackgroundPermissionsAsync();
+      console.log('gotten...')
+      // await requestBackgroundPermissions()
   
-      TaskManager.defineTask("LOCATION_GEOFENCE", ({ data: { eventType, region }, error }) => {
-          if (error) {
-            console.log('error ', error)
-            // check `error.message` for more details.
-            return;
-          }
-          if (eventType === Location.GeofencingEventType.Enter) {
-            alert("enter in region!")
-            console.log("You've entered region:", region);
-          } else if (eventType === Location.GeofencingEventType.Exit) {
-            console.log("You've left region:", region);
-          }
-        });
+      console.log('status ', status)
+        if (status !== 'granted' && res.status !== "granted") {
+          console.log('error')
+          return;
+        }
+  
+        console.log('getting location++++ ')
+        // await getLocation()
+    }
+    catch(error){
+      console.log('error ', error)
+    }
   }
 
-  startGeofence()
- }, [])
+//  useEffect(() => {
+//   const startGeofence = async () => {
+
+//     await requestPermissionAsync()
+//     let region: Location.LocationRegion = {identifier:"1", latitude:59.899489, longitude: 10.611103, radius:10}
+//       Location.startGeofencingAsync("LOCATION_GEOFENCE", [region])
+  
+//       TaskManager.defineTask("LOCATION_GEOFENCE", ({ data: { eventType, region }, error }) => {
+//           if (error) {
+//             console.log('error ', error)
+//             // check `error.message` for more details.
+//             return;
+//           }
+//           if (eventType === Location.GeofencingEventType.Enter) {
+//             alert("enter in region!")
+//             console.log("You've entered region:", region);
+//           } else if (eventType === Location.GeofencingEventType.Exit) {
+//             console.log("You've left region:", region);
+//           }
+//         });
+//   }
+
+//   startGeofence()
+//  }, [])
   
   
   
