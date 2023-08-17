@@ -1,4 +1,4 @@
-import { View, Text } from "../components/Themed";
+import { View, Text, InvTouchableOpacity } from "../components/Themed";
 import {
   Image,
   ListRenderItem,
@@ -21,8 +21,7 @@ import UserStack from "../navigation/userStack";
 import useUser from "../hooks/useUser";
 import Loading from "../components/Loading";
 import { getAllCoursesData } from "../utils/helpers";
-
-
+import { AntDesign } from "@expo/vector-icons";
 
 const ItemSeparator = () => <View style={styles.separator} />;
 
@@ -36,23 +35,18 @@ export default function MyCourses({ navigation, route }: any) {
   const [coursesData, setCoursesData] = useState<Array<ICourse>>([]);
 
   useEffect(() => {
-
-    if(isUserDataLoading){
+    if (isUserDataLoading) {
       return;
     }
     const courses =
       userData.status === "Student"
         ? userData.enrolledCourses
-        : userData.createdCourses ;
-
-    console.log('user courses ', courses)
-    console.log('user data courses ', userData.enrolledCourses)
+        : userData.createdCourses;
 
     if (courses.length > 0) {
       getAllCoursesData(courses, setCoursesLoading)
         .then((coursesData) => {
           // Use the enrolledCoursesData here, it will be an array of course data objects
-          console.log("Enrolled courses data:", coursesData);
           setCoursesData(coursesData);
         })
         .catch((error) => {
@@ -134,6 +128,29 @@ export default function MyCourses({ navigation, route }: any) {
             numColumns={2}
           />
         )}
+      <InvTouchableOpacity
+        style={[
+          styles.addCourseIcon,
+          styles.circle,
+          styles.shadow,
+          {
+            shadowColor: theme === "dark" ? "#0a2e3d" : "#000",
+          },
+        ]}
+        onPress={() => {
+          navigation.navigate(
+            userData.status === "Student" ? "JoinCourse" : "CreateCourse"
+          );
+        }}
+        darkColor="#0c0c0c"
+      >
+        <AntDesign
+          name="plus"
+          color={"#007bff"}
+          size={18}
+          style={{ fontWeight: "bold" }}
+        />
+      </InvTouchableOpacity>
     </SafeAreaView>
   );
 }

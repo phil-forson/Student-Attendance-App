@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useColorScheme } from "react-native";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -24,6 +24,9 @@ import ClockInScreen from "../screens/ClockInScreen";
 import AttendanceScreen from "../screens/AttendanceScreen";
 import MyCourses from "../screens/MyCourses";
 import EditClass from "../screens/EditClass";
+import useUser from "../hooks/useUser";
+import AllAttendanceScreen from "../screens/AllAttendanceScreen";
+import { styles } from "../styles/styles";
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>();
 
@@ -44,6 +47,21 @@ function MainStackNavigator() {
         <MainStack.Screen name="CourseDetails" component={CourseDetails} />
         <MainStack.Screen name="ClassDetails" component={ClassDetails} />
       </MainStack.Group>
+      <MainStack.Screen name="AllStudentsAttendance" component={AllAttendanceScreen} options={({navigation}) => ({
+        headerTitle: "Student Attendance",
+        headerLeft: () => {
+          return (
+            <TouchableOpacity
+              lightColor="#fff"
+              darkColor="#121212"
+              onPress={() => navigation.goBack()}
+              style={[{borderRadius: 100, padding: 5}]}
+            >
+              <AntDesign name="arrowleft" size={20} color={Colors.dark.tetiary} />
+            </TouchableOpacity>
+          );
+        }
+      })}/>
       <MainStack.Group
         screenOptions={({ navigation }) => ({
           presentation: "modal",
@@ -83,6 +101,10 @@ function UserBottomTabNavigator() {
     navigation.navigate("Members", { userId: 123 });
   };
 
+  const { userData, isLoading: isUserDataLoading } = useUser();
+
+  useEffect(() => {}, []);
+
   return (
     <UserBottomTab.Navigator
       initialRouteName="Home"
@@ -99,16 +121,18 @@ function UserBottomTabNavigator() {
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
-      <UserBottomTab.Screen
-        name="Attendance"
-        component={AttendanceScreen}
-        options={{
-          header: () => null,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="calendar" color={color} />
-          ),
-        }}
-      />
+      {userData.status === "Teacher" && (
+        <UserBottomTab.Screen
+          name="Attendance"
+          component={AttendanceScreen}
+          options={{
+            header: () => null,
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name="calendar" color={color} />
+            ),
+          }}
+        />
+      )}
       <UserBottomTab.Screen
         name="My Courses"
         component={MyCourses}

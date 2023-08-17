@@ -38,7 +38,8 @@ export type UserStackParamList = {
   CreateClass: undefined;
   CourseDetails: undefined;
   ClassDetails: undefined;
-  EditClass: undefined
+  EditClass: undefined;
+  AllStudentsAttendance: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -77,33 +78,25 @@ export type UserDrawerParamList = {
   Settings: undefined;
 };
 
-export interface ICourseDetails {
-  id: string;
-  courseTitle: string;
-  lecturerName: string;
-  courseLinkCode: string;
-  creatorId: string;
-  location: any;
-  courseClasses: Array<any>;
-  teachers: Array<any>;
-}
+
 
 
 
 export interface UserData {
-  uid?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  status?: "Student"|"Lecturer"
-  university?: any;
-  verified?: boolean;
-  enrolledCourses?: Array<any>;
+  uid: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: "Student"|"Lecturer"
+  university: any;
+  verified: boolean;
+  enrolledCourses: Array<any>;
 }
 
 export interface ICourse {
   courseCode: string;
   courseLinkCode: string;
+  courseClasses: Array<any>;
   courseTitle: string;
   creatorId: string;
   enrolledStudents: Array<any>;

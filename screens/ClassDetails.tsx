@@ -128,6 +128,11 @@ export default function ClassDetails({ navigation, route }: any) {
     if (user) {
       setClockInLoading(true);
       try {
+        if(isAlreadyClockedIn){
+          console.log('is already clocked in ')
+          setClockIn(true)
+          return ;
+        }
         const res = await isUserClockedInAndNotClockedOut(
           route.params?.uid,
           user?.uid ?? ""
@@ -154,7 +159,7 @@ export default function ClassDetails({ navigation, route }: any) {
           //   Alert.alert("Biometric not available ")
           // }
         } else {
-          await userClockIn(user?.uid, route.params.uid).then(() => {
+          await userClockIn(user?.uid, route.params.uid, userData?.firstName, userData?.lastName).then(() => {
             setClockIn(true);
             setModalVisible(false);
           });
@@ -384,7 +389,7 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {courseClass?.classLocation.description}
+              {courseClass?.classLocation.description.split(',').slice(0,2).join(',')}
             </Text>
           </View>
           <View

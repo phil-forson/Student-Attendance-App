@@ -19,7 +19,11 @@ import React, {
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import { AntDesign, Ionicons, FontAwesome } from "@expo/vector-icons";
-import { convertToHHMM, groupAndSortClasses } from "../utils/utils";
+import {
+  convertToHHMM,
+  formatSecondsToHM,
+  groupAndSortClasses,
+} from "../utils/utils";
 import { FlatList } from "react-native";
 import CardSeparator from "../components/CardSeparator";
 import ClassCard from "../components/ClassCard";
@@ -29,7 +33,14 @@ import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Image } from "react-native";
 import useUser from "../hooks/useUser";
 import useCourse from "../hooks/useCourse";
-import { getAllClassesData, removeClassFromCourse } from "../utils/helpers";
+import {
+  calculateTotalAttendanceTime,
+  calculateTotalClassTime,
+  getAllClassesData,
+  getTotalClassDurationForUser,
+  getUsersForCourseAttendanceData,
+  removeClassFromCourse,
+} from "../utils/helpers";
 import { IClass } from "../types";
 import { Unsubscribe } from "firebase/firestore";
 import { useIsFocused } from "@react-navigation/native";
@@ -59,6 +70,12 @@ export default function CourseDetails({ navigation, route }: any) {
   const [activeClass, setActiveClass] = useState<IClass>();
 
   const [unsubscribe, setUnsubscribe] = useState<Unsubscribe>();
+
+  const [totalClassTime, setTotalClassTime] = useState<number>(0);
+
+  const [totalAttendanceTime, setTotalAttendanceTime] = useState<number>(0);
+
+  const [userDataAndAttendance, setUserDataAndAttendance] = useState<any>([]);
 
   const { userData, isLoading: isUserDataLoading } = useUser();
 
@@ -145,32 +162,67 @@ export default function CourseDetails({ navigation, route }: any) {
   }, []);
 
   useEffect(() => {
-    setClassesLoading(true);
+    const calculations = async () => {
+      setClassesLoading(true);
+      try {
+        if (!isCourseDataLoading) {
+          const classes = courseData?.courseClasses ?? [];
 
-    const classes = courseData?.courseClasses ?? [];
+          if (!(classes?.length > 0)) {
+            console.log("classes length is 0");
+            setClassesData([]);
+            setAllClassesData([]);
+            setPastClassesData([]);
+            setUpcomingClassesData([]);
+            setClassesLoading(false);
+          }
 
-    if (!(classes?.length > 0)) {
-      setClassesLoading(false);
-      setClassesData([]);
-      setAllClassesData([]);
-      setPastClassesData([]);
-      setUpcomingClassesData([]);
-    }
+          if (classes?.length > 0) {
+            getAllClassesData(classes, setClassesLoading)
+              .then(({ enrolledClasses }) => {
+                setAllClassesData(enrolledClasses);
+                setClassesData(enrolledClasses);
+                const groupedClasses = groupAndSortClasses(enrolledClasses);
+                setPastClassesData(groupedClasses.past);
+                setUpcomingClassesData(groupedClasses.upcoming);
+                setOngoingClassesData(groupedClasses.ongoing);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          }
+          if (courseData) {
+            const totalClassTime = await calculateTotalClassTime(
+              courseData?.uid
+            );
+            setTotalClassTime(totalClassTime);
+            const userDataAndAttendance = await getUsersForCourseAttendanceData(
+              courseData.enrolledStudents,
+              courseData.courseClasses
+            );
+            setUserDataAndAttendance(userDataAndAttendance);
 
-    if (classes?.length > 0) {
-      getAllClassesData(classes, setClassesLoading)
-        .then(({ enrolledClasses }) => {
-          setAllClassesData(enrolledClasses);
-          setClassesData(enrolledClasses);
-          const groupedClasses = groupAndSortClasses(enrolledClasses);
-          setPastClassesData(groupedClasses.past);
-          setUpcomingClassesData(groupedClasses.upcoming);
-          setOngoingClassesData(groupedClasses.ongoing);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+            if (userData?.status === "Teacher") {
+              const totalAttendanceTime = calculateTotalAttendanceTime(
+                userDataAndAttendance
+              );
+              console.log("user data and attendance ", userDataAndAttendance);
+              setTotalAttendanceTime(totalAttendanceTime);
+            } else {
+              const totalAttendanceTime = await getTotalClassDurationForUser(
+                userData?.uid,
+                courseData.courseClasses
+              );
+              setTotalAttendanceTime(totalAttendanceTime);
+            }
+          }
+        }
+      } catch (error) {
+        console.log("error ", error);
+      }
+    };
+
+    calculations();
   }, [isCourseDataLoading, courseData]);
 
   useEffect(() => {
@@ -217,7 +269,9 @@ export default function CourseDetails({ navigation, route }: any) {
             },
           ]}
         />
-        <Text>{item}</Text>
+        <Text>
+          {item?.userData?.firstName} {item?.userData?.lastName}
+        </Text>
       </View>
     ),
     []
@@ -291,7 +345,7 @@ export default function CourseDetails({ navigation, route }: any) {
                 { fontSize: 12, color: Colors.dark.tetiary },
               ]}
             >
-              Total Attendance Time
+              Total Class Time
             </Text>
             <Text
               style={[
@@ -301,7 +355,7 @@ export default function CourseDetails({ navigation, route }: any) {
                 },
               ]}
             >
-              4h55m
+              {formatSecondsToHM(totalClassTime)}
             </Text>
           </View>
           <View
@@ -324,7 +378,9 @@ export default function CourseDetails({ navigation, route }: any) {
                 { fontSize: 12, color: Colors.dark.tetiary },
               ]}
             >
-              Total Attendance Time
+              {userData?.status === "Student"
+                ? "My Total Attendance Time"
+                : "Total Attendance Time"}
             </Text>
             <Text
               style={[
@@ -334,7 +390,7 @@ export default function CourseDetails({ navigation, route }: any) {
                 },
               ]}
             >
-              4h55m
+              {formatSecondsToHM(totalAttendanceTime)}
             </Text>
           </View>
         </View>
@@ -442,19 +498,24 @@ export default function CourseDetails({ navigation, route }: any) {
               <CardSeparator viewStyle={[styles.transBg]} />
             )}
             contentContainerStyle={[styles.transBg, { minHeight: 500 }]}
+            ListEmptyComponent={() => (
+              <View
+                style={[
+                  { height: 350 },
+                  styles.justifyCenter,
+                  styles.itemsCenter,
+                ]}
+                onTouchEnd={onTouchEnd}
+                onTouchStart={onTouchStart}
+              >
+                <Text style={[styles.mediumText]}>No classes available</Text>
+              </View>
+            )}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           />
         )}
-        {!areClassesLoading && classesData?.length === 0 && (
-          <View
-            style={[{ height: 350 }, styles.justifyCenter, styles.itemsCenter]}
-            onTouchEnd={onTouchEnd}
-            onTouchStart={onTouchStart}
-          >
-            <Text style={[styles.mediumText]}>No classes available</Text>
-          </View>
-        )}
+
         {isModalVisible && (
           <Modal
             isVisible={isModalVisible}
@@ -706,8 +767,8 @@ export default function CourseDetails({ navigation, route }: any) {
               Members
             </Text>
             <BottomSheetFlatList
-              data={flatlistData}
-              keyExtractor={(i: any) => i}
+              data={userDataAndAttendance}
+              keyExtractor={(i: any) => i.userData?.email}
               renderItem={renderBottomSheetItem}
               ItemSeparatorComponent={() => (
                 <CardSeparator viewStyle={[styles.transBg]} />

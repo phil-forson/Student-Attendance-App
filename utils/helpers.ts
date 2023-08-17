@@ -1,4 +1,5 @@
 import {
+  DocumentData,
   DocumentSnapshot,
   QuerySnapshot,
   Timestamp,
@@ -18,9 +19,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import React from "react";
-import { IAttendance, IClass } from "../types";
+import { IAttendance, IClass, ICourse, UserData } from "../types";
 import useClass from "../hooks/useClass";
 import {
+  calculateSecondsDifference,
   convertToDayString,
   getCurrentLocaleDateString,
   getValueFor,
@@ -43,7 +45,7 @@ const fetchClassData = async (classId: string): Promise<IClass> => {
 export const getAllCoursesData = async (
   enrolledCourseIds: Array<any>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<any[]> => {
+): Promise<ICourse[]> => {
   setIsLoading(true);
   const enrolledCoursesPromises = enrolledCourseIds.map((courseId: string) =>
     fetchCourseData(courseId)
@@ -63,21 +65,32 @@ export const getAllCoursesData = async (
 
 export const getAllClassesData = async (
   enrolledClassIds: Array<string>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<{ enrolledClasses: IClass[] }> => {
-  setIsLoading(true);
+  if (setIsLoading) {
+    setIsLoading(true);
+  }
+  try {
+    const enrolledClassesPromises = enrolledClassIds?.map(
+      async (classId: string) => {
+        return await fetchClassData(classId);
+      }
+    );
 
-  const enrolledClassesPromises = enrolledClassIds.map(
-    async (classId: string) => {
-      return await fetchClassData(classId);
+    const enrolledClasses: IClass[] = await Promise.all(
+      enrolledClassesPromises
+    );
+
+    return { enrolledClasses };
+  } catch (error) {
+    // Handle the error here
+    console.error("Error in getAllClassesData:", error);
+    throw error; // Re-throw the error to propagate it
+  } finally {
+    if (setIsLoading) {
+      setIsLoading(false);
     }
-  );
-
-  const enrolledClasses: IClass[] = await Promise.all(enrolledClassesPromises);
-
-  setIsLoading(false);
-
-  return { enrolledClasses };
+  }
 };
 
 export const enrollUserInCourse = async (userId: string, courseId: string) => {
@@ -247,17 +260,22 @@ export async function updateClassDetails(
   }
 }
 
-export const userClockIn = async (userId: string, classId: string) => {
+export const userClockIn = async (
+  userId: string,
+  classId: string,
+  firstName: string,
+  lastName: string
+) => {
   try {
     const currentTime = new Date(Date.now()).toISOString();
-    console.log("current time ", currentTime);
     await save("clockIn", currentTime);
     const dateString = await getValueFor("clockIn");
-    console.log('today"s string ', dateString);
     const clockInDate = new Date(dateString ?? Date.now());
     const attendanceData = {
-      clockIn: clockInDate, // Assuming you have imported Timestamp from firebase/firestore
+      clockIn: clockInDate,
       clockOut: null,
+      firstName: firstName,
+      lastName: lastName,
     };
 
     // Save the clock in time in the attendance document
@@ -278,7 +296,11 @@ export const userClockIn = async (userId: string, classId: string) => {
   }
 };
 
-export const userClockOut = async (userId: string, classId: string, endTime?: Date) => {
+export const userClockOut = async (
+  userId: string,
+  classId: string,
+  endTime?: Date
+) => {
   try {
     // Fetch the existing attendance data
     const attendanceDoc = await getDoc(
@@ -299,7 +321,7 @@ export const userClockOut = async (userId: string, classId: string, endTime?: Da
     }
 
     // Save the clock out time in the attendance document
-    
+
     await setDoc(
       doc(db, "classes", classId, "attendance", userId),
       { clockOut: endTime ?? Timestamp.now() },
@@ -314,6 +336,137 @@ export const userClockOut = async (userId: string, classId: string, endTime?: Da
     console.log("Clocked out successfully!");
   } catch (error) {
     console.error("Error clocking out:", error);
+  }
+};
+
+export const getUsersWithAttendanceData = async (
+  enrolledStudentIds: string[],
+  classId: string
+) => {
+  const userDataAndAttendance = [];
+
+  try {
+    for (const enrolledStudentId of enrolledStudentIds) {
+      const userDoc = await getDoc(doc(db, "users", enrolledStudentId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        // Fetch attendance data for the student
+        const attendanceDoc = await getDoc(
+          doc(db, "classes", classId, "attendance", enrolledStudentId)
+        );
+        if (attendanceDoc.exists()) {
+          const attendanceData = attendanceDoc.data();
+
+          // Do something with userData and attendanceData
+          userDataAndAttendance.push({
+            userData,
+            attendanceData,
+          });
+        } else {
+          const attendanceData = {
+            clockIn: null,
+            clockOut: null,
+          };
+          userDataAndAttendance.push({
+            userData,
+            attendanceData,
+          });
+        }
+      } else {
+        console.log(`No user data found for student ${enrolledStudentId}`);
+      }
+    }
+
+    console.log("user data and attendance ", userDataAndAttendance);
+    return userDataAndAttendance;
+  } catch (error) {
+    console.error("Error fetching user data and attendance:", error);
+    throw error;
+  }
+};
+
+export const getUsersForCourseAttendanceData = async (
+  enrolledStudentIds: string[],
+  classIds: string[]
+) => {
+  const userDataAndAttendance: {
+    userData: any; // Replace 'any' with the actual user data type
+    attendanceData: Record<string, any>; // Replace 'any' with the actual attendance data type
+  }[] = [];
+
+  try {
+    for (const enrolledStudentId of enrolledStudentIds) {
+      const userDoc = await getDoc(doc(db, "users", enrolledStudentId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const userAttendance = {
+          userData,
+          attendanceData: {} as Record<string, any>,
+        };
+
+        for (const classId of classIds) {
+          const attendanceDoc = await getDoc(
+            doc(db, "classes", classId, "attendance", enrolledStudentId)
+          );
+          if (attendanceDoc.exists()) {
+            userAttendance.attendanceData[classId] = attendanceDoc.data();
+          } else {
+            userAttendance.attendanceData[classId] = {
+              clockIn: null,
+              clockOut: null,
+            };
+          }
+        }
+
+        userDataAndAttendance.push(userAttendance);
+      } else {
+        console.log(`No user data found for student ${enrolledStudentId}`);
+      }
+    }
+
+    console.log("user data and attendance ", userDataAndAttendance);
+    return userDataAndAttendance;
+  } catch (error) {
+    console.error("Error fetching user data and attendance:", error);
+    throw error;
+  }
+};
+
+export const getAllUsersAttendance = async (classId: string) => {
+  try {
+    const data = await getDocs(
+      collection(db, "classes", classId, "attendance")
+    );
+    console.log("data ", data.docs);
+
+    return data.docs;
+  } catch (error) {
+    console.log("error ", error);
+  }
+};
+
+export const getMembersWithAttendance = async (classId: string) => {
+  const members = [];
+
+  try {
+    const classDocRef = doc(db, "classes", classId);
+    const attendanceCollectionRef = collection(classDocRef, "attendance");
+    const attendanceSnapshot = await getDocs(attendanceCollectionRef);
+
+    for (const attendanceDoc of attendanceSnapshot.docs) {
+      const memberId = attendanceDoc.id;
+      const memberData = attendanceDoc.data();
+      members.push({
+        id: memberId,
+        ...memberData,
+      });
+    }
+
+    return members;
+  } catch (error) {
+    console.error("Error fetching members with attendance:", error);
+    throw error;
   }
 };
 
@@ -333,7 +486,6 @@ export async function isUserClockedInAndNotClockedOut(
     if (attendanceData?.clockIn && !attendanceData?.clockOut) {
       return true;
     }
-
 
     // If class or attendance data for the user is not found, return false
     return false;
@@ -361,4 +513,178 @@ export const isCourseCodeUnique = async (
 
   // If the query returns any documents, the course code is not unique
   return isCodeUnique;
+};
+
+interface UserAttendance {
+  attendanceData: any;
+  userData: UserData;
+}
+
+interface RankedUser {
+  userData: UserData;
+  attendancePercentage: number;
+  totalDuration: number; // in seconds
+}
+
+export const calculateAttendanceRanking = (
+  userDataAndAttendance: UserAttendance[]
+): RankedUser[] => {
+  const rankedUsers: RankedUser[] = userDataAndAttendance.map(
+    (userAttendance) => {
+      const { userData, attendanceData } = userAttendance;
+
+      let totalAttendancePercentage = 0;
+      let totalDuration = 0;
+
+      // Iterate through attendance data for each class
+      for (const classId in attendanceData) {
+        const classAttendance = attendanceData[classId];
+        if (classAttendance.clockIn && classAttendance.clockOut) {
+          const durationInSeconds = calculateSecondsDifference(
+            classAttendance.clockIn,
+            classAttendance.clockOut
+          );
+          console.log("duration in seconds ", durationInSeconds);
+          totalDuration += durationInSeconds;
+          totalAttendancePercentage += 1;
+        }
+      }
+
+      // Calculate the attendance percentage and duration
+      const attendancePercentage =
+        (totalAttendancePercentage / userData?.enrolledCourses?.length) * 100;
+
+      return {
+        userData,
+        attendancePercentage,
+        totalDuration,
+      };
+    }
+  );
+
+  // Sort the rankedUsers array based on attendance percentage and duration
+  rankedUsers.sort((a, b) => {
+    // First, compare by attendance percentage
+    if (a.attendancePercentage !== b.attendancePercentage) {
+      return b.attendancePercentage - a.attendancePercentage;
+    }
+    // If attendance percentage is the same, compare by total duration
+    return b.totalDuration - a.totalDuration;
+  });
+
+  return rankedUsers;
+};
+
+export const calculateTotalClassTime = async (
+  courseId: string
+): Promise<number> => {
+  try {
+    let totalDuration = 0;
+
+    const courseDoc = await getDoc(doc(db, "courses", courseId));
+
+    if (!courseDoc.exists()) {
+      console.log(`Course with ID ${courseId} not found.`);
+      return totalDuration;
+    }
+
+    const courseData = courseDoc.data();
+
+    if (!courseData || !courseData.courseClasses) {
+      console.log(`No classes found for course ${courseId}.`);
+      return totalDuration;
+    }
+
+    const classPromises: Promise<IClass | null>[] =
+      courseData.courseClasses.map(async (classId: string) => {
+        const classDoc = await getDoc(doc(db, "classes", classId));
+
+        if (classDoc.exists()) {
+          const classData = classDoc.data();
+          if (classData) {
+            return {
+              classId,
+              classTitle: classData.classTitle,
+              classStartTime: classData.classStartTime,
+              classEndTime: classData.classEndTime,
+            };
+          }
+        }
+        return null;
+      });
+
+    const classes = await Promise.all(classPromises);
+
+    for (const classInfo of classes) {
+      if (classInfo) {
+        const totalSeconds = calculateSecondsDifference(
+          classInfo.classStartTime,
+          classInfo.classEndTime
+        );
+        totalDuration += totalSeconds;
+        // You can store or process the totalSeconds as needed
+      }
+    }
+
+    return totalDuration;
+  } catch (error) {
+    console.error("Error calculating total class time:", error);
+    throw error;
+  }
+};
+
+export const calculateTotalAttendanceTime = (
+  userDataAndAttendance: UserAttendance[]
+): number => {
+  let totalAttendanceTime: number = 0;
+
+  userDataAndAttendance.forEach((userAttendance) => {
+    const { userData, attendanceData } = userAttendance;
+
+    let totalDurationInSeconds = 0;
+
+    for (const classId in attendanceData) {
+      const classAttendance = attendanceData[classId];
+
+      if (classAttendance.clockIn && classAttendance.clockOut) {
+        const durationInSeconds =
+          classAttendance.clockOut.seconds - classAttendance.clockIn.seconds;
+        totalDurationInSeconds += durationInSeconds;
+      }
+    }
+
+    totalAttendanceTime += totalDurationInSeconds;
+  });
+
+  return totalAttendanceTime;
+};
+
+export const getTotalClassDurationForUser = async (
+  userId: string,
+  classIds: string[]
+) => {
+  try {
+    let totalDuration = 0;
+
+    for (const classId of classIds) {
+      const attendanceDoc = await getDoc(
+        doc(db, "classes", classId, "attendance", userId)
+      );
+      if (attendanceDoc.exists()) {
+        const attendanceData = attendanceDoc.data();
+        
+        if (attendanceData.clockIn && attendanceData.clockOut) {
+          const durationInSeconds = Math.floor(
+            (attendanceData.clockOut.seconds - attendanceData.clockIn.seconds)
+          );
+          totalDuration += durationInSeconds;
+        }
+      }
+    }
+
+    return totalDuration;
+  } catch (error) {
+    console.error("Error fetching user data and attendance:", error);
+    throw error;
+  }
 };

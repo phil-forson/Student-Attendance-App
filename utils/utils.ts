@@ -55,8 +55,39 @@ export const generateUid = () => {
   return uuid.v4(); // Generate a 6-character unique code using nanoid library
 };
 
+export function calculateDurationInHHMMSS(
+  startDate: Timestamp,
+  endDate: Timestamp
+) {
+  console.log("end date ", endDate);
+  console.log("end date ", endDate?.toDate().getTime());
+  console.log("start date ", startDate?.toDate().getTime());
+
+  const durationInSeconds = Math.floor(
+    (endDate?.toDate().getTime() - startDate?.toDate().getTime()) / 1000
+  );
+  console.log("duration ", durationInSeconds);
+
+  const hours = Math.floor(durationInSeconds / 3600);
+  const minutes = Math.floor((durationInSeconds % 3600) / 60);
+  const seconds = durationInSeconds % 60;
+
+  console.log(
+    `timeee:   ${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+  );
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
 export const calculateDuration = (startDate: Timestamp, endDate: Timestamp) => {
+  console.log("start date", startDate);
+  console.log("end date", endDate);
   const diffInMs = endDate.toDate().getTime() - startDate.toDate().getTime();
+  console.log("diff in ms", diffInMs);
   const hours = Math.floor(diffInMs / (1000 * 60 * 60));
   const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -256,3 +287,34 @@ export function isTimePast(time: Date) {
   const currentTime = new Date();
   return time.getTime() < currentTime.getTime();
 }
+
+export function secondsToHHMMSS(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  return formattedTime;
+}
+
+export function calculateSecondsDifference(
+  timestamp1: Timestamp,
+  timestamp2: Timestamp
+): number {
+  const millisecondsDifference = timestamp2.toMillis() - timestamp1.toMillis();
+  const secondsDifference = Math.floor(millisecondsDifference / 1000);
+  return secondsDifference;
+}
+
+export const formatSecondsToHM = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+};

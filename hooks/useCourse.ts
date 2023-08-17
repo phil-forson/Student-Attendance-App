@@ -7,10 +7,10 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { ICourseDetails } from "../types";
+import { ICourse } from "../types";
 
 const useCourse = (courseId: string) => {
-  const [courseData, setCourseData] = useState<ICourseDetails | null>(null);
+  const [courseData, setCourseData] = useState<ICourse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const useCourse = (courseId: string) => {
         const courseSnapshot = await getDoc(courseDocRef);
 
         unsubscribe = onSnapshot(courseDocRef, (doc) => {
-          const courseData = doc.data() as ICourseDetails;
+          const courseData = doc.data() as ICourse;
           console.log(courseData);
           setCourseData(courseData);
         });
