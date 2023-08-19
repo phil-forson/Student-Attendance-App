@@ -77,6 +77,9 @@ export default function CourseDetails({ navigation, route }: any) {
 
   const [userDataAndAttendance, setUserDataAndAttendance] = useState<any>([]);
 
+  const [attendanceTimeLoading, setAttendanceTimeLoading] =
+    useState<boolean>(false);
+
   const { userData, isLoading: isUserDataLoading } = useUser();
 
   const { courseData, isLoading: isCourseDataLoading } = useCourse(
@@ -158,7 +161,6 @@ export default function CourseDetails({ navigation, route }: any) {
 
   useLayoutEffect(() => {
     setCourse(route.params);
-    console.log(route.params);
   }, []);
 
   useEffect(() => {
@@ -183,6 +185,7 @@ export default function CourseDetails({ navigation, route }: any) {
                 setAllClassesData(enrolledClasses);
                 setClassesData(enrolledClasses);
                 const groupedClasses = groupAndSortClasses(enrolledClasses);
+                console.log("grouped classes ", groupedClasses);
                 setPastClassesData(groupedClasses.past);
                 setUpcomingClassesData(groupedClasses.upcoming);
                 setOngoingClassesData(groupedClasses.ongoing);
@@ -192,6 +195,7 @@ export default function CourseDetails({ navigation, route }: any) {
               });
           }
           if (courseData) {
+            setAttendanceTimeLoading(true);
             const totalClassTime = await calculateTotalClassTime(
               courseData?.uid
             );
@@ -208,12 +212,14 @@ export default function CourseDetails({ navigation, route }: any) {
               );
               console.log("user data and attendance ", userDataAndAttendance);
               setTotalAttendanceTime(totalAttendanceTime);
+              setAttendanceTimeLoading(false);
             } else {
               const totalAttendanceTime = await getTotalClassDurationForUser(
                 userData?.uid,
                 courseData.courseClasses
               );
               setTotalAttendanceTime(totalAttendanceTime);
+              setAttendanceTimeLoading(false);
             }
           }
         }
@@ -284,8 +290,8 @@ export default function CourseDetails({ navigation, route }: any) {
         {
           backgroundColor:
             theme === "dark" ? Colors.dark.background : Colors.light.background,
-          paddingHorizontal: 20,
-          paddingVertical: 10,
+          paddingHorizontal: Platform.OS === "android" ? 0 : 20,
+          paddingVertical: Platform.OS === "android" ? 30 : 10,
         },
       ]}
     >
@@ -390,7 +396,11 @@ export default function CourseDetails({ navigation, route }: any) {
                 },
               ]}
             >
-              {formatSecondsToHM(totalAttendanceTime)}
+              {attendanceTimeLoading ? (
+                <ActivityIndicator />
+              ) : (
+                formatSecondsToHM(totalAttendanceTime)
+              )}
             </Text>
           </View>
         </View>
@@ -404,17 +414,34 @@ export default function CourseDetails({ navigation, route }: any) {
                   borderBottomColor:
                     theme === "dark"
                       ? activeTab === "All"
-                        ? Colors.dark.tetiary
+                        ? Colors.deSaturatedPurple
                         : Colors.dark.primaryGrey
                       : activeTab === "All"
-                      ? Colors.light.secondaryGrey
+                      ? Colors.mainPurple
                       : Colors.light.primaryGrey,
                   borderBottomWidth: 3,
                 },
               ]}
               onPress={() => setActiveTab("All")}
             >
-              <Text style={[{ textAlign: "center" }]}>All</Text>
+              <Text
+                style={[
+                  {
+                    textAlign: "center",
+                    color:
+                      theme === "dark"
+                        ? activeTab === "All"
+                          ? Colors.deSaturatedPurple
+                          : "white"
+                        : activeTab === "All"
+                        ? Colors.mainPurple
+                        : "black",
+                    fontWeight: activeTab === "All" ? "bold" : "normal",
+                  },
+                ]}
+              >
+                All
+              </Text>
             </Pressable>
             <Pressable
               style={[
@@ -424,17 +451,34 @@ export default function CourseDetails({ navigation, route }: any) {
                   borderBottomColor:
                     theme === "dark"
                       ? activeTab === "Upcoming"
-                        ? Colors.dark.tetiary
+                        ? Colors.deSaturatedPurple
                         : Colors.dark.primaryGrey
                       : activeTab === "Upcoming"
-                      ? Colors.light.secondaryGrey
+                      ? Colors.mainPurple
                       : Colors.light.primaryGrey,
                   borderBottomWidth: 3,
                 },
               ]}
               onPress={() => setActiveTab("Upcoming")}
             >
-              <Text style={[{ textAlign: "center" }]}>Upcoming</Text>
+              <Text
+                style={[
+                  {
+                    textAlign: "center",
+                    color:
+                      theme === "dark"
+                        ? activeTab === "Upcoming"
+                          ? Colors.deSaturatedPurple
+                          : "white"
+                        : activeTab === "Upcoming"
+                        ? Colors.mainPurple
+                        : "black",
+                    fontWeight: activeTab === "Upcoming" ? "bold" : "normal",
+                  },
+                ]}
+              >
+                Upcoming
+              </Text>
             </Pressable>
             <Pressable
               style={[
@@ -444,17 +488,34 @@ export default function CourseDetails({ navigation, route }: any) {
                   borderBottomColor:
                     theme === "dark"
                       ? activeTab === "Ongoing"
-                        ? Colors.dark.tetiary
+                        ? Colors.deSaturatedPurple
                         : Colors.dark.primaryGrey
                       : activeTab === "Ongoing"
-                      ? Colors.light.secondaryGrey
+                      ? Colors.mainPurple
                       : Colors.light.primaryGrey,
                   borderBottomWidth: 3,
                 },
               ]}
               onPress={() => setActiveTab("Ongoing")}
             >
-              <Text style={[{ textAlign: "center" }]}>Ongoing</Text>
+              <Text
+                style={[
+                  {
+                    textAlign: "center",
+                    color:
+                      theme === "dark"
+                        ? activeTab === "Ongoing"
+                          ? Colors.deSaturatedPurple
+                          : "white"
+                        : activeTab === "Ongoing"
+                        ? Colors.mainPurple
+                        : "black",
+                    fontWeight: activeTab === "Ongoing" ? "bold" : "normal",
+                  },
+                ]}
+              >
+                Ongoing
+              </Text>
             </Pressable>
             <Pressable
               style={[
@@ -464,17 +525,34 @@ export default function CourseDetails({ navigation, route }: any) {
                   borderBottomColor:
                     theme === "dark"
                       ? activeTab === "Past"
-                        ? Colors.dark.tetiary
+                        ? Colors.deSaturatedPurple
                         : Colors.dark.primaryGrey
                       : activeTab === "Past"
-                      ? Colors.light.secondaryGrey
+                      ? Colors.mainPurple
                       : Colors.light.primaryGrey,
                   borderBottomWidth: 3,
                 },
               ]}
               onPress={() => setActiveTab("Past")}
             >
-              <Text style={[{ textAlign: "center" }]}>Past</Text>
+              <Text
+                style={[
+                  {
+                    textAlign: "center",
+                    color:
+                      theme === "dark"
+                        ? activeTab === "Past"
+                          ? Colors.deSaturatedPurple
+                          : "white"
+                        : activeTab === "Past"
+                        ? Colors.mainPurple
+                        : "black",
+                    fontWeight: activeTab === "Past" ? "bold" : "normal",
+                  },
+                ]}
+              >
+                Past
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -489,7 +567,7 @@ export default function CourseDetails({ navigation, route }: any) {
           </View>
         )}
 
-        {classesData && !areClassesLoading && classesData?.length > 0 && (
+        {classesData && !areClassesLoading && (
           <FlatList
             data={classesData}
             keyExtractor={(courseClass: IClass) => courseClass.uid}

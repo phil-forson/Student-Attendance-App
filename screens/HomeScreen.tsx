@@ -10,6 +10,7 @@ import {
   ListRenderItem,
   ScrollView,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import {
   useCallback,
@@ -203,11 +204,20 @@ export const HomeScreen = ({ navigation, route }: any) => {
               </Text>
             </View>
           </View>
-          <View style={[styles.smy, styles.transBg]}>
-            <Text lightColor={Colors.light.text} darkColor={Colors.dark.text}>
-              Profile
-            </Text>
-          </View>
+          <Pressable
+            style={[
+              styles.smy,
+              styles.transBg,
+              styles.rounded,
+              { width: 40, height: 40 },
+            ]}
+            onPress={() => navigation.navigate("Settings")}
+          >
+            <Image
+              source={require("../assets/profile.jpg")}
+              style={[styles.fullImage, { borderRadius: 100 }]}
+            />
+          </Pressable>
         </View>
         <BottomSheet
           ref={bottomSheetRef}
@@ -226,7 +236,10 @@ export const HomeScreen = ({ navigation, route }: any) => {
             {userClockedIn && (
               <>
                 <Text style={[styles.bold, styles.smy]}>Clocked In</Text>
-                <ClockedInCard classId={userData?.classClockedIn} navigation={navigation}/>
+                <ClockedInCard
+                  classId={userData?.classClockedIn}
+                  navigation={navigation}
+                />
               </>
             )}
             {(userData?.status === "Student" &&
@@ -402,8 +415,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
           >
             <AntDesign
               name="plus"
-              color={"#007bff"}
-              size={18}
+              color={Colors.mainPurple}
+              size={24}
               style={{ fontWeight: "bold" }}
             />
           </InvTouchableOpacity>

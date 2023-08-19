@@ -2,6 +2,7 @@ import { View, Text, InvTouchableOpacity } from "../components/Themed";
 import {
   Image,
   ListRenderItem,
+  Platform,
   SafeAreaView,
   useColorScheme,
 } from "react-native";
@@ -82,12 +83,12 @@ export default function MyCourses({ navigation, route }: any) {
         },
       ]}
     >
-      <View style={[styles.contentContainer, styles.transBg, {}]}>
+      <View style={[ styles.transBg, {paddingHorizontal: 15, paddingTop: Platform.OS === "android" ? 40 : 10}]}>
         <View style={[styles.smy, styles.transBg]}>
           <Text
             lightColor={Colors.light.text}
             darkColor={Colors.dark.text}
-            style={[styles.bold, styles.largeText]}
+            style={[styles.bold, styles.largeText,]}
           >
             My Courses
           </Text>
@@ -106,12 +107,8 @@ export default function MyCourses({ navigation, route }: any) {
             data={coursesData}
             keyExtractor={(courseClass: ICourse) => courseClass?.uid}
             renderItem={renderItem}
-            contentContainerStyle={styles.list}
+            contentContainerStyle={[{ marginHorizontal: 10 }]}
             ItemSeparatorComponent={() => <ItemSeparator />}
-            columnWrapperStyle={styles.column}
-            horizontal={false}
-            key={2}
-            numColumns={2}
           />
         )}
       {userData?.status === "Teacher" &&
@@ -120,12 +117,8 @@ export default function MyCourses({ navigation, route }: any) {
             data={coursesData}
             keyExtractor={(courseClass: ICourse) => courseClass?.uid}
             renderItem={renderItem}
-            contentContainerStyle={styles.list}
+            contentContainerStyle={[{ marginHorizontal: 10 }]}
             ItemSeparatorComponent={() => <ItemSeparator />}
-            columnWrapperStyle={styles.column}
-            horizontal={false}
-            key={2}
-            numColumns={2}
           />
         )}
       <InvTouchableOpacity

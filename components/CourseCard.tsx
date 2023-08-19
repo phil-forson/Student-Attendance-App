@@ -1,6 +1,6 @@
 import useColorScheme from "../hooks/useColorScheme";
 import { styles } from "../styles/styles";
-import {  ICourse } from "../types";
+import { ICourse } from "../types";
 import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
 import React, { useEffect } from "react";
 import {
@@ -9,7 +9,11 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
-import { convertToDayString, convertToHHMM, truncateTextWithEllipsis } from "../utils/utils";
+import {
+  convertToDayString,
+  convertToHHMM,
+  truncateTextWithEllipsis,
+} from "../utils/utils";
 import {
   AntDesign,
   Ionicons,
@@ -29,7 +33,7 @@ export default function CourseCard({
 
   useEffect(() => {
     console.log("width ", width);
-    console.log('course ', course)
+    console.log("course ", course);
   }, []);
   return (
     <>
@@ -43,7 +47,6 @@ export default function CourseCard({
               theme === "dark"
                 ? Colors.dark.secondaryGrey
                 : Colors.light.primaryGrey,
-            width: (width - 30) / 2,
             marginHorizontal: 5,
           },
         ]}
@@ -61,17 +64,22 @@ export default function CourseCard({
         >
           <View style={[styles.transBg]}>
             <Text style={[styles.semiBold, styles.largeText]}>
-              {truncateTextWithEllipsis(course?.courseTitle, 17)}
+              {truncateTextWithEllipsis(course?.courseTitle, 23)}
             </Text>
+            <Text style={[styles.semiBold, ]}>{course?.courseCode}</Text>
             <Text style={[styles.semiBold]}>{course?.lecturerName}</Text>
           </View>
           <View style={[styles.transBg, styles.flexRow, styles.itemsCenter]}>
             <Ionicons
               name="people"
               size={30}
-              color={theme === "dark" ? "white" : "black"}
+              color={"green"}
+              style={[{paddingRight: 10}]}
             />
-            <Text style={[{ paddingRight: 10 }]}>{course?.enrolledStudents?.length} student{course?.enrolledStudents.length > 1 ? "s": ""}</Text>
+            <Text style={[{ paddingRight: 10 }]}>
+              {course?.enrolledStudents?.length} student
+              {course?.enrolledStudents.length === 1 ? "" : "s"}
+            </Text>
           </View>
         </View>
       </Pressable>

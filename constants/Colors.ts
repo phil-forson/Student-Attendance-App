@@ -1,4 +1,4 @@
-const tintColorLight = "#2f95dc";
+const tintColorLight = "#4240c9";
 const tintColorDark = "#fbfcfd";
 
 
@@ -31,5 +31,8 @@ export default {
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorDark,
   },
-  danger: "#ff0e0e"
+  danger: "#ff0e0e",
+  mainBlue: "#42a9f9",
+  mainPurple: "#4240c9",
+  deSaturatedPurple: "#3f3e89"
 };

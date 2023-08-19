@@ -37,7 +37,7 @@ export default function ClassCard({
             borderRadius: 10,
             zIndex: 1,
             borderLeftWidth: 10,
-            borderLeftColor: theme === "dark" ? Colors.dark.text : "#121212",
+            borderLeftColor: theme === "dark" ? Colors.dark.text : Colors.mainPurple,
             backgroundColor:
               theme === "dark"
                 ? Colors.dark.secondaryGrey

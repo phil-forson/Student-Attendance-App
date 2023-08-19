@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity } from "../components/Themed";
 import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
 import FullWidthButton from "../components/FullWidthButton";
 import { RootStackScreenProps } from "../types";
+import Colors from "../constants/Colors";
 
 export default function UserStatus({
   navigation,
@@ -91,7 +92,7 @@ export default function UserStatus({
             onPress={() => setUserStatus("Teacher")}
           >
             <View style={[{ backgroundColor: "transparent" }, styles.cardMain]}>
-              <View style={[styles.circle, { backgroundColor: "#42a9f9" }]}>
+              <View style={[styles.circle, { backgroundColor: Colors.mainBlue }]}>
                 <FontAwesome5
                   name="chalkboard-teacher"
                   size={24}

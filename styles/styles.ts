@@ -1,20 +1,20 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, Platform, StyleSheet } from "react-native";
 
 export const width = Dimensions.get("screen").width;
 export const height = Dimensions.get("screen").height;
 
 export const styles = StyleSheet.create({
   autocompleteContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
   },
   listView: {
-    position: 'relative',
+    position: "relative",
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     elevation: 3,
     zIndex: 999,
   },
@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     marginVertical: 10,
   },
   pr20: {
-    paddingRight: 20
+    paddingRight: 20,
   },
   fullWidth: {
     width: width,
@@ -67,8 +67,8 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     flex: 1,
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: Platform.OS === "android" ? 13 : 20,
+    paddingVertical: Platform.OS === "android" ? 0 : 10,
   },
   fullImage: {
     ...StyleSheet.absoluteFillObject,
@@ -101,7 +101,7 @@ export const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === "android" ? 30 : 20,
   },
   h30: {
     height: 30,
@@ -115,10 +115,7 @@ export const styles = StyleSheet.create({
   autoWidth: {
     width: "auto",
   },
-  list: {
-    justifyContent: "space-around",
-    marginHorizontal: 10,
-  },
+  
   column: {
     flexShrink: 1,
   },

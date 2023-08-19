@@ -34,7 +34,11 @@ import {
 } from "../utils/utils";
 import { createClassInCourse } from "../utils/helpers";
 import { IClass } from "../types";
-import { GooglePlaceData, GooglePlaceDetail, GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import {
+  GooglePlaceData,
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete,
+} from "react-native-google-places-autocomplete";
 
 export default function CreateClass({ navigation, route }: any) {
   const [classTitle, setClassTitle] = useState("");
@@ -48,7 +52,7 @@ export default function CreateClass({ navigation, route }: any) {
   const [classLocationSearch, setClassLocationSearch] = useState<string>("");
   const [classLocationDetails, setClassLocationDetails] = useState<any>();
   const [classDate, setClassDate] = useState<Date>();
-  const [showDate, setShowDate] = useState(false);
+  const [googlePlacesInputFocused, setGooglePlacesInputFocused] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [places, setPlaces] = useState([]);
   const [isItemSelected, setIsItemSelected] = useState(false);
@@ -215,7 +219,8 @@ export default function CreateClass({ navigation, route }: any) {
         classStatus: "upcoming",
       };
 
-      await createClassInCourse(route.params.uid, data);
+      console.log("data ", data);
+      // await createClassInCourse(route.params.uid, data);
       navigation.goBack();
     } catch (error) {
       console.log(error);
@@ -322,16 +327,19 @@ export default function CreateClass({ navigation, route }: any) {
           setValue={handleClassTitleChange}
         />
       </View>
-      <View style={[styles.mmy, { paddingBottom: 200 }]}>
+      <View
+        style={[
+          styles.mmy,
+          { paddingBottom: googlePlacesInputFocused ? 200 : 50 },
+        ]}
+      >
         <GooglePlacesAutocomplete
           placeholder="Search Class Location"
           onPress={(data, details = null) => {
             setIsItemSelected(true);
-            setClassLocation(data)
-            setClassLocationDetails(details);
-            setClassLocationSearch(data.description)
-            console.log("data ", data);
-            console.log("details ", details?.geometry)
+            setClassLocation(data);
+            setClassLocationDetails(details?.geometry);
+            setClassLocationSearch(data.description);
             // setClassLocation(data)
           }}
           ref={autoCompleteRef}
@@ -339,14 +347,18 @@ export default function CreateClass({ navigation, route }: any) {
             key: "AIzaSyAjJSMzeqfZBuoqAdx3bpAmezoIfGK5n1E",
             language: "en", // language of the results
           }}
-          listEmptyComponent={
+          listEmptyComponent={() => (
             <View
-              style={[styles.transBg, styles.justifyCenter, styles.itemsCenter, {height: 400}]}
+              style={[
+                styles.transBg,
+                styles.justifyCenter,
+                styles.itemsCenter,
+                { height: 400 },
+              ]}
             >
               <Text>No places available</Text>
             </View>
-          }
-          
+          )}
           styles={{
             textInput: [
               styles.transBg,
@@ -365,6 +377,10 @@ export default function CreateClass({ navigation, route }: any) {
                 color: theme === "dark" ? "white" : "black",
               },
             ],
+          }}
+          textInputProps={{
+            onFocus: () => setGooglePlacesInputFocused(true),
+            onBlur: () => setGooglePlacesInputFocused(false)
           }}
           fetchDetails={true}
           enablePoweredByContainer={false}

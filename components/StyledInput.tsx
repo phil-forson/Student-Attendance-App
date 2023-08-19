@@ -55,22 +55,18 @@ export default function StyledInput({
                 ? "#0083eb"
                 : "red"
               : "#0083eb"
-            : isBlur
-            ? textChanged
-              ? valid
-                ? "#C7C7CD"
-                : valid === undefined
-                ? "#c7c7cd"
-                : "red"
-              : "#C7C7CD"
-            : "#C7C7CD",
+            :  theme === "dark" ? "#302e2e" : "#f1f1f2",
         }}
         autoCapitalize={"none"}
         secureTextEntry={isPasswordSecure}
         keyboardType={keyboardType}
         placeholder={placeholder}
         placeholderTextColor={
-          placeholderTextColor ? placeholderTextColor :  theme === "dark" ? "white" : "black"
+          placeholderTextColor
+            ? placeholderTextColor
+            : theme === "dark"
+            ? "white"
+            : "black"
         }
         autoCorrect={false}
         caretHidden={caretHidden}
