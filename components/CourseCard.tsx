@@ -73,7 +73,7 @@ export default function CourseCard({
             <Ionicons
               name="people"
               size={30}
-              color={"green"}
+              color={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
               style={[{paddingRight: 10}]}
             />
             <Text style={[{ paddingRight: 10 }]}>

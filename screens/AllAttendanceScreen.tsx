@@ -1,10 +1,11 @@
-import { View, Text, ListRenderItem, useColorScheme } from "react-native";
+import {  ListRenderItem, useColorScheme } from "react-native";
 import React, { useEffect } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { styles } from "../styles/styles";
 import UserAttendanceCard from "../components/UserAttendanceCard";
 import Colors from "../constants/Colors";
 import { secondsToHHMMSS } from "../utils/utils";
+import { Text, View } from "../components/Themed";
 
 export default function AllAttendanceScreen({ navigation, route }: any) {
   const theme = useColorScheme();

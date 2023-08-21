@@ -11,18 +11,23 @@ import {
 } from "../utils/utils";
 import FullWidthButton from "./FullWidthButton";
 import useClass from "../hooks/useClass";
-import { ActivityIndicator, AppState, AppStateStatus } from "react-native";
+import { ActivityIndicator, AppState, AppStateStatus, useColorScheme } from "react-native";
 import useAuth from "../hooks/useAuth";
 import { userClockOut } from "../utils/helpers";
 import ClockInSheet from "./ClockInSheet";
 import { Alert } from "react-native";
+import { IClass } from "../types";
 
 export default function ClockedInCard({
   classId,
   navigation,
+  classClockedIn,
+  clockInDate
 }: {
   classId: string;
   navigation: any;
+  classClockedIn: IClass;
+  clockInDate: any
 }) {
   const { classData, isLoading: isClassDataLoading } = useClass(classId);
   const [seconds, setSeconds] = useState(0);
@@ -34,16 +39,14 @@ export default function ClockedInCard({
 
   const [timerActive, setTimerActive] = useState(true);
 
-  let duration = 0;
+  const theme = useColorScheme()
 
-  useEffect(() => {
-    if (classData) {
-      duration = calculateDurationInSeconds(
-        classData?.classStartTime.toDate(),
-        classData.classEndTime.toDate()
-      );
-    }
-  }, [classData]);
+  const duration = calculateDurationInSeconds(
+    new Date(Date.now()),
+    classClockedIn?.classEndTime.toDate()
+  );
+
+ 
 
   useEffect(() => {
     const unsubscribe = AppState.addEventListener(
@@ -57,7 +60,6 @@ export default function ClockedInCard({
     fetchAndSetClockInTime();
 
     // Start the timer when the component mounts
-    console.log("starting timer...");
     const interval = setInterval(() => {
       setInitialSeconds((prevSeconds) => prevSeconds + 1);
     }, 1000);
@@ -76,7 +78,6 @@ export default function ClockedInCard({
       appState.current.match(/inactive|background/) &&
       nextAppState === "active"
     ) {
-      console.log("background...");
       // We just became active again: recalculate elapsed time based
       // on what we stored in AsyncStorage when we started.
       fetchAndSetClockInTime();
@@ -86,7 +87,7 @@ export default function ClockedInCard({
 
   const getElapsedTime = async () => {
     try {
-      const clockInDateStr = await getValueFor("clockIn");
+      const clockInDateStr = clockInDate.toDate();
       if (clockInDateStr) {
         const clockInDate = new Date(clockInDateStr);
         const currentTime = new Date();
@@ -104,9 +105,6 @@ export default function ClockedInCard({
   const fetchAndSetClockInTime = async () => {
     const elapsed = await getElapsedTime();
 
-    console.log("total seconds ", duration);
-
-    console.log("elapsed ", elapsed);
     // Update the elapsed seconds state
     setInitialSeconds(elapsed ?? 0);
   };
@@ -155,7 +153,6 @@ export default function ClockedInCard({
         onPress={() => {
           if (classData && user) {
             navigation.navigate("ClassDetails", classData);
-            console.log(classData);
           }
         }}
       >
@@ -200,9 +197,12 @@ export default function ClockedInCard({
               value={initialSeconds}
               maxValue={duration}
               radius={45}
-              duration={duration} // 2 minutes in milliseconds
-              title={convertToHHMM(new Date(Date.now()))}
+              duration={calculateDurationInSeconds(new Date(Date.now()), new Date(Date.now()))} // 2 minutes in milliseconds
+              title={convertToHHMM(classClockedIn.classEndTime.toDate())}
               titleFontSize={10}
+              activeStrokeColor={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
+              progressValueColor={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
+              titleColor={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
               progressValueFontSize={15}
               progressFormatter={formatTime}
             />

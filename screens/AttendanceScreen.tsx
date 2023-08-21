@@ -57,7 +57,7 @@ export default function AttendanceScreen({ navigation }: any) {
 
   const [groupedClasses, setGroupedClasses] = useState<any>();
 
-  const [totalClassTime, setTotalClassTime] = useState<number>(0)
+  const [totalClassTime, setTotalClassTime] = useState<number>(0);
 
   const [rankedStudentsAttendance, setRankedStudentsAttendance] =
     useState<any>();
@@ -246,9 +246,9 @@ export default function AttendanceScreen({ navigation }: any) {
               userDataAndAttendance
             );
 
-            const totalClassTime = await calculateTotalClassTime(activeTab.uid)
-            console.log('total class time ', totalClassTime)
-            setTotalClassTime(totalClassTime)
+            const totalClassTime = await calculateTotalClassTime(activeTab.uid);
+            console.log("total class time ", totalClassTime);
+            setTotalClassTime(totalClassTime);
 
             setRankedStudentsAttendance(rankedStudents);
             setRankedStudentsLoading(false);
@@ -333,13 +333,24 @@ export default function AttendanceScreen({ navigation }: any) {
               </Text>
               <Pressable
                 onPress={() =>
-                  navigation.navigate(
-                    "AllStudentsAttendance",
-                    {rankedStudentsAttendance, totalClassTime}
-                  )
+                  navigation.navigate("AllStudentsAttendance", {
+                    rankedStudentsAttendance,
+                    totalClassTime,
+                  })
                 }
               >
-                <Text>View all</Text>
+                <Text
+                  style={[
+                    {
+                      color:
+                        theme === "dark"
+                          ? Colors.deSaturatedPurple
+                          : Colors.mainPurple,
+                    },
+                  ]}
+                >
+                  View all
+                </Text>
               </Pressable>
             </View>
           )}
@@ -462,7 +473,7 @@ const TabGroup = ({
   activeTab,
   setActiveTab,
   tabItem,
-  setBottomSheetVisible
+  setBottomSheetVisible,
 }: {
   activeTab: any;
   setActiveTab: React.Dispatch<React.SetStateAction<any>>;
@@ -479,21 +490,35 @@ const TabGroup = ({
           borderBottomColor:
             theme === "dark"
               ? activeTab?.uid === tabItem.uid
-                ? Colors.dark.tetiary
+                ? Colors.deSaturatedPurple
                 : Colors.dark.primaryGrey
               : activeTab?.uid === tabItem.uid
-              ? Colors.light.secondaryGrey
+              ? Colors.mainPurple
               : Colors.light.primaryGrey,
           borderBottomWidth: 3,
           width: 180,
         },
       ]}
       onPress={() => {
-        setBottomSheetVisible(false)
-         setActiveTab(tabItem)
+        setBottomSheetVisible(false);
+        setActiveTab(tabItem);
       }}
     >
-      <Text style={[{ textAlign: "center" }]}>
+      <Text
+        style={[
+          {
+            textAlign: "center",
+            color:
+              theme === "dark"
+                ? activeTab?.uid === tabItem.uid
+                  ? Colors.deSaturatedPurple
+                  : "white"
+                : activeTab?.uid === tabItem.uid
+                ? Colors.mainPurple
+                : "black",
+          },
+        ]}
+      >
         {truncateTextWithEllipsis(tabItem?.courseTitle, 25)}
       </Text>
     </Pressable>

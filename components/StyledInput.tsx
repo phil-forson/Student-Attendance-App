@@ -82,6 +82,7 @@ export default function StyledInput({
           setIsFocused(false);
           setIsBlur(true);
         }}
+        focusable={false}
         value={value}
         onChangeText={(text) => {
           setValue(text);

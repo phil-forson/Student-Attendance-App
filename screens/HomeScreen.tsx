@@ -62,8 +62,10 @@ import Loading from "../components/Loading";
 import { UserContext } from "../contexts/UserContext";
 import GetStarted from "../components/GetStarted";
 import {
+  fetchClassData,
   getAllClassesData,
   getAllCoursesData,
+  getClassData,
   isUserClockedInAndNotClockedOut,
 } from "../utils/helpers";
 import CourseClassCard from "../components/CourseClassCard";
@@ -83,6 +85,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
 
+  const [classClockedIn, setClassClockedIn] = useState<any>({});
+
   const [userClockedIn, setUserClockedIn] = useState<boolean>(false);
 
   const [todaysClasses, setTodaysClasses] = useState<IClass[]>([]);
@@ -97,9 +101,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
   const snapPoints = useMemo(() => ["75%"], []);
 
   // callbacks
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
+  const handleSheetChanges = useCallback((index: number) => {}, []);
 
   const renderItem: ListRenderItem<IClass> = ({ item }) => {
     return <CourseClassCard courseClass={item} navigation={navigation} />;
@@ -118,37 +120,39 @@ export const HomeScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    const courses =
-      userData.status === "Student"
-        ? userData.enrolledCourses
-        : userData.createdCourses;
+    const getAllData = async () => {
+      const courses =
+        userData.status === "Student"
+          ? userData.enrolledCourses
+          : userData.createdCourses;
 
-    console.log("user courses ", courses);
-    console.log("user data courses ", userData.enrolledCourses);
+      if (courses.length > 0) {
+        getAllCoursesData(courses, setAreCoursesLoading).then((res) => {
+          const coursesClasses = res.flatMap((item) => item?.courseClasses);
 
-    if (courses.length > 0) {
-      getAllCoursesData(courses, setAreCoursesLoading).then((res) => {
-        console.log("res ", res);
-        const coursesClasses = res.flatMap((item) => item?.courseClasses);
-        console.log("resss ", coursesClasses);
+          if (coursesClasses.length > 0) {
+            getAllClassesData(coursesClasses, setAreClassesLoading).then(
+              ({ enrolledClasses }) => {
+                const todaysClasses = getClassesTodayAndFuture(enrolledClasses);
+                const { ongoing, past, upcoming } =
+                  groupAndSortClasses(todaysClasses);
+                setTodaysClasses(todaysClasses);
+                setOngoingClasses(ongoing);
+              }
+            );
+          }
+        });
+      }
 
-        if (coursesClasses.length > 0) {
-          getAllClassesData(coursesClasses, setAreClassesLoading).then(
-            ({ enrolledClasses }) => {
-              const todaysClasses = getClassesTodayAndFuture(enrolledClasses);
-              console.log("today's classes ", todaysClasses);
-              const { ongoing, past, upcoming } =
-                groupAndSortClasses(todaysClasses);
-              setTodaysClasses(todaysClasses);
-              setOngoingClasses(ongoing);
-            }
-          );
-        }
-      });
-    }
+      console.log("user data================", userData);
+      if (userData?.clockedIn) {
+        const classClockedIn = await fetchClassData(userData.classClockedIn);
+        setClassClockedIn(classClockedIn);
+        setUserClockedIn(userData?.clockedIn);
+      }
+    };
 
-    console.log("user data================", userData);
-    setUserClockedIn(userData?.clockedIn);
+    getAllData();
 
     // const classesHappeningToday = getClassesTodayAndFuture(userData.courseClasses)
   }, [isUserDataLoading, userData]);
@@ -239,6 +243,8 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 <ClockedInCard
                   classId={userData?.classClockedIn}
                   navigation={navigation}
+                  classClockedIn={classClockedIn}
+                  clockInDate={userData?.clockInDate}
                 />
               </>
             )}
@@ -407,9 +413,9 @@ export const HomeScreen = ({ navigation, route }: any) => {
               },
             ]}
             onPress={() => {
-              navigation.navigate(
-                userData.status === "Student" ? "JoinCourse" : "CreateCourse"
-              );
+              userData.status === "Student"
+                ? navigation.navigate("JoinCourse", userData)
+                : navigation.navigate("CreateCourse");
             }}
             darkColor="#0c0c0c"
           >

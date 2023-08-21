@@ -36,8 +36,8 @@ export default function CourseClassCard({
             borderRadius: 10,
             zIndex: 1,
             borderLeftWidth: 10,
-            borderLeftColor: theme === "dark" ? Colors.dark.text : "#121212",
-            backgroundColor:
+            borderLeftColor:
+            theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple,            backgroundColor:
               theme === "dark"
                 ? Colors.dark.secondaryGrey
                 : Colors.light.primaryGrey,

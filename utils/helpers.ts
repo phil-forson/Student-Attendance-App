@@ -29,13 +29,25 @@ import {
   save,
 } from "./utils";
 
-const fetchCourseData = async (courseId: string) => {
+export const getClassData = async (classId: string) => {
+  console.log("class id===========", classId);
+  const classDocRef = doc(db, "classes", classId);
+  onSnapshot(classDocRef, (doc) => {
+    const classData = doc.data() as IClass;
+    console.log(
+      "class data======================================== ",
+      classData
+    );
+    return classData;
+  });
+};
+export const fetchCourseData = async (courseId: string) => {
   const courseDoc = doc(db, "courses", courseId);
   const courseSnapshot = await getDoc(courseDoc);
   return courseSnapshot.data();
 };
 
-const fetchClassData = async (classId: string): Promise<IClass> => {
+export const fetchClassData = async (classId: string): Promise<IClass> => {
   const classDocRef = doc(db, "classes", classId);
   const classSnapshot = await getDoc(classDocRef);
 
@@ -404,6 +416,7 @@ export const getUsersForCourseAttendanceData = async (
           userData,
           attendanceData: {} as Record<string, any>,
         };
+        console.log("class ids ", classIds);
 
         for (const classId of classIds) {
           const attendanceDoc = await getDoc(
@@ -419,13 +432,14 @@ export const getUsersForCourseAttendanceData = async (
           }
         }
 
+        console.log("user data and attendance  ", userAttendance);
+
         userDataAndAttendance.push(userAttendance);
       } else {
         console.log(`No user data found for student ${enrolledStudentId}`);
       }
     }
 
-    console.log("user data and attendance ", userDataAndAttendance);
     return userDataAndAttendance;
   } catch (error) {
     console.error("Error fetching user data and attendance:", error);
@@ -664,6 +678,7 @@ export const getTotalClassDurationForUser = async (
   classIds: string[]
 ) => {
   try {
+    console.log("class ids ==============", classIds);
     let totalDuration = 0;
 
     for (const classId of classIds) {
@@ -672,10 +687,10 @@ export const getTotalClassDurationForUser = async (
       );
       if (attendanceDoc.exists()) {
         const attendanceData = attendanceDoc.data();
-        
+
         if (attendanceData.clockIn && attendanceData.clockOut) {
           const durationInSeconds = Math.floor(
-            (attendanceData.clockOut.seconds - attendanceData.clockIn.seconds)
+            attendanceData.clockOut.seconds - attendanceData.clockIn.seconds
           );
           totalDuration += durationInSeconds;
         }
@@ -687,4 +702,54 @@ export const getTotalClassDurationForUser = async (
     console.error("Error fetching user data and attendance:", error);
     throw error;
   }
+};
+
+export const getStudentsClockedIn = async (classId: string) => {
+  try {
+    console.log("classes id ", classId);
+    const clockedInUsers = [];
+
+    // Query the 'attendance' collection for users who are currently clocked in
+    const attendanceQuery = query(
+      collection(db, "classes", classId, "attendance"),
+      where("clockIn", "!=", null), // Filter by users who have clocked in
+      where("clockOut", "==", null) // Filter by users who have not clocked out yet
+    );
+
+    const querySnapshot = await getDocs(attendanceQuery);
+
+    // Iterate through the query snapshot to gather clocked-in users' data
+    for (const docRef of querySnapshot.docs) {
+      const userId = docRef.id;
+      const attendanceData = docRef.data();
+
+      const userDoc = await getDoc(doc(db, "users", userId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        clockedInUsers.push({ userData, attendanceData });
+      }
+    }
+
+    return clockedInUsers;
+  } catch (error) {
+    console.error("Error fetching clocked-in users:", error);
+    throw error;
+  }
+};
+
+export const getAllCoursesWithUniversity = async (university: any) => {
+  const coursesQuery = query(
+    collection(db, "courses"),
+    where("university", "==", university)
+  );
+
+  let uniSpecificCourses = [];
+  const coursesQuerySnapshot = getDocs(coursesQuery);
+  for (const docRef of (await coursesQuerySnapshot).docs) {
+    const courseData = docRef.data();
+    uniSpecificCourses.push(courseData);
+  }
+
+  return uniSpecificCourses;
 };

@@ -3,6 +3,7 @@ import { Image, StyleSheet, useColorScheme } from "react-native";
 import React from "react";
 import FullWidthButton from "../components/FullWidthButton";
 import { RootStackParamList, RootStackScreenProps } from "../types";
+import Colors from "../constants/Colors";
 
 export default function Onboarding({navigation}: RootStackScreenProps<"Root">) {
   const theme = useColorScheme();
@@ -16,7 +17,7 @@ export default function Onboarding({navigation}: RootStackScreenProps<"Root">) {
         <View style={[styles.signIn]}>
           <FullWidthButton
             text={"Log In"}
-            style={{ borderRadius: 50, height: 55 }}
+            style={{ borderRadius: 50, height: 55, backgroundColor: theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple }}
             onPress={() => navigation.navigate("LogIn")}
           />
           <FullWidthButton

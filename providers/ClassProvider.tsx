@@ -9,6 +9,7 @@ interface ClassProviderProps {
 export const ClassProvider: React.FC<ClassProviderProps> = ({ children }) => {
   const [courseClass, setCourseClass] = useState<IClass>();
   const [courseClasses, setCourseClasses] = useState<IClass []>([]);
+  const [classClockedIn, setClassClockedIn] = useState<boolean>(false)
 
 
   const setCourseClassData = (data: any) => {
@@ -26,7 +27,8 @@ export const ClassProvider: React.FC<ClassProviderProps> = ({ children }) => {
         setCourseClassData,
         courseClasses,
         setCourseClassesData,
-
+        classClockedIn,
+        setClassClockedIn
       }}
     >
       {children}

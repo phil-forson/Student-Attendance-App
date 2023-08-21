@@ -5,7 +5,13 @@ import {
   TouchableOpacity,
   InvTouchableOpacity,
 } from "../components/Themed";
-import React, { useEffect, useState, useContext, useLayoutEffect } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { FlatList, Alert } from "react-native";
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -28,16 +34,27 @@ import {
 import { createClassInCourse, updateClassDetails } from "../utils/helpers";
 import { IClass } from "../types";
 import useClass from "../hooks/useClass";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
-export default function EditClass({ navigation, route }: {navigation: any, route: any}) {
+export default function EditClass({
+  navigation,
+  route,
+}: {
+  navigation: any;
+  route: any;
+}) {
   const [classTitle, setClassTitle] = useState("");
   const [classStartTime, setClassStartTime] = useState<Date | null>(null);
   const [classEndTime, setClassEndTime] = useState<Date | null>(null);
   const [classStartTimeError, setClassStartTimeError] =
     useState<boolean>(false);
   const [classEndTimeError, setClassEndTimeError] = useState<boolean>(false);
-  const [classLocation, setClassLocation] = useState("");
+  const [classLocation, setClassLocation] = useState<any>();
   const [classLocationSearch, setClassLocationSearch] = useState<string>("");
+  const [classLocationDetails, setClassLocationDetails] = useState<any>();
+
+  const [googlePlacesInputFocused, setGooglePlacesInputFocused] =
+    useState(false);
   const [classDate, setClassDate] = useState<Date>();
   const [places, setPlaces] = useState([]);
   const [isItemSelected, setIsItemSelected] = useState(false);
@@ -50,22 +67,28 @@ export default function EditClass({ navigation, route }: {navigation: any, route
 
   const theme = useColorScheme();
 
+  const autoCompleteRef = useRef(null);
+
   // const { classData, isLoading: isClassDataLoading} = useClass(route.params)
 
   useLayoutEffect(() => {
-    console.log('params ', route.params);
+    console.log("params ", route.params);
     const classData: IClass = route.params;
-    console.log('logging class data ', classData)
-        setClassTitle(classData?.classTitle)
-        setClassLocation(classData.classLocation)
-        setClassLocationSearch(classData?.classLocation.name.split(',').slice(0,2).join(','))
-        setIsItemSelected(true)
-        setClassDate(classData?.classDate.toDate())
-        setClassStartTime(classData?.classStartTime.toDate())
-        setClassEndTime(classData?.classEndTime.toDate())
+    console.log("logging class data ", classData);
+    setClassTitle(classData?.classTitle);
+    setClassLocation(classData.classLocation);
+    setClassLocationSearch(
+      classData?.classLocation.description.split(",").slice(0, 2).join(",")
+    );
+    setIsItemSelected(true);
+    setClassDate(classData?.classDate.toDate());
+    setClassStartTime(classData?.classStartTime.toDate());
+    setClassEndTime(classData?.classEndTime.toDate());
   }, []);
 
- 
+  useLayoutEffect(() => {
+  }, []);
+
   const showDatePicker = () => {
     console.log("opening modal");
     setDatePickerVisibility(true);
@@ -238,14 +261,15 @@ export default function EditClass({ navigation, route }: {navigation: any, route
         courseTitle: route.params.courseTitle,
         classTitle: classTitle,
         classLocation: classLocation,
+        classLocationDetails: classLocationDetails,
         classDate: Timestamp.fromDate(classDate),
         classStartTime: Timestamp.fromDate(classStartTime),
         classEndTime: Timestamp.fromDate(classEndTime),
         classStatus: "upcoming",
       };
 
-      console.log('data ', data)
-      await updateClassDetails(route.params.uid, data)
+      console.log("data ", data);
+      await updateClassDetails(route.params.uid, data);
       //   await createClassInCourse(route.params.uid, data);
       navigation.goBack();
     } catch (error) {
@@ -338,7 +362,7 @@ export default function EditClass({ navigation, route }: {navigation: any, route
   return (
     <View style={[styles.container, styles.contentContainer]}>
       <Text style={styles.mediumText}>
-        Enter the following details to create a class
+        Enter the following details to edit a class
       </Text>
       <View style={styles.mmy}>
         <StyledInput
@@ -350,53 +374,64 @@ export default function EditClass({ navigation, route }: {navigation: any, route
           setValue={handleClassTitleChange}
         />
       </View>
-      <View style={[styles.mmy]}>
-        <StyledInput
-          placeholder="Class Location"
-          placeholderTextColor="gray"
-          secure={false}
-          keyboardType="default"
-          value={classLocationSearch}
-          setValue={handleClassLocChange}
-        />
-        {!(isPlacesLoading || isItemSelected) && (
-          <FlatList
-            data={places}
-            renderItem={({ item }: any) => (
-              <TouchableOpacity
-                onPress={() => {
-                  handleDropdownItemPressed(item);
-                }}
-                darkColor={Colors.dark.secondaryGrey}
-                lightColor={Colors.light.secondaryGrey}
-                style={[
-                  {
-                    padding: 10,
-                    height: 55,
-                    justifyContent: "center",
-                  },
-                ]}
-              >
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item: any) => item.id.toString()}
-          />
-        )}
-        {isPlacesLoading && (
-          <View
-            style={[
+      <View
+        style={[
+          styles.mmy,
+          { paddingBottom: googlePlacesInputFocused ? 200 : 50 },
+        ]}
+      >
+        <GooglePlacesAutocomplete
+          placeholder={classLocation?.description}
+          onPress={(data, details = null) => {
+            setIsItemSelected(true);
+            setClassLocation(data);
+            setClassLocationDetails(details?.geometry);
+            setClassLocationSearch(data.description);
+            // setClassLocation(data)
+          }}
+          ref={autoCompleteRef}
+          query={{
+            key: "AIzaSyAjJSMzeqfZBuoqAdx3bpAmezoIfGK5n1E",
+            language: "en", // language of the results
+          }}
+          listEmptyComponent={() => (
+            <View
+              style={[
+                styles.transBg,
+                styles.justifyCenter,
+                styles.itemsCenter,
+                { height: 400 },
+              ]}
+            >
+              <Text>No places available</Text>
+            </View>
+          )}
+          styles={{
+            textInput: [
+              styles.transBg,
               {
-                height: 80,
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 8,
+                height: 50,
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                color: theme === "dark" ? "white" : "black",
+                paddingHorizontal: 20,
               },
-            ]}
-          >
-            <Text>Loading...</Text>
-          </View>
-        )}
+            ],
+            container: [styles.autocompleteContainer],
+            listView: [
+              styles.listView,
+              {
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                color: theme === "dark" ? "white" : "black",
+              },
+            ],
+          }}
+          textInputProps={{
+            onFocus: () => setGooglePlacesInputFocused(true),
+            onBlur: () => setGooglePlacesInputFocused(false),
+          }}
+          fetchDetails={true}
+          enablePoweredByContainer={false}
+        />
       </View>
       <View style={[styles.mmy]}>
         <InvTouchableOpacity
@@ -404,7 +439,7 @@ export default function EditClass({ navigation, route }: {navigation: any, route
             {
               backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
               borderWidth: classDate ? 1 : 0,
-              borderColor: "#C7c7c7",
+              borderColor: theme === "dark" ? "#000" : "#fff",
               borderRadius: 4,
               height: 50,
               paddingHorizontal: 20,
@@ -441,7 +476,11 @@ export default function EditClass({ navigation, route }: {navigation: any, route
         <InvTouchableOpacity
           style={[
             {
-              borderColor: !classStartTimeError ? "#C7C7CD" : "red",
+              borderColor: !classStartTimeError
+                ? theme === "dark"
+                  ? "#000"
+                  : "#fff"
+                : "red",
               backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
               borderWidth: classStartTimeError || classStartTime ? 1 : 0,
               height: 50,
@@ -485,7 +524,11 @@ export default function EditClass({ navigation, route }: {navigation: any, route
         <InvTouchableOpacity
           style={[
             {
-              borderColor: !classEndTimeError ? "#C7C7CD" : "red",
+              borderColor: !classEndTimeError
+                ? theme === "dark"
+                  ? "#000"
+                  : "#fff"
+                : "red",
               backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
               borderWidth: classEndTimeError || classEndTime ? 1 : 0,
               height: 50,

@@ -23,6 +23,7 @@ import { APIKEY } from "@env";
 import { UserContext } from "../contexts/UserContext";
 import StyledInput from "../components/StyledInput";
 import FullWidthButton from "../components/FullWidthButton";
+import Colors from "../constants/Colors";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const PWD_REGEX =
@@ -128,7 +129,7 @@ export const LogInScreen = ({ navigation }: RootStackScreenProps<"LogIn">) => {
             text={"Log In"}
             onPress={handleSubmit}
             disabled={!(matchPwd && validEmail) || isLoading}
-            style={{ borderRadius: 50, paddingHorizontal: 10 }}
+            style={{ borderRadius: 50, paddingHorizontal: 10, backgroundColor: theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple }}
           />
         </KeyboardAvoidingView>
 

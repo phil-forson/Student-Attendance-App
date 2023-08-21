@@ -66,17 +66,10 @@ export function calculateDurationInHHMMSS(
   const durationInSeconds = Math.floor(
     (endDate?.toDate().getTime() - startDate?.toDate().getTime()) / 1000
   );
-  console.log("duration ", durationInSeconds);
 
   const hours = Math.floor(durationInSeconds / 3600);
   const minutes = Math.floor((durationInSeconds % 3600) / 60);
   const seconds = durationInSeconds % 60;
-
-  console.log(
-    `timeee:   ${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-  );
 
   return `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
@@ -84,8 +77,6 @@ export function calculateDurationInHHMMSS(
 }
 
 export const calculateDuration = (startDate: Timestamp, endDate: Timestamp) => {
-  console.log("start date", startDate);
-  console.log("end date", endDate);
   const diffInMs = endDate.toDate().getTime() - startDate.toDate().getTime();
   console.log("diff in ms", diffInMs);
   const hours = Math.floor(diffInMs / (1000 * 60 * 60));
@@ -122,24 +113,19 @@ export function groupAndSortClasses(classes: IClass[]): {
   const ongoing: IClass[] = [];
   const past: IClass[] = [];
 
-  console.log("classes ", classes);
 
   classes.forEach((classItem: IClass) => {
     console.log(classItem);
     const classStartTime = new Date(classItem?.classStartTime.toDate());
     const classEndTime = new Date(classItem?.classEndTime.toDate());
 
-    console.log("class start time ", classStartTime);
 
     if (classStartTime > now) {
       upcoming.push(classItem);
-      console.log("upcoming ", classItem);
     } else if (classStartTime <= now && classEndTime >= now) {
       ongoing.push(classItem);
-      console.log("ongoing ", classItem);
     } else {
       past.push(classItem);
-      console.log("past ", classItem);
     }
   });
 
@@ -184,6 +170,20 @@ export function add30MinutesToTime(originalTime: Date) {
   const currentMinutes = updatedTime.getMinutes();
   updatedTime.setMinutes(currentMinutes + 30);
   return updatedTime;
+}
+
+export function addTwoHoursTwentyMinutesToTime(time: Date) {
+  const timeObject = new Date(time);
+  timeObject.setHours(timeObject.getHours() + 2);
+  timeObject.setMinutes(timeObject.getMinutes() + 20);
+  return timeObject;
+}
+
+export function subtractTwoHoursTwentyMinutesToTime(time: Date) {
+  const timeObject = new Date(time);
+  timeObject.setHours(timeObject.getHours() - 2);
+  timeObject.setMinutes(timeObject.getMinutes() - 20);
+  return timeObject;
 }
 
 export function subtract30MinutesFromTime(originalTime: Date) {

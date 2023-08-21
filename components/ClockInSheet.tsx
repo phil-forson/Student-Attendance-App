@@ -29,6 +29,7 @@ import {
 import { userClockOut } from "../utils/helpers";
 import FullWidthButton from "./FullWidthButton";
 import { useIsFocused } from "@react-navigation/native";
+import { Timestamp } from "firebase/firestore";
 
 export default function ClockInSheet({
   startTime,
@@ -36,12 +37,14 @@ export default function ClockInSheet({
   userId,
   classId,
   setClockIn,
+  clockedInTimestamp,
 }: {
   startTime: Date;
   endTime: Date;
   userId: string;
   classId: string;
   setClockIn: React.Dispatch<React.SetStateAction<boolean>>;
+  clockedInTimestamp: Timestamp;
 }) {
   const theme = useColorScheme();
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -79,8 +82,7 @@ export default function ClockInSheet({
   }, [isFocused]);
 
   useEffect(() => {
-
-    fetchAndSetClockInTime()
+    fetchAndSetClockInTime();
 
     // Start the timer when the component mounts
     const interval = setInterval(() => {
@@ -101,17 +103,16 @@ export default function ClockInSheet({
       appState.current.match(/inactive|background/) &&
       nextAppState === "active"
     ) {
-      console.log("background...");
       // We just became active again: recalculate elapsed time based
       // on what we stored in AsyncStorage when we started.
-      fetchAndSetClockInTime()
+      fetchAndSetClockInTime();
     }
     appState.current = nextAppState;
   };
 
   const getElapsedTime = async () => {
     try {
-      const clockInDateStr = await getValueFor("clockIn");
+      const clockInDateStr = clockedInTimestamp?.toDate();
       if (clockInDateStr) {
         const clockInDate = new Date(clockInDateStr);
         const currentTime = new Date();
@@ -127,20 +128,16 @@ export default function ClockInSheet({
   };
 
   const fetchAndSetClockInTime = async () => {
-
     const elapsed = await getElapsedTime();
 
-    console.log('total seconds ', duration)
-
-    console.log("elapsed ", elapsed);
     // Update the elapsed seconds state
     setInitialSeconds(elapsed ?? 0);
-  }
+  };
 
   const handleClockOut = () => {
     try {
       userClockOut(userId, classId);
-      setClockIn(false)
+      setClockIn(false);
     } catch (error) {
       Alert.alert("Error", "Something unexpected happened");
     }
@@ -172,6 +169,7 @@ export default function ClockInSheet({
     <>
       <BottomSheet
         ref={bottomSheetRef}
+        enablePanDownToClose={true}
         index={2}
         snapPoints={snapPoints}
         onChange={handleSheetChanges}
@@ -197,6 +195,9 @@ export default function ClockInSheet({
             duration={duration} // 2 minutes in milliseconds
             title={convertToHHMM(endTime)}
             titleFontSize={20}
+            activeStrokeColor={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
+            progressValueColor={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
+            titleColor={theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}
             progressValueFontSize={50}
             dashedStrokeConfig={{
               count: 50,
@@ -205,21 +206,33 @@ export default function ClockInSheet({
             progressFormatter={formatTime}
           />
 
-<View style={[styles.transBg, styles.mmy, {width: 200}]}>
-
-          <FullWidthButton text={"Clock Out"} onPress={() => {
-            Alert.alert("Clock Out", "Do you want to continue to clock out?", [
-              {
-                text: "No",
-              },
-              {
-                text: "Yes",
-                style: "destructive",
-                onPress: handleClockOut,
-              },
-            ]);
-          }} />
-</View>
+          <View style={[styles.transBg, styles.mmy, { width: 200 }]}>
+            <FullWidthButton
+              text={"Clock Out"}
+              onPress={() => {
+                Alert.alert(
+                  "Clock Out",
+                  "Do you want to continue to clock out?",
+                  [
+                    {
+                      text: "No",
+                    },
+                    {
+                      text: "Yes",
+                      style: "destructive",
+                      onPress: handleClockOut,
+                    },
+                  ]
+                );
+              }}
+              style={{
+                backgroundColor:
+                  theme === "dark"
+                    ? Colors.deSaturatedPurple
+                    : Colors.mainPurple,
+              }}
+            />
+          </View>
         </View>
       </BottomSheet>
     </>

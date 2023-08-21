@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -37,13 +38,17 @@ import useClass from "../hooks/useClass";
 import Loading from "../components/Loading";
 import useUser from "../hooks/useUser";
 import ClockInSheet from "../components/ClockInSheet";
-import { isUserClockedInAndNotClockedOut, userClockIn } from "../utils/helpers";
+import {
+  getStudentsClockedIn,
+  isUserClockedInAndNotClockedOut,
+  userClockIn,
+} from "../utils/helpers";
 import useAuth from "../hooks/useAuth";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Alert } from "react-native";
-import * as Location from 'expo-location';
-import * as TaskManager from 'expo-task-manager';
-
+import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
+import { ClassProvider } from "../providers/ClassProvider";
 
 export default function ClassDetails({ navigation, route }: any) {
   const [courseClass, setCourseClass] = useState<any>();
@@ -66,9 +71,12 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const [clockIn, setClockIn] = useState<boolean>(false);
 
+  const [locationLoading, setLocationLoading] = useState<boolean>(false);
+
   const [isAlreadyClockedIn, setIsAlreadyClockedIn] = useState<boolean>(false);
 
   const [isModalVisible, setModalVisible] = useState(false);
+
 
   const [isBottomSheetVisible, setIsBottomSheetVisible] =
     useState<boolean>(false);
@@ -92,13 +100,12 @@ export default function ClassDetails({ navigation, route }: any) {
     }
   }, []);
 
-  
-
   const isBiometricAvailable = async () => {
     try {
       const result = await LocalAuthentication.hasHardwareAsync();
       return result && (await LocalAuthentication.isEnrolledAsync());
     } catch (error) {
+      Alert.alert("Biometric authentication is not available on this device.");
       console.error("Error checking biometric availability:", error);
       return false;
     }
@@ -106,11 +113,9 @@ export default function ClassDetails({ navigation, route }: any) {
 
   const authenticateWithBiometrics = async () => {
     try {
-      return await LocalAuthentication.authenticateAsync({
-        
-      });
+      return await LocalAuthentication.authenticateAsync({});
     } catch (error) {
-      Alert.alert("An Error occured ")
+      Alert.alert("An Error occured ");
     }
   };
   const handleBiometricAuthentication = async () => {
@@ -123,46 +128,40 @@ export default function ClassDetails({ navigation, route }: any) {
   };
 
   const onClockIn = async () => {
-    console.log("on clock in");
-    console.log("user ", user);
     if (user) {
       setClockInLoading(true);
       try {
-        if(isAlreadyClockedIn){
-          console.log('is already clocked in ')
-          setClockIn(true)
-          return ;
+        if (isAlreadyClockedIn) {
+          console.log("is already clocked in ");
+          setModalVisible(false)
+          setClockIn(true);
+          return;
         }
         const res = await isUserClockedInAndNotClockedOut(
           route.params?.uid,
           user?.uid ?? ""
         );
-        console.log(
-          "res =+++++++++++++++++++++++++++++++++++++++++++++++++++",
-          res
-        );
 
         if (!res) {
-          console.log('yesss')
-          await requestPermissionAsync()
+          console.log("yesss");
+          await requestPermissionAsync();
           setModalVisible(false);
-          // const result = await handleBiometricAuthentication();
-          // console.log('result from authenticating.... ', result)
-          // if(biometricAvailable){
+          const result = await handleBiometricAuthentication();
 
-          //   if (result?.success) {
-          //     Alert.alert("User is authenticated hence can proceed");
-          //   } else {
-          //     Alert.alert("Already clocked out for class ");
-          //   }
-          // } else {
-          //   Alert.alert("Biometric not available ")
-          // }
+          if (result?.success) {
+            await userClockIn(
+              user?.uid,
+              route.params.uid,
+              userData?.firstName,
+              userData?.lastName
+            ).then(() => {
+              setClockIn(true);
+              setModalVisible(false);
+            });
+          } else {
+            Alert.alert("Failed authentication, try again to clock in ");
+          }
         } else {
-          await userClockIn(user?.uid, route.params.uid, userData?.firstName, userData?.lastName).then(() => {
-            setClockIn(true);
-            setModalVisible(false);
-          });
         }
       } catch (error) {
         setClockIn(false);
@@ -173,14 +172,13 @@ export default function ClassDetails({ navigation, route }: any) {
   };
 
   // Define the same task name as in app.js
-const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
+  const BACKGROUND_TASK_NAME = "LOCATION_TASK";
 
-// Start the background task after successful login
-
+  // Start the background task after successful login
 
   const getLocation = async () => {
     try {
-      console.log('geting jskfldfl')
+      console.log("geting jskfldfl");
       const { coords } = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = coords;
       console.log("Current location:", latitude, longitude);
@@ -190,78 +188,87 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
     }
   };
 
-  async function requestBackgroundPermissions(){
+  async function requestBackgroundPermissions() {
     try {
-    const [status, requestPermission] = Location.useBackgroundPermissions();
+      const [status, requestPermission] = Location.useBackgroundPermissions();
+    } catch (error) {
+      console.log(error);
     }
-    catch(error){
-      console.log(error)
-    }
-
   }
-  async function requestPermissionAsync(){
+  async function requestPermissionAsync() {
     try {
-
       let { status } = await Location.requestForegroundPermissionsAsync();
       let res = await Location.requestBackgroundPermissionsAsync();
-      console.log('gotten...')
+      console.log("gotten...");
       // await requestBackgroundPermissions()
-  
-      console.log('status ', status)
-        if (status !== 'granted' && res.status !== "granted") {
-          console.log('error')
-          return;
-        }
-  
-        console.log('getting location++++ ')
-        // await getLocation()
-    }
-    catch(error){
-      console.log('error ', error)
+
+      console.log("status ", status);
+      if (status !== "granted" && res.status !== "granted") {
+        console.log("error");
+        return;
+      }
+
+      console.log("getting location++++ ");
+      await getLocation();
+    } catch (error) {
+      console.log("error ", error);
     }
   }
 
-//  useEffect(() => {
-//   const startGeofence = async () => {
+  //  useEffect(() => {
+  //   const startGeofence = async () => {
 
-//     await requestPermissionAsync()
-//     let region: Location.LocationRegion = {identifier:"1", latitude:59.899489, longitude: 10.611103, radius:10}
-//       Location.startGeofencingAsync("LOCATION_GEOFENCE", [region])
-  
-//       TaskManager.defineTask("LOCATION_GEOFENCE", ({ data: { eventType, region }, error }) => {
-//           if (error) {
-//             console.log('error ', error)
-//             // check `error.message` for more details.
-//             return;
-//           }
-//           if (eventType === Location.GeofencingEventType.Enter) {
-//             alert("enter in region!")
-//             console.log("You've entered region:", region);
-//           } else if (eventType === Location.GeofencingEventType.Exit) {
-//             console.log("You've left region:", region);
-//           }
-//         });
-//   }
+  //     await requestPermissionAsync()
+  //     let region: Location.LocationRegion = {identifier:"1", latitude:59.899489, longitude: 10.611103, radius:10}
+  //       Location.startGeofencingAsync("LOCATION_GEOFENCE", [region])
 
-//   startGeofence()
-//  }, [])
-  
-  
-  
-  
+  //       TaskManager.defineTask("LOCATION_GEOFENCE", ({ data: { eventType, region }, error }) => {
+  //           if (error) {
+  //             console.log('error ', error)
+  //             // check `error.message` for more details.
+  //             return;
+  //           }
+  //           if (eventType === Location.GeofencingEventType.Enter) {
+  //             alert("enter in region!")
+  //             console.log("You've entered region:", region);
+  //           } else if (eventType === Location.GeofencingEventType.Exit) {
+  //             console.log("You've left region:", region);
+  //           }
+  //         });
+  //   }
+
+  //   startGeofence()
+  //  }, [])
 
   useEffect(() => {
     isBiometricAvailable().then((available) =>
       setBiometricAvailable(available)
     );
-
   }, []);
 
   useLayoutEffect(() => {
     setCourseClass(route.params);
     getValueFor("clockIn");
-    console.log("ye yeeee");
   }, []);
+
+  const handlePlusIconPressed = () => {
+    if (userData.status === "Student") {
+      const now = new Date();
+
+      if (now < courseClass.classStartTime.toDate().getTime()) {
+        Alert.alert("Class not yet started");
+      } else if (
+        now >= courseClass.classStartTime.toDate().getTime() &&
+        now <= courseClass.classEndTime.toDate().getTime()
+      ) {
+        setModalVisible(true);
+      } else {
+        Alert.alert("Clock In Failed", "Class already ended");
+      }
+    } else {
+      setModalVisible(true);
+    }
+  };
 
   const theme = useColorScheme();
 
@@ -290,8 +297,11 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
       return;
     }
 
+    console.log("user data ", userData?.clockedIn);
     setIsAlreadyClockedIn(userData?.clockedIn);
-    console.log("user data... ", userData);
+
+    if (userData.status === "Teacher") {
+    }
   }, [isUserDataLoading, userData]);
 
   if (isClassDataLoading) {
@@ -389,7 +399,7 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
               darkColor={Colors.dark.tetiary}
               lightColor={Colors.dark.tetiary}
             >
-              {courseClass?.classLocation.description.split(',').slice(0,2).join(',')}
+              {courseClass?.classLocation.structured_formatting.main_text}
             </Text>
           </View>
           <View
@@ -474,7 +484,7 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
                 darkColor={Colors.dark.tetiary}
                 lightColor={Colors.dark.tetiary}
               >
-                Total Attendance Time
+                Total Class Time
               </Text>
               <Text
                 style={[
@@ -483,9 +493,7 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
                     fontSize: 20,
                   },
                 ]}
-              >
-                4h55m
-              </Text>
+              >2h20m</Text>
             </View>
             <View
               lightColor={Colors.light.primaryGrey}
@@ -516,7 +524,7 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
                   },
                 ]}
               >
-                4h55m
+                10m
               </Text>
             </View>
           </View>
@@ -672,12 +680,14 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
                 zIndex: 10,
               },
             ]}
-            onPress={() => setModalVisible(true)}
+            onPress={handlePlusIconPressed}
             darkColor="#0c0c0c"
           >
             <AntDesign
               name="plus"
-              color={"#007bff"}
+              color={
+                theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple
+              }
               size={18}
               style={{ fontWeight: "bold" }}
             />
@@ -689,6 +699,7 @@ const BACKGROUND_TASK_NAME = 'LOCATION_TASK';
             endTime={route.params.classEndTime.toDate()}
             classId={route.params.uid}
             userId={user.uid}
+            clockedInTimestamp={userData?.clockInDate}
             setClockIn={setClockIn}
           />
         )}

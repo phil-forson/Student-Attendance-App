@@ -44,6 +44,7 @@ import {
 import { IClass } from "../types";
 import { Unsubscribe } from "firebase/firestore";
 import { useIsFocused } from "@react-navigation/native";
+import TopTabBar from "../components/TopTabBar";
 
 export default function CourseDetails({ navigation, route }: any) {
   const [course, setCourse] = useState<any>();
@@ -196,6 +197,7 @@ export default function CourseDetails({ navigation, route }: any) {
           }
           if (courseData) {
             setAttendanceTimeLoading(true);
+            try {
             const totalClassTime = await calculateTotalClassTime(
               courseData?.uid
             );
@@ -210,7 +212,6 @@ export default function CourseDetails({ navigation, route }: any) {
               const totalAttendanceTime = calculateTotalAttendanceTime(
                 userDataAndAttendance
               );
-              console.log("user data and attendance ", userDataAndAttendance);
               setTotalAttendanceTime(totalAttendanceTime);
               setAttendanceTimeLoading(false);
             } else {
@@ -221,6 +222,10 @@ export default function CourseDetails({ navigation, route }: any) {
               setTotalAttendanceTime(totalAttendanceTime);
               setAttendanceTimeLoading(false);
             }
+          }
+          catch(error){
+            setAttendanceTimeLoading(false)
+          }
           }
         }
       } catch (error) {
@@ -406,154 +411,10 @@ export default function CourseDetails({ navigation, route }: any) {
         </View>
         <View style={[styles.my]}>
           <View style={[styles.flexRow]}>
-            <Pressable
-              style={[
-                styles.h30,
-                styles.flexOne,
-                {
-                  borderBottomColor:
-                    theme === "dark"
-                      ? activeTab === "All"
-                        ? Colors.deSaturatedPurple
-                        : Colors.dark.primaryGrey
-                      : activeTab === "All"
-                      ? Colors.mainPurple
-                      : Colors.light.primaryGrey,
-                  borderBottomWidth: 3,
-                },
-              ]}
-              onPress={() => setActiveTab("All")}
-            >
-              <Text
-                style={[
-                  {
-                    textAlign: "center",
-                    color:
-                      theme === "dark"
-                        ? activeTab === "All"
-                          ? Colors.deSaturatedPurple
-                          : "white"
-                        : activeTab === "All"
-                        ? Colors.mainPurple
-                        : "black",
-                    fontWeight: activeTab === "All" ? "bold" : "normal",
-                  },
-                ]}
-              >
-                All
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.h30,
-                styles.flexOne,
-                {
-                  borderBottomColor:
-                    theme === "dark"
-                      ? activeTab === "Upcoming"
-                        ? Colors.deSaturatedPurple
-                        : Colors.dark.primaryGrey
-                      : activeTab === "Upcoming"
-                      ? Colors.mainPurple
-                      : Colors.light.primaryGrey,
-                  borderBottomWidth: 3,
-                },
-              ]}
-              onPress={() => setActiveTab("Upcoming")}
-            >
-              <Text
-                style={[
-                  {
-                    textAlign: "center",
-                    color:
-                      theme === "dark"
-                        ? activeTab === "Upcoming"
-                          ? Colors.deSaturatedPurple
-                          : "white"
-                        : activeTab === "Upcoming"
-                        ? Colors.mainPurple
-                        : "black",
-                    fontWeight: activeTab === "Upcoming" ? "bold" : "normal",
-                  },
-                ]}
-              >
-                Upcoming
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.h30,
-                styles.flexOne,
-                {
-                  borderBottomColor:
-                    theme === "dark"
-                      ? activeTab === "Ongoing"
-                        ? Colors.deSaturatedPurple
-                        : Colors.dark.primaryGrey
-                      : activeTab === "Ongoing"
-                      ? Colors.mainPurple
-                      : Colors.light.primaryGrey,
-                  borderBottomWidth: 3,
-                },
-              ]}
-              onPress={() => setActiveTab("Ongoing")}
-            >
-              <Text
-                style={[
-                  {
-                    textAlign: "center",
-                    color:
-                      theme === "dark"
-                        ? activeTab === "Ongoing"
-                          ? Colors.deSaturatedPurple
-                          : "white"
-                        : activeTab === "Ongoing"
-                        ? Colors.mainPurple
-                        : "black",
-                    fontWeight: activeTab === "Ongoing" ? "bold" : "normal",
-                  },
-                ]}
-              >
-                Ongoing
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.h30,
-                styles.flexOne,
-                {
-                  borderBottomColor:
-                    theme === "dark"
-                      ? activeTab === "Past"
-                        ? Colors.deSaturatedPurple
-                        : Colors.dark.primaryGrey
-                      : activeTab === "Past"
-                      ? Colors.mainPurple
-                      : Colors.light.primaryGrey,
-                  borderBottomWidth: 3,
-                },
-              ]}
-              onPress={() => setActiveTab("Past")}
-            >
-              <Text
-                style={[
-                  {
-                    textAlign: "center",
-                    color:
-                      theme === "dark"
-                        ? activeTab === "Past"
-                          ? Colors.deSaturatedPurple
-                          : "white"
-                        : activeTab === "Past"
-                        ? Colors.mainPurple
-                        : "black",
-                    fontWeight: activeTab === "Past" ? "bold" : "normal",
-                  },
-                ]}
-              >
-                Past
-              </Text>
-            </Pressable>
+            <TopTabBar active={activeTab === "All"} text="All" onPress={() => setActiveTab("All")}/>
+            <TopTabBar active={activeTab === "Upcoming"} text="Upcoming" onPress={() => setActiveTab("Upcoming")}/>
+            <TopTabBar active={activeTab === "Ongoing"} text="Ongoing" onPress={() => setActiveTab("Ongoing")}/>
+            <TopTabBar active={activeTab === "Past"} text="Past" onPress={() => setActiveTab("Past")}/>
           </View>
         </View>
 

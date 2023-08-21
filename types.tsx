@@ -52,7 +52,7 @@ export type StudentTabParamList = {
   Home: undefined;
   Attendance: undefined;
   MyCourses: undefined;
-  Settings: undefined
+  Settings: undefined;
 };
 
 export type UserTabScreenProps<Screen extends keyof StudentTabParamList> =
@@ -78,16 +78,12 @@ export type UserDrawerParamList = {
   Settings: undefined;
 };
 
-
-
-
-
 export interface UserData {
   uid: string;
   firstName: string;
   lastName: string;
   email: string;
-  status: "Student"|"Lecturer"
+  status: "Student" | "Lecturer";
   university: any;
   verified: boolean;
   enrolledCourses: Array<any>;
@@ -98,6 +94,7 @@ export interface ICourse {
   courseLinkCode: string;
   courseClasses: Array<any>;
   courseTitle: string;
+  university: any
   creatorId: string;
   enrolledStudents: Array<any>;
   lecturerName: string;
@@ -125,6 +122,6 @@ export interface GroupedClasses {
 }
 
 export interface IAttendance {
-  clockIn: Date | null
-  clockOut: Date | null
+  clockIn: Date | null;
+  clockOut: Date | null;
 }

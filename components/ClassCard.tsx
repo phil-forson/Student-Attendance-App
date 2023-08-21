@@ -1,10 +1,14 @@
 import useColorScheme from "../hooks/useColorScheme";
 import { styles } from "../styles/styles";
-import { IClass} from "../types";
+import { IClass } from "../types";
 import { View, Text, InvTouchableOpacity, TouchableOpacity } from "./Themed";
 import React from "react";
 import { Pressable, StyleSheet } from "react-native";
-import { calculateDuration, convertToDayString, convertToHHMM } from "../utils/utils";
+import {
+  calculateDuration,
+  convertToDayString,
+  convertToHHMM,
+} from "../utils/utils";
 import {
   AntDesign,
   MaterialIcons,
@@ -15,17 +19,17 @@ import Colors from "../constants/Colors";
 export default function ClassCard({
   courseClass,
   navigation,
-  onPress
+  onPress,
 }: {
   courseClass: IClass;
   navigation: any;
-  onPress?: any
+  onPress?: any;
 }) {
   const theme = useColorScheme();
 
   const navigateToClassDetails = () => {
-    navigation.navigate("ClassDetails", courseClass)
-  }
+    navigation.navigate("ClassDetails", courseClass);
+  };
   return (
     <>
       <Pressable
@@ -37,7 +41,8 @@ export default function ClassCard({
             borderRadius: 10,
             zIndex: 1,
             borderLeftWidth: 10,
-            borderLeftColor: theme === "dark" ? Colors.dark.text : Colors.mainPurple,
+            borderLeftColor:
+              theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple,
             backgroundColor:
               theme === "dark"
                 ? Colors.dark.secondaryGrey
@@ -59,7 +64,9 @@ export default function ClassCard({
         >
           <View style={[styles.transBg]}>
             <Text style={[styles.semiBold]}>{courseClass.classTitle}</Text>
-            <Text style={[styles.semiBold]}>{convertToDayString(courseClass.classDate.toDate())}</Text>
+            <Text style={[styles.semiBold]}>
+              {convertToDayString(courseClass.classDate.toDate())}
+            </Text>
           </View>
           <View style={[styles.flexRow, styles.justifyBetween, styles.transBg]}>
             <View
@@ -109,7 +116,12 @@ export default function ClassCard({
                 color="#2f95dc"
               />
 
-              <Text>{calculateDuration(courseClass.classStartTime, courseClass.classEndTime)}</Text>
+              <Text>
+                {calculateDuration(
+                  courseClass.classStartTime,
+                  courseClass.classEndTime
+                )}
+              </Text>
             </View>
           </View>
         </View>

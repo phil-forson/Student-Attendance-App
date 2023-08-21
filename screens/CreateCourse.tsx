@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   SafeAreaView,
+  InvTouchableOpacity,
 } from "../components/Themed";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -37,8 +38,10 @@ import { styles } from "../styles/styles";
 import useUserData from "../hooks/useUserData";
 import useAuth from "../hooks/useAuth";
 import { UserContext } from "../contexts/UserContext";
-import {  formatStringToCourseCode, generateUid } from "../utils/utils";
+import { formatStringToCourseCode, generateUid } from "../utils/utils";
 import { isCourseCodeUnique } from "../utils/helpers";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+
 
 export default function CreateCourse({ navigation }: any) {
   const { user } = useAuth();
@@ -50,10 +53,47 @@ export default function CreateCourse({ navigation }: any) {
   const [classLocation, setClassLocation] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [courseCode, setCourseCode] = useState("");
+  const [courseDateFrom, setCourseDateFrom] = useState<Date>();
+  const [courseDateTo, setCourseDateTo] = useState<Date>();
+  const [isDatePickerFromVisible, setDatePickerFromVisibility] =
+  useState(false);
+const [isDatePickerToVisible, setDatePickerToVisibility] = useState(false);
 
   useEffect(() => {
     console.log("user data ", userData);
   }, []);
+
+  const showDatePickerFrom = () => {
+    console.log("opening modal");
+    setDatePickerFromVisibility(true);
+  };
+
+  const showDatePickerTo = () => {
+    console.log("opening modal");
+    setDatePickerToVisibility(true);
+  };
+
+  const hideDatePickerFrom = () => {
+    setDatePickerFromVisibility(false);
+  };
+
+  const hideDatePickerTo = () => {
+    setDatePickerToVisibility(false);
+  };
+
+  const handleConfirmDateFrom = (date: any) => {
+    const classDate = new Date(date);
+    console.log(classDate);
+    setCourseDateFrom(classDate);
+    hideDatePickerFrom();
+  };
+
+  const handleConfirmDateTo = (date: any) => {
+    const classDate = new Date(date);
+    console.log(classDate);
+    setCourseDateTo(classDate);
+    hideDatePickerTo();
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -71,7 +111,7 @@ export default function CreateCourse({ navigation }: any) {
                 color:
                   !(courseTitle.length && courseCode.length) || isLoading
                     ? "#0874b8"
-                    : "#008be3",
+                    : Colors.mainPurple,
                 fontSize: 16,
                 opacity:
                   !(courseTitle.length && courseCode.length) || isLoading
@@ -107,16 +147,15 @@ export default function CreateCourse({ navigation }: any) {
       return;
     }
     try {
-
-      const formattedCourseCode = formatStringToCourseCode(courseCode)
-      const isCodeUnique = await isCourseCodeUnique(formattedCourseCode)
-      if(!isCodeUnique){
-        Alert.alert("There is already a course with this course code")
-        console.log('code is not unqiue')
-        return ;
+      const formattedCourseCode = formatStringToCourseCode(courseCode);
+      const isCodeUnique = await isCourseCodeUnique(formattedCourseCode);
+      if (!isCodeUnique) {
+        Alert.alert("There is already a course with this course code");
+        console.log("code is not unqiue");
+        return;
       }
 
-      console.log('code unique ', isCodeUnique)
+      console.log("code unique ", isCodeUnique);
       const uid = generateUid();
       const coursesDocRef = doc(db, "courses", uid.toString());
 
@@ -124,8 +163,11 @@ export default function CreateCourse({ navigation }: any) {
         uid: uid,
         courseTitle: courseTitle,
         courseCode: formattedCourseCode,
+        courseDateFrom: courseDateFrom,
+        courseDateTo: courseDateTo,
         creatorId: user?.uid,
         lecturerName: userData?.firstName + " " + userData?.lastName,
+        university: userData?.university,
         enrolledStudents: [],
         teachers: [],
         courseClasses: [],
@@ -177,17 +219,6 @@ export default function CreateCourse({ navigation }: any) {
         </View>
         <View style={styles.mmy}>
           <StyledInput
-            value={courseTitle}
-            setValue={handleCourseTitleChange}
-            secure={false}
-            keyboardType="default"
-            placeholder="Course Title"
-            placeholderTextColor="gray"
-            valid={courseTitle.length > 1}
-          />
-        </View>
-        <View style={styles.mmy}>
-          <StyledInput
             value={courseCode}
             setValue={handleCourseCodeChange}
             secure={false}
@@ -197,6 +228,109 @@ export default function CreateCourse({ navigation }: any) {
             valid={courseCode.length > 1}
           />
         </View>
+        <View style={styles.mmy}>
+          <StyledInput
+            value={courseTitle}
+            setValue={handleCourseTitleChange}
+            secure={false}
+            keyboardType="default"
+            placeholder="Course Title"
+            placeholderTextColor="gray"
+            valid={courseTitle.length > 1}
+          />
+        </View>
+        <View style={[styles.mmy]}>
+          <InvTouchableOpacity
+            style={[
+              {
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                borderWidth: courseDateFrom ? 1 : 0,
+                borderColor: theme === "dark" ? "#000" : "#fff",
+                borderRadius: 4,
+                height: 50,
+                paddingHorizontal: 20,
+              },
+              styles.justifyCenter,
+            ]}
+            onPress={showDatePickerFrom}
+          >
+            <Text
+              style={{
+                color:
+                  theme === "dark"
+                    ? courseDateFrom
+                      ? "white"
+                      : "gray"
+                    : courseDateFrom
+                    ? "black"
+                    : "gray",
+                fontSize: 13.8,
+              }}
+            >
+              {courseDateFrom
+                ? courseDateFrom?.toLocaleDateString([], {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "Course Duration From"}
+            </Text>
+          </InvTouchableOpacity>
+        </View>
+        <View style={[styles.mmy]}>
+          <InvTouchableOpacity
+            style={[
+              {
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                borderWidth: courseDateFrom ? 1 : 0,
+                borderColor: theme === "dark" ? "#000" : "#fff",
+                borderRadius: 4,
+                height: 50,
+                paddingHorizontal: 20,
+              },
+              styles.justifyCenter,
+            ]}
+            onPress={showDatePickerTo}
+          >
+            <Text
+              style={{
+                color:
+                  theme === "dark"
+                    ? courseDateTo
+                      ? "white"
+                      : "gray"
+                    : courseDateTo
+                    ? "black"
+                    : "gray",
+                fontSize: 13.8,
+              }}
+            >
+              {courseDateTo
+                ? courseDateTo?.toLocaleDateString([], {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "Course Duration To"}
+            </Text>
+          </InvTouchableOpacity>
+        </View>
+        <DateTimePickerModal
+        isVisible={isDatePickerFromVisible}
+        mode="date"
+        date={courseDateFrom ?? new Date(Date.now())}
+        onConfirm={handleConfirmDateFrom}
+        onCancel={hideDatePickerFrom}
+      />
+      <DateTimePickerModal
+        isVisible={isDatePickerToVisible}
+        mode="date"
+        date={courseDateTo ?? new Date(Date.now())}
+        onConfirm={handleConfirmDateTo}
+        onCancel={hideDatePickerTo}
+      />
       </View>
     </SafeAreaView>
   );
