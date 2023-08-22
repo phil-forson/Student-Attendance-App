@@ -246,6 +246,7 @@ export default function CourseDetails({ navigation, route }: any) {
     } else if (activeTab === "Ongoing") {
       setClassesData(ongoingClasses);
     }
+
   }, [activeTab]);
   const theme = useColorScheme();
 
@@ -301,7 +302,7 @@ export default function CourseDetails({ navigation, route }: any) {
       ]}
     >
       <View
-        style={[styles.transBg, { paddingHorizontal: 20, paddingVertical: 10 }]}
+        style={[styles.transBg, styles.flexOne,  { paddingHorizontal: 20, paddingVertical: 10 }]}
       >
         <View
           style={[]}
@@ -436,7 +437,7 @@ export default function CourseDetails({ navigation, route }: any) {
             ItemSeparatorComponent={() => (
               <CardSeparator viewStyle={[styles.transBg]} />
             )}
-            contentContainerStyle={[styles.transBg, { minHeight: 500 }]}
+            contentContainerStyle={[styles.transBg, { minHeight: 500, marginVertical: 10 }]}
             ListEmptyComponent={() => (
               <View
                 style={[
@@ -450,8 +451,8 @@ export default function CourseDetails({ navigation, route }: any) {
                 <Text style={[styles.mediumText]}>No classes available</Text>
               </View>
             )}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
+            
+          
           />
         )}
 

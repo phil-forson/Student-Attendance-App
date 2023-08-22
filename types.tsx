@@ -112,7 +112,7 @@ export interface IClass {
   classDate: Timestamp;
   courseId: string;
   courseTitle: string;
-  classStatus: string;
+  classStatus?: string;
 }
 
 export interface GroupedClasses {

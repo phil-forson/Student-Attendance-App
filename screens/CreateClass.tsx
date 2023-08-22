@@ -27,12 +27,13 @@ import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
 import {
   add30MinutesToTime,
-  addTwoHoursTwentyMinutesToTime,
+  addOneHourFifyMinutesToTime,
   convertToDayString,
+  convertToHHMM,
   generateUid,
   isStartTimeGreater,
   subtract30MinutesFromTime,
-  subtractTwoHoursTwentyMinutesToTime,
+  subtractOneHourFiftyMinutesToTime,
 } from "../utils/utils";
 import { createClassInCourse } from "../utils/helpers";
 import { IClass } from "../types";
@@ -110,7 +111,7 @@ export default function CreateClass({ navigation, route }: any) {
     newDate.setMinutes(time.getMinutes());
 
     if (!classEndTime) {
-      const suggestedEndTime = addTwoHoursTwentyMinutesToTime(newDate);
+      const suggestedEndTime = addOneHourFifyMinutesToTime(newDate);
       setClassEndTime(suggestedEndTime);
     }
 
@@ -136,7 +137,7 @@ export default function CreateClass({ navigation, route }: any) {
     newDate.setMinutes(time.getMinutes());
 
     if (!classStartTime) {
-      const suggestedStartTime = subtractTwoHoursTwentyMinutesToTime(newDate);
+      const suggestedStartTime = subtractOneHourFiftyMinutesToTime(newDate);
       setClassStartTime(suggestedStartTime);
     }
 
@@ -179,20 +180,45 @@ export default function CreateClass({ navigation, route }: any) {
 
     const classTime = new Date(startDate); // Initialize classTime with the start date
 
+
     const selectedDay = dayOfTheWeek.slice(6);
     console.log("selected day ", selectedDay);
-    // while (classTime <= endDate) {
-    //   if (classTime.getDay() === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(selectedDay)) {
-    //     // Set class time and other details
-    //     classTime.setHours(parseInt(startTime.split(':')[0]));
-    //     classTime.setMinutes(parseInt(startTime.split(':')[1]));
-    //     classTime.setSeconds(0);
 
-    //     // Create class document in Firestore
+    let classes = []
+    let lectureNumber = 1;
+    
+    while (classTime <= endDate) {
+      if (classTime.getDay() === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(selectedDay)) {
+        // Set class time and other details
+        classTime.setHours(parseInt(convertToHHMM(classStartTime).split(':')[0]));
+        classTime.setMinutes(parseInt(convertToHHMM(classStartTime).split(':')[1]));
+        classTime.setSeconds(0);
 
-    //   }
-    //   classTime.setDate(classTime.getDate() + 1); // Move to the next day
-    // }
+        const lectureTitle = `Lecture ${lectureNumber}`; // Generate class title
+
+        // Prepare class document for Firestore
+        const uid = generateUid()
+        const data: IClass = {
+          uid: uid.toString(),
+          classTitle: lectureTitle,
+          courseId: route.params.uid,
+          courseTitle: route.params.courseTitle,
+          classLocation: classLocation,
+          classLocationDetails: classLocationDetails,
+          classStartTime: Timestamp.fromDate(classStartTime),
+          classEndTime: Timestamp.fromDate(classEndTime),
+          classDate: Timestamp.fromDate(new Date(classTime))
+        }
+
+        await createClassInCourse(route.params.uid, data)
+
+        classes.push(data)
+        lectureNumber++;
+      }
+      classTime.setDate(classTime.getDate() + 1); // Move to the next day
+    }
+
+    console.log('classes ', classes)
 
     try {
       const uid = generateUid();
@@ -208,7 +234,6 @@ export default function CreateClass({ navigation, route }: any) {
         classStatus: "upcoming",
       };
 
-      console.log("data ", data);
       // await createClassInCourse(route.params.uid, data);
       // navigation.goBack();
     } catch (error) {
@@ -237,7 +262,6 @@ export default function CreateClass({ navigation, route }: any) {
             style={{}}
             disabled={
               !(
-                classTitle.length &&
                 classLocationSearch.length &&
                 classStartTime?.toLocaleString().length &&
                 classEndTime?.toLocaleString().length
@@ -252,7 +276,6 @@ export default function CreateClass({ navigation, route }: any) {
               style={{
                 color:
                   !(
-                    classTitle.length &&
                     classLocationSearch.length &&
                     classStartTime?.toLocaleString().length &&
                     classEndTime?.toLocaleString().length
@@ -265,7 +288,6 @@ export default function CreateClass({ navigation, route }: any) {
                     : Colors.mainPurple,
                 opacity:
                   !(
-                    classTitle.length &&
                     classLocationSearch.length &&
                     classStartTime &&
                     classEndTime
@@ -286,7 +308,6 @@ export default function CreateClass({ navigation, route }: any) {
       },
     });
   }, [
-    classTitle,
     classLocation,
     classLocationDetails,
     classStartTime,
@@ -298,234 +319,232 @@ export default function CreateClass({ navigation, route }: any) {
   ]);
 
   return (
-    <ScrollView style={[styles.container]}>
-      <View style={[, styles.contentContainer]}>
-        <Text style={styles.mediumText}>
-          Enter the following details to create a recurring class
-        </Text>
-        <View style={styles.mmy}>
-          <StyledInput
-            keyboardType="default"
-            secure={false}
-            placeholder="Class Title eg. Lecture 1"
-            placeholderTextColor="gray"
-            value={classTitle}
-            setValue={handleClassTitleChange}
-          />
-        </View>
-        <View
-          style={[
-            styles.mmy,
-            { paddingBottom: googlePlacesInputFocused ? 200 : 50 },
-          ]}
-        >
-          <GooglePlacesAutocomplete
-            placeholder="Search Class Location"
-            onPress={(data, details = null) => {
-              setIsItemSelected(true);
-              setClassLocation(data);
-              setClassLocationDetails(details?.geometry);
-              setClassLocationSearch(data.description);
-              // setClassLocation(data)
-            }}
-            ref={autoCompleteRef}
-            query={{
-              key: "AIzaSyAjJSMzeqfZBuoqAdx3bpAmezoIfGK5n1E",
-              language: "en", // language of the results
-            }}
-            listEmptyComponent={() => (
-              <View
-                style={[
-                  styles.transBg,
-                  styles.justifyCenter,
-                  styles.itemsCenter,
-                  { height: 400 },
-                ]}
-              >
-                <Text>No places available</Text>
-              </View>
-            )}
-            styles={{
-              textInput: [
-                styles.transBg,
-                {
-                  height: 50,
-                  backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
-                  color: theme === "dark" ? "white" : "black",
-                  paddingHorizontal: 20,
-                },
-              ],
-              container: [styles.autocompleteContainer],
-              listView: [
-                styles.listView,
-                {
-                  backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
-                  color: theme === "dark" ? "white" : "black",
-                },
-              ],
-            }}
-            textInputProps={{
-              onFocus: () => setGooglePlacesInputFocused(true),
-              onBlur: () => setGooglePlacesInputFocused(false),
-            }}
-            fetchDetails={true}
-            enablePoweredByContainer={false}
-          />
-        </View>
-
-        <View style={[styles.mmy]}>
-          <SelectList
-            placeholder="Enter day of the week. Every Sunday"
-            searchPlaceholder="Day of the week"
-            boxStyles={{
-              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
-              borderWidth: dayOfTheWeek ? 1 : 0,
-              borderColor: theme === "dark" ? "#000" : "#fff",
-              borderRadius: 4,
-              height: 50,
-              paddingHorizontal: 20,
-              alignItems: "center",
-            }}
-            inputStyles={{
-              color:
-                theme === "dark"
-                  ? dayOfTheWeek
-                    ? "white"
-                    : "gray"
-                  : dayOfTheWeek
-                  ? "black"
-                  : "gray",
-            }}
-            dropdownStyles={{
-              borderColor: theme === "dark" ? "#000" : "#fff",
-              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
-              paddingHorizontal: 5,
-            }}
-            dropdownItemStyles={{
-              padding: 10,
-              height: 55,
-              justifyContent: "center",
-              borderBottomWidth: 0.19,
-              borderBottomColor:
-                theme === "dark" ? Colors.light.primaryGrey : "#636161",
-            }}
-            setSelected={(val: string) => setDayOfTheWeek(val)}
-            data={daysOfTheWeek}
-            save="value"
-          />
-        </View>
-        <View style={[styles.mmy]}>
-          <InvTouchableOpacity
-            style={[
-              {
-                borderColor: !classStartTimeError
-                  ? theme === "dark"
-                    ? "#000"
-                    : "#fff"
-                  : "red",
-                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
-                borderWidth: classStartTimeError || classStartTime ? 1 : 0,
-                height: 50,
-                paddingHorizontal: 20,
-                borderRadius: 4,
-                paddingVertical: 12,
-              },
-              styles.justifyCenter,
-            ]}
-            onPress={showStartTimePicker}
-          >
-            <Text
-              style={{
-                color:
-                  theme === "dark"
-                    ? classStartTime
-                      ? "white"
-                      : "gray"
-                    : classStartTime
-                    ? "black"
-                    : "gray",
-                fontSize: 13.8,
-              }}
-            >
-              {classStartTime
-                ? classStartTime?.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })
-                : "Class Start Time"}
-            </Text>
-          </InvTouchableOpacity>
-          {classStartTimeError && (
-            <Text style={{ color: "red", marginTop: 6, fontSize: 13 }}>
-              Start time cannot be greater than end time
-            </Text>
-          )}
-        </View>
-        <View style={[styles.mmy]}>
-          <InvTouchableOpacity
-            style={[
-              {
-                borderColor: !classEndTimeError
-                  ? theme === "dark"
-                    ? "#000"
-                    : "#fff"
-                  : "red",
-                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
-                borderWidth: classEndTimeError || classEndTime ? 1 : 0,
-                height: 50,
-                paddingHorizontal: 20,
-                borderRadius: 4,
-                paddingVertical: 12,
-              },
-              styles.justifyCenter,
-            ]}
-            onPress={showEndTimePicker}
-          >
-            <Text
-              style={{
-                color:
-                  theme === "dark"
-                    ? classEndTime
-                      ? "white"
-                      : "gray"
-                    : classEndTime
-                    ? "black"
-                    : "gray",
-                fontSize: 13.8,
-              }}
-            >
-              {classEndTime
-                ? classEndTime.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })
-                : "Class End Time"}
-            </Text>
-          </InvTouchableOpacity>
-          {classEndTimeError && (
-            <Text style={{ color: "red", marginTop: 6, fontSize: 13 }}>
-              End time cannot be less than start time
-            </Text>
-          )}
-        </View>
-
-        <DateTimePickerModal
-          isVisible={isStartTimePickerVisible}
-          mode="time"
-          date={classStartTime ?? new Date(Date.now())}
-          onConfirm={handleConfirmStartTime}
-          onCancel={hideStartTimePicker}
+    <View style={[styles.container, styles.contentContainer]}>
+      <Text style={styles.mediumText}>
+        Enter the following details to create a recurring class
+      </Text>
+      {/* <View style={styles.mmy}>
+        <StyledInput
+          keyboardType="default"
+          secure={false}
+          placeholder="Class Title eg. Full Class"
+          placeholderTextColor="gray"
+          value={classTitle}
+          setValue={handleClassTitleChange}
         />
-        <DateTimePickerModal
-          isVisible={isEndTimePickerVisible}
-          mode="time"
-          date={classEndTime ?? new Date(Date.now())}
-          onConfirm={handleConfirmEndTime}
-          onCancel={hideEndTimePicker}
+      </View> */}
+      <View
+        style={[
+          styles.mmy,
+          { paddingBottom: googlePlacesInputFocused ? 260 : 50 },
+        ]}
+      >
+        <GooglePlacesAutocomplete
+          placeholder="Search Class Location"
+          onPress={(data, details = null) => {
+            setIsItemSelected(true);
+            setClassLocation(data);
+            setClassLocationDetails(details?.geometry);
+            setClassLocationSearch(data.description);
+            // setClassLocation(data)
+          }}
+          ref={autoCompleteRef}
+          query={{
+            key: "AIzaSyAjJSMzeqfZBuoqAdx3bpAmezoIfGK5n1E",
+            language: "en", // language of the results
+          }}
+          listEmptyComponent={() => (
+            <View
+              style={[
+                styles.transBg,
+                styles.justifyCenter,
+                styles.itemsCenter,
+                { height: 400 },
+              ]}
+            >
+              <Text>No places available</Text>
+            </View>
+          )}
+          styles={{
+            textInput: [
+              styles.transBg,
+              {
+                height: 50,
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                color: theme === "dark" ? "white" : "black",
+                paddingHorizontal: 20,
+              },
+            ],
+            container: [styles.autocompleteContainer],
+            listView: [
+              styles.listView,
+              {
+                backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+                color: theme === "dark" ? "white" : "black",
+              },
+            ],
+          }}
+          textInputProps={{
+            onFocus: () => setGooglePlacesInputFocused(true),
+            onBlur: () => setGooglePlacesInputFocused(false),
+          }}
+          fetchDetails={true}
+          enablePoweredByContainer={false}
         />
       </View>
-    </ScrollView>
+
+      <View style={[styles.mmy]}>
+        <SelectList
+          placeholder="Enter day of the week. eg. Every Sunday"
+          searchPlaceholder="Day of the week"
+          boxStyles={{
+            backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+            borderWidth: dayOfTheWeek ? 1 : 0,
+            borderColor: theme === "dark" ? "#000" : "#fff",
+            borderRadius: 4,
+            height: 50,
+            paddingHorizontal: 20,
+            alignItems: "center",
+          }}
+          inputStyles={{
+            color:
+              theme === "dark"
+                ? dayOfTheWeek
+                  ? "white"
+                  : "gray"
+                : dayOfTheWeek
+                ? "black"
+                : "gray",
+          }}
+          dropdownStyles={{
+            borderColor: theme === "dark" ? "#000" : "#fff",
+            backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+            paddingHorizontal: 5,
+          }}
+          dropdownItemStyles={{
+            padding: 10,
+            height: 55,
+            justifyContent: "center",
+            borderBottomWidth: 0.19,
+            borderBottomColor:
+              theme === "dark" ? Colors.light.primaryGrey : "#fff",
+          }}
+          setSelected={(val: string) => setDayOfTheWeek(val)}
+          data={daysOfTheWeek}
+          save="value"
+        />
+      </View>
+      <View style={[styles.mmy]}>
+        <InvTouchableOpacity
+          style={[
+            {
+              borderColor: !classStartTimeError
+                ? theme === "dark"
+                  ? "#000"
+                  : "#fff"
+                : "red",
+              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+              borderWidth: classStartTimeError || classStartTime ? 1 : 0,
+              height: 50,
+              paddingHorizontal: 20,
+              borderRadius: 4,
+              paddingVertical: 12,
+            },
+            styles.justifyCenter,
+          ]}
+          onPress={showStartTimePicker}
+        >
+          <Text
+            style={{
+              color:
+                theme === "dark"
+                  ? classStartTime
+                    ? "white"
+                    : "gray"
+                  : classStartTime
+                  ? "black"
+                  : "gray",
+              fontSize: 13.8,
+            }}
+          >
+            {classStartTime
+              ? classStartTime?.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "Class Start Time"}
+          </Text>
+        </InvTouchableOpacity>
+        {classStartTimeError && (
+          <Text style={{ color: "red", marginTop: 6, fontSize: 13 }}>
+            Start time cannot be greater than end time
+          </Text>
+        )}
+      </View>
+      <View style={[styles.mmy]}>
+        <InvTouchableOpacity
+          style={[
+            {
+              borderColor: !classEndTimeError
+                ? theme === "dark"
+                  ? "#000"
+                  : "#fff"
+                : "red",
+              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+              borderWidth: classEndTimeError || classEndTime ? 1 : 0,
+              height: 50,
+              paddingHorizontal: 20,
+              borderRadius: 4,
+              paddingVertical: 12,
+            },
+            styles.justifyCenter,
+          ]}
+          onPress={showEndTimePicker}
+        >
+          <Text
+            style={{
+              color:
+                theme === "dark"
+                  ? classEndTime
+                    ? "white"
+                    : "gray"
+                  : classEndTime
+                  ? "black"
+                  : "gray",
+              fontSize: 13.8,
+            }}
+          >
+            {classEndTime
+              ? classEndTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "Class End Time"}
+          </Text>
+        </InvTouchableOpacity>
+        {classEndTimeError && (
+          <Text style={{ color: "red", marginTop: 6, fontSize: 13 }}>
+            End time cannot be less than start time
+          </Text>
+        )}
+      </View>
+
+      <DateTimePickerModal
+        isVisible={isStartTimePickerVisible}
+        mode="time"
+        date={classStartTime ?? new Date(Date.now())}
+        onConfirm={handleConfirmStartTime}
+        onCancel={hideStartTimePicker}
+      />
+      <DateTimePickerModal
+        isVisible={isEndTimePickerVisible}
+        mode="time"
+        date={classEndTime ?? new Date(Date.now())}
+        onConfirm={handleConfirmEndTime}
+        onCancel={hideEndTimePicker}
+      />
+    </View>
   );
 }

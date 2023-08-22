@@ -159,6 +159,22 @@ const [isDatePickerToVisible, setDatePickerToVisibility] = useState(false);
       const uid = generateUid();
       const coursesDocRef = doc(db, "courses", uid.toString());
 
+      const data = {
+        uid: uid,
+        courseTitle: courseTitle,
+        courseCode: formattedCourseCode,
+        courseDateFrom: courseDateFrom,
+        courseDateTo: courseDateTo,
+        creatorId: user?.uid,
+        lecturerName: userData?.firstName + " " + userData?.lastName,
+        university: userData?.university,
+        enrolledStudents: [],
+        teachers: [],
+        courseClasses: [],
+      }
+
+      console.log('data ', data)
+
       await setDoc(coursesDocRef, {
         uid: uid,
         courseTitle: courseTitle,
@@ -182,6 +198,7 @@ const [isDatePickerToVisible, setDatePickerToVisibility] = useState(false);
           await updateDoc(doc(db, "users", userId), {
             createdCourses: createdCourses,
           }).then(() => {
+            Alert.alert("Success", "Course created successfully")
             navigation.goBack();
           });
         })

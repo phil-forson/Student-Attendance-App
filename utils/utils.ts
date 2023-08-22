@@ -113,12 +113,10 @@ export function groupAndSortClasses(classes: IClass[]): {
   const ongoing: IClass[] = [];
   const past: IClass[] = [];
 
-
   classes.forEach((classItem: IClass) => {
     console.log(classItem);
     const classStartTime = new Date(classItem?.classStartTime.toDate());
     const classEndTime = new Date(classItem?.classEndTime.toDate());
-
 
     if (classStartTime > now) {
       upcoming.push(classItem);
@@ -172,17 +170,17 @@ export function add30MinutesToTime(originalTime: Date) {
   return updatedTime;
 }
 
-export function addTwoHoursTwentyMinutesToTime(time: Date) {
+export function addOneHourFifyMinutesToTime(time: Date) {
   const timeObject = new Date(time);
-  timeObject.setHours(timeObject.getHours() + 2);
-  timeObject.setMinutes(timeObject.getMinutes() + 20);
+  timeObject.setHours(timeObject.getHours() + 1);
+  timeObject.setMinutes(timeObject.getMinutes() + 50);
   return timeObject;
 }
 
-export function subtractTwoHoursTwentyMinutesToTime(time: Date) {
+export function subtractOneHourFiftyMinutesToTime(time: Date) {
   const timeObject = new Date(time);
-  timeObject.setHours(timeObject.getHours() - 2);
-  timeObject.setMinutes(timeObject.getMinutes() - 20);
+  timeObject.setHours(timeObject.getHours() - 1);
+  timeObject.setMinutes(timeObject.getMinutes() - 50);
   return timeObject;
 }
 
@@ -198,10 +196,8 @@ export const getClassesTodayAndFuture = (classes: IClass[]): IClass[] => {
   const today = new Date(); // Get the start of today in milliseconds
 
   const filteredClasses = classes.filter((classItem) => {
-    const classStartTime = new Date(
-      classItem?.classStartTime.toDate()
-    ).toDateString();
-    return classStartTime === today.toDateString();
+    const classDate = new Date(classItem?.classDate.toDate()).toDateString();
+    return classDate === today.toDateString();
   });
 
   console.log(
