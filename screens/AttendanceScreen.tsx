@@ -550,7 +550,7 @@ const TabGroup = ({
               ? Colors.mainPurple
               : Colors.light.primaryGrey,
           borderBottomWidth: 3,
-          width: 180,
+          paddingHorizontal: 15
         },
       ]}
       onPress={() => {
@@ -570,10 +570,11 @@ const TabGroup = ({
                 : activeTab?.uid === tabItem.uid
                 ? Colors.mainPurple
                 : "black",
+            
           },
         ]}
       >
-        {truncateTextWithEllipsis(tabItem?.courseTitle, 25)}
+        {truncateTextWithEllipsis(tabItem?.courseTitle, 13)}
       </Text>
     </Pressable>
   );
