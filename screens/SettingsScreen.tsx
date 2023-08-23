@@ -244,7 +244,7 @@ const SettingsScreen = ({ navigation }: any) => {
         <FullWidthButton
           text={"Sign Out"}
           style={{backgroundColor: theme === "dark" ? Colors.deSaturatedPurple : Colors.mainPurple}}
-          textStyle={{color: theme === "dark" ? "white": "black"}}
+          textStyle={{color: "white"}}
           onPress={() => {
             Alert.alert("Sign Out", "Do you want to continue to sign out?", [
               {

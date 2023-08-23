@@ -36,9 +36,14 @@ export const truncateTextWithEllipsis = (
   return truncatedText + "...";
 };
 
+export function removeSpacesFromString(inputString: string): string {
+  const stringWithoutSpaces = inputString.replace(/\s/g, "");
+
+  return stringWithoutSpaces;
+}
 export function formatStringToCourseCode(inputString: string): string {
   // Remove all spaces
-  const stringWithoutSpaces = inputString.replace(/\s/g, "");
+  const stringWithoutSpaces = removeSpacesFromString(inputString);
 
   // Capitalize all letters
   const stringWithCapitalLetters = stringWithoutSpaces.toUpperCase();

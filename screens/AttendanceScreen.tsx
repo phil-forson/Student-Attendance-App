@@ -1,11 +1,12 @@
 import {
   ActivityIndicator,
   ListRenderItem,
+  Platform,
   Pressable,
   SafeAreaView,
   useColorScheme,
 } from "react-native";
-import { View, Text } from "../components/Themed";
+import { View, Text, TouchableOpacity } from "../components/Themed";
 import React, {
   useCallback,
   useEffect,
@@ -15,12 +16,13 @@ import React, {
 } from "react";
 import { styles } from "../styles/styles";
 import Colors from "../constants/Colors";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
 import {
   calculateDuration,
   calculateDurationInHHMMSS,
   convertToDayString,
   convertToHHMM,
+  removeSpacesFromString,
   secondsToHHMMSS,
   truncateTextWithEllipsis,
 } from "../utils/utils";
@@ -33,8 +35,6 @@ import {
   calculateTotalClassTime,
   getAllClassesData,
   getAllCoursesData,
-  getAllUsersAttendance,
-  getMembersWithAttendance,
   getUsersForCourseAttendanceData,
   getUsersWithAttendanceData,
 } from "../utils/helpers";
@@ -45,6 +45,10 @@ import { Timestamp } from "firebase/firestore";
 import { db } from "../config/firebase";
 import ClassGroupItem from "../components/ClassGroupItem";
 import UserAttendanceCard from "../components/UserAttendanceCard";
+import StyledInput from "../components/StyledInput";
+import MembersAttendanceTable from "../components/MembersAttendanceTable";
+import FullWidthButton from "../components/FullWidthButton";
+import { shareExcel } from "../utils/excel";
 
 export default function AttendanceScreen({ navigation }: any) {
   const theme = useColorScheme();
@@ -54,6 +58,8 @@ export default function AttendanceScreen({ navigation }: any) {
   const [coursesData, setCoursesData] = useState<ICourse[]>();
 
   const [membersAttendanceData, setMembersAttendanceData] = useState<any>([]);
+
+  const [filteredMembersData, setFilteredMembersData] = useState<any>([]);
 
   const [groupedClasses, setGroupedClasses] = useState<any>();
 
@@ -78,6 +84,8 @@ export default function AttendanceScreen({ navigation }: any) {
   const [isBottomSheetVisible, setBottomSheetVisible] =
     useState<boolean>(false);
 
+  const [searchValue, setSearchValue] = useState<string>("");
+
   const [activeTab, setActiveTab] = useState<ICourse>();
 
   const sheetRef = useRef<BottomSheet>(null);
@@ -85,7 +93,6 @@ export default function AttendanceScreen({ navigation }: any) {
   const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
 
   const handleSheetChange = useCallback((index: number) => {
-    console.log("handleSheetChange", index);
     if (index === -1) {
       setBottomSheetVisible(false);
     }
@@ -154,7 +161,6 @@ export default function AttendanceScreen({ navigation }: any) {
 
   const handleClassItemPressed = async (classId: string) => {
     setBottomSheetVisible(true);
-    console.log("attendance loading...");
 
     if (activeTab) {
       try {
@@ -164,23 +170,27 @@ export default function AttendanceScreen({ navigation }: any) {
         if (enrolledStudentIds.length > 0) {
           getUsersWithAttendanceData(enrolledStudentIds, classId).then(
             (res) => {
-              console.log("res ", res);
+              console.log("members data ", res);
               setMembersAttendanceLoading(false);
               setMembersAttendanceData(res);
+              setFilteredMembersData(res);
             }
           );
         } else {
         }
-        console.log("class item pressed ", classId);
       } catch (error) {
         setMembersAttendanceLoading(false);
-      } finally {
-        console.log("attendance deloading...");
       }
     }
   };
 
+  const generateExcelSheet = () => {
+    console.log("generating...");
+    shareExcel(membersAttendanceData);
+  };
+
   const groupClassesByDate = async (activeCourse: ICourse) => {
+    console.log("grouping classes by date");
     const classesData = await getAllClassesData(
       activeCourse.courseClasses,
       setClassesLoading
@@ -205,16 +215,28 @@ export default function AttendanceScreen({ navigation }: any) {
     );
 
     setGroupedClasses(groupedClasses);
-
-    console.log("groupedClasses ", groupedClasses);
   };
 
+  const handleFilterMembers = (search: string) => {
+    const filteredResults = membersAttendanceData.filter((memberData: any) => {
+      const fullName = removeSpacesFromString(
+        memberData.userData.firstName + memberData.userData.lastName
+      ).toLowerCase();
+      const stringWithoutSpaces = removeSpacesFromString(search).toLowerCase();
+      const userId = memberData.userData.userId;
+      return fullName.includes(stringWithoutSpaces) || userId.includes(search);
+    });
+    setFilteredMembersData(filteredResults);
+  };
+
+  useEffect(() => {
+    handleFilterMembers(searchValue);
+  }, [searchValue]);
   useEffect(() => {
     try {
       const courses = userData.createdCourses;
       getAllCoursesData(courses, setCoursesLoading).then(
         async (res: ICourse[]) => {
-          console.log("res ", res);
           setCoursesData(res);
           setActiveTab(res[0]);
 
@@ -247,12 +269,11 @@ export default function AttendanceScreen({ navigation }: any) {
             );
 
             const totalClassTime = await calculateTotalClassTime(activeTab.uid);
-            console.log("total class time ", totalClassTime);
             setTotalClassTime(totalClassTime);
 
+            console.log("ranking students");
             setRankedStudentsAttendance(rankedStudents);
             setRankedStudentsLoading(false);
-            console.log("ranked students", rankedStudents);
           } else {
             setRankedStudentsAttendance([]);
           }
@@ -263,11 +284,6 @@ export default function AttendanceScreen({ navigation }: any) {
     };
     sortStudentByAttendance();
   }, [activeTab]);
-
-  useEffect(() => {
-    if (activeTab) {
-    }
-  }, []);
 
   return (
     <SafeAreaView
@@ -416,7 +432,7 @@ export default function AttendanceScreen({ navigation }: any) {
           ref={sheetRef}
           snapPoints={snapPoints}
           onChange={handleSheetChange}
-          style={[styles.contentContainer]}
+          style={[styles.contentContainer, styles.sheetShadow]}
           enablePanDownToClose={true}
           backgroundStyle={{
             backgroundColor:
@@ -425,31 +441,67 @@ export default function AttendanceScreen({ navigation }: any) {
                 : Colors.light.primaryGrey,
           }}
         >
-          <Text
+          <View
             style={[
-              styles.bigText,
-              styles.my,
-              styles.bold,
-              {
-                borderTopWidth: 1,
-                borderBottomColor:
-                  theme === "dark"
-                    ? Colors.dark.background
-                    : Colors.light.background,
-              },
+              styles.flexRow,
+              styles.justifyBetween,
+              styles.transBg,
+              styles.itemsCenter,
             ]}
           >
-            Members
-          </Text>
-          {!membersAttendanceLoading && (
-            <BottomSheetFlatList
-              data={membersAttendanceData}
-              keyExtractor={(item: any) => item.userData?.email}
-              renderItem={renderBottomSheetItem}
-              ItemSeparatorComponent={() => (
-                <View style={[{ paddingVertical: 5 }, styles.transBg]}></View>
+            <Text
+              style={[
+                styles.bigText,
+                styles.my,
+                styles.bold,
+                {
+                  borderTopWidth: 1,
+                  borderBottomColor:
+                    theme === "dark"
+                      ? Colors.dark.background
+                      : Colors.light.background,
+                },
+              ]}
+            >
+              Members{" "}
+              {membersAttendanceLoading ? (
+                <ActivityIndicator />
+              ) : (
+                <Text>({membersAttendanceData.length})</Text>
               )}
+            </Text>
+            {!membersAttendanceLoading && (
+              <TouchableOpacity
+                style={[
+                  {
+                    backgroundColor: theme == "dark" ? Colors.deSaturatedPurple : Colors.mainPurple,
+                    padding: 10,
+                    borderRadius: 100,
+                  },
+                ]}
+                onPress={generateExcelSheet}
+              >
+                {Platform.OS === "ios" ? (
+                  <Entypo name="share-alternative" size={20} color={"white"} />
+                ) : (
+                  <Entypo name="share" size={20} color={"white"} />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={[styles.my]}>
+            <StyledInput
+              keyboardType="default"
+              placeholder="Search members by name or student id"
+              placeholderTextColor="gray"
+              secure={false}
+              value={searchValue}
+              setValue={setSearchValue}
+              onFocus={() => sheetRef.current?.snapToIndex(2)}
             />
+          </View>
+          {!membersAttendanceLoading && (
+            <MembersAttendanceTable data={filteredMembersData} />
           )}
           {membersAttendanceLoading && (
             <View

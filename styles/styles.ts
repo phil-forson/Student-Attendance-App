@@ -115,7 +115,7 @@ export const styles = StyleSheet.create({
   autoWidth: {
     width: "auto",
   },
-  
+
   column: {
     flexShrink: 1,
   },
@@ -177,5 +177,37 @@ export const styles = StyleSheet.create({
     padding: 6,
     margin: 6,
     backgroundColor: "#eee",
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  headerCell: {
+    padding: 10,
+    borderWidth: 2,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "left",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  tableCell: {
+    padding: 10,
+    borderWidth: 2,
+    flex: 1,
+    textAlign: "left",
+  },
+  sheetShadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
   },
 });

@@ -12,28 +12,19 @@ import { formatStringToCourseCode } from "../utils/utils";
 import useUser from "../hooks/useUser";
 import { FlatList } from "react-native";
 import { ICourse } from "../types";
+import { SelectList } from "react-native-dropdown-select-list";
 
 export default function JoinCourse({ navigation, route }: any) {
   const theme = useColorScheme();
   const { user } = useAuth();
   const { userData } = useUser();
   const [courseCode, setCourseCode] = useState("");
-  const [itemSelected, setItemSelected] = useState<boolean>(false);
-  const [allCourses, setAllCourses] = useState<any>([]);
-  const [universityCourses, setUniversityCourses] = useState<any>([]);
+  const [dropdownCourses, setDropdownCourses] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCourseCodeChange = (title: string) => {
-    console.log("all courses ", allCourses);
-    const formattedInput = formatStringToCourseCode(title);
-    const filteredCourses = allCourses.filter((course: ICourse) =>
-      formatStringToCourseCode(course.courseCode).includes(formattedInput)
-    );
-    console.log("filtered courses ", filteredCourses);
-    setUniversityCourses(filteredCourses);
-    setItemSelected(false);
-    setCourseCode(title);
-  };
+  useEffect(() => {
+    console.log("course code changed to ", courseCode);
+  }, [courseCode]);
 
   const handleJoinCourse = async () => {
     console.log("joining course...");
@@ -42,12 +33,12 @@ export default function JoinCourse({ navigation, route }: any) {
         setIsLoading(true);
         const userId = user.uid; // Replace with the actual user ID
         const formattedCourseCode = formatStringToCourseCode(courseCode);
-        console.log("formatted course code ", formattedCourseCode);
         const result = await joinCourse(userId, formattedCourseCode);
 
         if (result.success) {
           // Course joining was successful
           Alert.alert("Success", result.message);
+          navigation.goBack()
           // Additional actions after successful course joining can be added here
         } else {
           // Course joining failed
@@ -69,7 +60,10 @@ export default function JoinCourse({ navigation, route }: any) {
       const allCourses = await getAllCoursesWithUniversity(
         route.params.university
       );
-      setAllCourses(allCourses);
+      let preparedCourses = allCourses.map((course: ICourse) => {
+        return { id: course.uid, value: course.courseCode };
+      });
+      setDropdownCourses(preparedCourses);
     };
     getCoursesData();
   }, []);
@@ -83,13 +77,13 @@ export default function JoinCourse({ navigation, route }: any) {
             darkColor="#121212"
             onPress={handleJoinCourse}
             style={{}}
-            disabled={courseCode.length < 1 || isLoading || !itemSelected}
+            disabled={courseCode.length < 1 || isLoading}
           >
             <Text
               style={{
                 color:
-                  courseCode.length < 1 || isLoading || !itemSelected? "#023f65" : "#008be3",
-                opacity: courseCode.length < 1 || isLoading || !itemSelected ? 0.32 : 1,
+                  courseCode.length < 1 || isLoading ? "#023f65" : "#008be3",
+                opacity: courseCode.length < 1 || isLoading ? 0.32 : 1,
                 fontSize: 16,
               }}
             >
@@ -137,43 +131,52 @@ export default function JoinCourse({ navigation, route }: any) {
             Enter the link to the course you would like to join{" "}
           </Text>
         </View>
-        <View style={styles.my}>
-          <StyledInput
-            value={courseCode}
-            setValue={handleCourseCodeChange}
-            secure={false}
-            keyboardType="default"
+        <View style={[styles.mmy]}>
+          <SelectList
             placeholder="Course Code eg. DCIT 400"
-            placeholderTextColor="gray"
-            valid={courseCode.length > 1}
+            searchPlaceholder="Course Code"
+            boxStyles={{
+              backgroundColor: theme === "dark" ? "#302e2e" : "#f1f1f2",
+              borderWidth: 0,
+              height: 55,
+              paddingHorizontal: 20,
+              alignItems: "center",
+              borderRadius: 0,
+              padding: 0,
+            }}
+            inputStyles={{
+              color:
+                theme === "dark"
+                  ? courseCode
+                    ? "white"
+                    : "gray"
+                  : courseCode
+                  ? "black"
+                  : "gray",
+            }}
+            dropdownStyles={{
+              borderColor: theme === "dark" ? "#000" : "#fff",
+              backgroundColor: theme === "dark" ? "#302e2e" : "#fff",
+              paddingHorizontal: 5,
+              paddingVertical: 0,
+              borderRadius: 0,
+            }}
+            dropdownItemStyles={{
+              paddingVertical: 1,
+              height: 50,
+              justifyContent: "center",
+              borderBottomWidth: 0.2,
+              borderBottomColor:
+                theme === "dark"
+                  ? Colors.dark.primaryGrey
+                  : Colors.light.primaryGrey,
+            }}
+            search
+            setSelected={(val: string) => setCourseCode(val)}
+            data={dropdownCourses}
+            save="value"
           />
         </View>
-        {!itemSelected && (
-          <FlatList
-            data={universityCourses}
-            renderItem={({ item }: any) => (
-              <TouchableOpacity
-                onPress={() => {
-                  console.log("item ", item);
-                  setCourseCode(item.courseCode);
-                  setItemSelected(true);
-                }}
-                darkColor={Colors.dark.secondaryGrey}
-                lightColor={Colors.light.secondaryGrey}
-                style={[
-                  {
-                    paddingHorizontal: 20,
-                    height: 55,
-                    justifyContent: "center",
-                  },
-                ]}
-              >
-                <Text>{item.courseCode}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item: any, index) => index.toString()}
-          />
-        )}
       </View>
     </SafeAreaView>
   );

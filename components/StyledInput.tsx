@@ -16,6 +16,7 @@ export type Props = {
   editable?: boolean;
   onClick?: () => void;
   caretHidden?: boolean;
+  onFocus?: () => void;
 };
 
 export default function StyledInput({
@@ -31,6 +32,7 @@ export default function StyledInput({
   editable,
   onClick,
   caretHidden,
+  onFocus,
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [isBlur, setIsBlur] = useState(false);
@@ -55,7 +57,9 @@ export default function StyledInput({
                 ? "#0083eb"
                 : "red"
               : "#0083eb"
-            :  theme === "dark" ? "#302e2e" : "#f1f1f2",
+            : theme === "dark"
+            ? "#302e2e"
+            : "#f1f1f2",
         }}
         autoCapitalize={"none"}
         secureTextEntry={isPasswordSecure}
@@ -74,6 +78,7 @@ export default function StyledInput({
         onFocus={() => {
           setIsFocused(true);
           setIsBlur(false);
+          if (onFocus) onFocus();
           if (onClick) {
             onClick();
           }

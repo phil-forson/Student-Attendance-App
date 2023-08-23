@@ -7,7 +7,6 @@ import Colors from '../constants/Colors';
 import { useColorScheme } from 'react-native';
 
 export default function UserAttendanceCard({item}: any) {
-    console.log('item from attendance card ', item)
     const theme = useColorScheme()
     return (
       <View

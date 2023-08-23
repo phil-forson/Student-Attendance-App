@@ -180,62 +180,58 @@ export default function CreateClass({ navigation, route }: any) {
 
     const classTime = new Date(startDate); // Initialize classTime with the start date
 
-
     const selectedDay = dayOfTheWeek.slice(6);
     console.log("selected day ", selectedDay);
 
-    let classes = []
+    let classes = [];
     let lectureNumber = 1;
-    
-    while (classTime <= endDate) {
-      if (classTime.getDay() === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(selectedDay)) {
-        // Set class time and other details
-        classTime.setHours(parseInt(convertToHHMM(classStartTime).split(':')[0]));
-        classTime.setMinutes(parseInt(convertToHHMM(classStartTime).split(':')[1]));
-        classTime.setSeconds(0);
-
-        const lectureTitle = `Lecture ${lectureNumber}`; // Generate class title
-
-        // Prepare class document for Firestore
-        const uid = generateUid()
-        const data: IClass = {
-          uid: uid.toString(),
-          classTitle: lectureTitle,
-          courseId: route.params.uid,
-          courseTitle: route.params.courseTitle,
-          classLocation: classLocation,
-          classLocationDetails: classLocationDetails,
-          classStartTime: Timestamp.fromDate(classStartTime),
-          classEndTime: Timestamp.fromDate(classEndTime),
-          classDate: Timestamp.fromDate(new Date(classTime))
-        }
-
-        await createClassInCourse(route.params.uid, data)
-
-        classes.push(data)
-        lectureNumber++;
-      }
-      classTime.setDate(classTime.getDate() + 1); // Move to the next day
-    }
-
-    console.log('classes ', classes)
 
     try {
-      const uid = generateUid();
-      const data: any = {
-        uid: uid.toString(),
-        courseId: route.params.uid,
-        courseTitle: route.params.courseTitle,
-        classTitle: classTitle,
-        classLocation: classLocation,
-        classLocationDetails: classLocationDetails,
-        classStartTime: Timestamp.fromDate(classStartTime),
-        classEndTime: Timestamp.fromDate(classEndTime),
-        classStatus: "upcoming",
-      };
+      while (classTime <= endDate) {
+        if (
+          classTime.getDay() ===
+          [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ].indexOf(selectedDay)
+        ) {
+          // Set class time and other details
+          classTime.setHours(
+            parseInt(convertToHHMM(classStartTime).split(":")[0])
+          );
+          classTime.setMinutes(
+            parseInt(convertToHHMM(classStartTime).split(":")[1])
+          );
+          classTime.setSeconds(0);
 
-      // await createClassInCourse(route.params.uid, data);
-      // navigation.goBack();
+          const lectureTitle = `Lecture ${lectureNumber}`; // Generate class title
+
+          // Prepare class document for Firestore
+          const uid = generateUid();
+          const data: IClass = {
+            uid: uid.toString(),
+            classTitle: lectureTitle,
+            courseId: route.params.uid,
+            courseTitle: route.params.courseTitle,
+            classLocation: classLocation,
+            classLocationDetails: classLocationDetails,
+            classStartTime: Timestamp.fromDate(classStartTime),
+            classEndTime: Timestamp.fromDate(classEndTime),
+            classDate: Timestamp.fromDate(new Date(classTime)),
+          };
+
+          await createClassInCourse(route.params.uid, data);
+
+          classes.push(data);
+          lectureNumber++;
+        }
+        classTime.setDate(classTime.getDate() + 1); // Move to the next day
+      }
     } catch (error) {
       console.log(error);
     } finally {

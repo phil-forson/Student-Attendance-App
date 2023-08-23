@@ -358,11 +358,14 @@ export const getUsersWithAttendanceData = async (
   const userDataAndAttendance = [];
 
   try {
+    const classDoc = await getDoc(doc(db, "classes", classId));
+    const classData = classDoc.data();
     for (const enrolledStudentId of enrolledStudentIds) {
       const userDoc = await getDoc(doc(db, "users", enrolledStudentId));
       if (userDoc.exists()) {
         const userData = userDoc.data();
 
+        //Get Class Data
         // Fetch attendance data for the student
         const attendanceDoc = await getDoc(
           doc(db, "classes", classId, "attendance", enrolledStudentId)
@@ -374,6 +377,7 @@ export const getUsersWithAttendanceData = async (
           userDataAndAttendance.push({
             userData,
             attendanceData,
+            classData,
           });
         } else {
           const attendanceData = {
@@ -383,6 +387,7 @@ export const getUsersWithAttendanceData = async (
           userDataAndAttendance.push({
             userData,
             attendanceData,
+            classData,
           });
         }
       } else {
@@ -738,6 +743,40 @@ export const getStudentsClockedIn = async (classId: string) => {
   }
 };
 
+export const getStudentsWhoAttended = async (classId: string) => {
+  try {
+    console.log("classes id ", classId);
+    const clockedInUsers = [];
+
+    // Query the 'attendance' collection for users who are currently clocked in
+    const attendanceQuery = query(
+      collection(db, "classes", classId, "attendance"),
+      where("clockIn", "!=", null), // Filter by users who have clocked in
+      where("clockOut", "!=", null) // Filter by users who have not clocked out yet
+    );
+
+    const querySnapshot = await getDocs(attendanceQuery);
+
+    // Iterate through the query snapshot to gather clocked-in users' data
+    for (const docRef of querySnapshot.docs) {
+      const userId = docRef.id;
+      const attendanceData = docRef.data();
+
+      const userDoc = await getDoc(doc(db, "users", userId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        clockedInUsers.push({ userData, attendanceData });
+      }
+    }
+
+    return clockedInUsers;
+  } catch (error) {
+    console.error("Error fetching clocked-in users:", error);
+    throw error;
+  }
+};
+
 export const getAllCoursesWithUniversity = async (university: any) => {
   const coursesQuery = query(
     collection(db, "courses"),
@@ -747,7 +786,7 @@ export const getAllCoursesWithUniversity = async (university: any) => {
   let uniSpecificCourses = [];
   const coursesQuerySnapshot = getDocs(coursesQuery);
   for (const docRef of (await coursesQuerySnapshot).docs) {
-    const courseData = docRef.data();
+    const courseData = docRef.data() as ICourse;
     uniSpecificCourses.push(courseData);
   }
 
