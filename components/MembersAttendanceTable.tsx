@@ -11,22 +11,21 @@ type Props = {
 export default function MembersAttendanceTable({ data }: Props) {
   const theme = useColorScheme();
 
-  const [classStarted, setClassStarted]= useState<boolean>(false)
+  const [classStarted, setClassStarted] = useState<boolean>(false);
 
-  useEffect(()=> {
-  }, [])
+  useEffect(() => {}, []);
   const renderTableRow: ListRenderItem<any> = ({ item }: any) => {
     console.log("item", item);
-    const newDate = new Date(item?.classData?.classDate)
-    newDate.setHours(item?.classData?.classStartTime.toDate().getHours())
-    newDate.setMinutes(item?.classData?.classStartTime.toDate().getMinutes())
+    const newDate = new Date(item?.classData?.classDate);
+    newDate.setHours(item?.classData?.classStartTime.toDate().getHours());
+    newDate.setMinutes(item?.classData?.classStartTime.toDate().getMinutes());
 
-    const now = new Date()
+    const now = new Date();
 
-    
     return (
       <View style={[styles.row]}>
-        <Text style={[
+        <Text
+          style={[
             styles.tableCell,
             {
               borderColor:
@@ -34,7 +33,10 @@ export default function MembersAttendanceTable({ data }: Props) {
                   ? Colors.dark.primaryGrey
                   : Colors.light.tetiary,
             },
-          ]}>{item.userData?.userId}</Text>
+          ]}
+        >
+          {item.userData?.userId}
+        </Text>
         <Text
           style={[
             styles.tableCell,
@@ -46,7 +48,8 @@ export default function MembersAttendanceTable({ data }: Props) {
             },
           ]}
         >{`${item.userData?.firstName} ${item.userData?.lastName}`}</Text>
-        <Text style={[
+        <Text
+          style={[
             styles.tableCell,
             {
               borderColor:
@@ -54,8 +57,13 @@ export default function MembersAttendanceTable({ data }: Props) {
                   ? Colors.dark.primaryGrey
                   : Colors.light.tetiary,
             },
-          ]}>
-          {newDate > now ? item.attendanceData?.clockIn === null ? "Absent" : "Present": "Not Yet Started"}
+          ]}
+        >
+          {newDate > now
+            ? item.attendanceData?.clockIn === null
+              ? "Absent"
+              : "Present"
+            : "Not Yet Started"}
         </Text>
       </View>
     );
@@ -107,6 +115,26 @@ export default function MembersAttendanceTable({ data }: Props) {
         data={data}
         renderItem={renderTableRow}
         keyExtractor={(item, index) => index.toString()}
+        ListEmptyComponent={() => (
+          <View
+            style={[
+              styles.transBg,
+              styles.flexOne,
+              styles.justifyCenter,
+              styles.itemsCenter,
+              ,{
+                borderWidth: 3,
+                paddingVertical: 10,
+                borderColor:
+                theme === "dark"
+                  ? Colors.dark.primaryGrey
+                  : Colors.light.tetiary,
+              }
+            ]}
+          >
+            <Text style={[]}>No data found</Text>
+          </View>
+        )}
       />
     </View>
   );

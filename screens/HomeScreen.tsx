@@ -93,6 +93,9 @@ export const HomeScreen = ({ navigation, route }: any) => {
 
   const [onGoingClasses, setOngoingClasses] = useState<IClass[]>([]);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+
   const onRefresh = useCallback(() => {}, []);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -107,50 +110,48 @@ export const HomeScreen = ({ navigation, route }: any) => {
     return <CourseClassCard courseClass={item} navigation={navigation} />;
   };
 
-  const courseClassDeets = {
-    id: "1",
-    startTime: convertToHHMM(new Date(Date.now())),
-    endTime: convertToHHMM(new Date(Date.now())),
-    date: convertToHHMM(new Date(Date.now())),
-    duration: "7h 50m",
-  };
+  const handleRefresh = () => {
+    setRefreshing(true);
 
+    getAllData()
+
+    setRefreshing(false);
+  };
+  const getAllData = async () => {
+    const courses =
+      userData.status === "Student"
+        ? userData.enrolledCourses
+        : userData.createdCourses;
+
+    if (courses.length > 0) {
+      getAllCoursesData(courses, setAreCoursesLoading).then((res) => {
+        const coursesClasses = res.flatMap((item) => item?.courseClasses);
+
+        if (coursesClasses.length > 0) {
+          getAllClassesData(coursesClasses, setAreClassesLoading).then(
+            ({ enrolledClasses }) => {
+              const todaysClasses = getClassesTodayAndFuture(enrolledClasses);
+              const { ongoing, past, upcoming } =
+                groupAndSortClasses(todaysClasses);
+              setTodaysClasses(todaysClasses);
+              setOngoingClasses(ongoing);
+            }
+          );
+        }
+      });
+    }
+
+    console.log("user data================", userData);
+    if (userData?.clockedIn) {
+      const classClockedIn = await fetchClassData(userData.classClockedIn);
+      setClassClockedIn(classClockedIn);
+      setUserClockedIn(userData?.clockedIn);
+    }
+  };
   useEffect(() => {
     if (isUserDataLoading) {
       return;
     }
-
-    const getAllData = async () => {
-      const courses =
-        userData.status === "Student"
-          ? userData.enrolledCourses
-          : userData.createdCourses;
-
-      if (courses.length > 0) {
-        getAllCoursesData(courses, setAreCoursesLoading).then((res) => {
-          const coursesClasses = res.flatMap((item) => item?.courseClasses);
-
-          if (coursesClasses.length > 0) {
-            getAllClassesData(coursesClasses, setAreClassesLoading).then(
-              ({ enrolledClasses }) => {
-                const todaysClasses = getClassesTodayAndFuture(enrolledClasses);
-                const { ongoing, past, upcoming } =
-                  groupAndSortClasses(todaysClasses);
-                setTodaysClasses(todaysClasses);
-                setOngoingClasses(ongoing);
-              }
-            );
-          }
-        });
-      }
-
-      console.log("user data================", userData);
-      if (userData?.clockedIn) {
-        const classClockedIn = await fetchClassData(userData.classClockedIn);
-        setClassClockedIn(classClockedIn);
-        setUserClockedIn(userData?.clockedIn);
-      }
-    };
 
     getAllData();
 
@@ -184,7 +185,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
               <Text
                 lightColor={Colors.dark.background}
                 darkColor={Colors.dark.text}
-                style={[styles.largeText, styles.bold, styles.smy]}
+                style={[{ fontSize: 18 }, styles.bold, styles.smy]}
               >
                 {convertToDayString(new Date(Date.now()))}
               </Text>
@@ -193,7 +194,7 @@ export const HomeScreen = ({ navigation, route }: any) => {
               <Text
                 lightColor={Colors.light.text}
                 darkColor={Colors.dark.text}
-                style={[styles.mediumText, styles.semiBold, styles.smy]}
+                style={[styles.mediumText, styles.smy]}
               >
                 Good Day
               </Text>
@@ -236,28 +237,26 @@ export const HomeScreen = ({ navigation, route }: any) => {
                 : Colors.light.background,
           }}
         >
-          <View style={[styles.contentContainer, styles.transBg]}>
-            {userClockedIn && (
-              <>
-                <Text style={[styles.bold, styles.smy]}>Clocked In</Text>
-                <ClockedInCard
-                  classId={userData?.classClockedIn}
+          {userClockedIn && (
+            <View style={[styles.contentContainer, styles.transBg]}>
+              <Text style={[styles.bold, styles.smy]}>Clocked In</Text>
+              <ClockedInCard
+                classId={userData?.classClockedIn}
+                navigation={navigation}
+                classClockedIn={classClockedIn}
+                clockInDate={userData?.clockInDate}
+              />
+            </View>
+          )}
+          {(userData?.status === "Student" &&
+            !userData?.enrolledCourses?.length) ||
+            (userData?.status === "Teacher" &&
+              !userData?.createdCourses?.length && (
+                <GetStarted
+                  userStatus={userData?.status}
                   navigation={navigation}
-                  classClockedIn={classClockedIn}
-                  clockInDate={userData?.clockInDate}
                 />
-              </>
-            )}
-            {(userData?.status === "Student" &&
-              !userData?.enrolledCourses?.length) ||
-              (userData?.status === "Teacher" &&
-                !userData?.createdCourses?.length && (
-                  <GetStarted
-                    userStatus={userData?.status}
-                    navigation={navigation}
-                  />
-                ))}
-          </View>
+              ))}
           {onGoingClasses?.length > 0 && (
             <>
               <Text
@@ -304,36 +303,43 @@ export const HomeScreen = ({ navigation, route }: any) => {
                   Today
                 </Text>
                 {!areClassesLoading ? (
-                  todaysClasses.length > 0 ? (
-                    <View style={[styles.transBg]}>
-                      <FlatList
-                        data={todaysClasses}
-                        keyExtractor={(courseClass: IClass) => courseClass.uid}
-                        renderItem={renderItem}
-                        ItemSeparatorComponent={() => (
-                          <CardSeparator viewStyle={[styles.transBg]} />
-                        )}
-                        contentContainerStyle={[
-                          styles.contentContainer,
+                  <FlatList
+                    data={todaysClasses}
+                    keyExtractor={(courseClass: IClass) => courseClass.uid}
+                    renderItem={renderItem}
+                    ItemSeparatorComponent={() => (
+                      <CardSeparator
+                        viewStyle={[
                           styles.transBg,
+                          { backgroundColor: "yellow" },
                         ]}
                       />
-                    </View>
-                  ) : (
-                    <View
-                      style={[
-                        styles.transBg,
-                        styles.contentContainer,
-                        styles.justifyCenter,
-                        styles.itemsCenter,
-                        { height: 100 },
-                      ]}
-                    >
-                      <Text style={[styles.semiBold]}>
-                        No classes for today
-                      </Text>
-                    </View>
-                  )
+                    )}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>}
+                    contentContainerStyle={[
+                      styles.contentContainer,
+                      styles.transBg,
+                      {
+                        minHeight: 500,
+                      },
+                    ]}
+                    style={[{ backgroundColor: "red" }]}
+                    ListEmptyComponent={() => (
+                      <View
+                        style={[
+                          styles.transBg,
+                          styles.contentContainer,
+                          styles.justifyCenter,
+                          styles.itemsCenter,
+                          { height: 100 },
+                        ]}
+                      >
+                        <Text style={[styles.semiBold]}>
+                          No classes for today
+                        </Text>
+                      </View>
+                    )}
+                  />
                 ) : (
                   <View
                     style={[
@@ -358,36 +364,39 @@ export const HomeScreen = ({ navigation, route }: any) => {
                   Today
                 </Text>
                 {!areClassesLoading ? (
-                  todaysClasses.length > 0 ? (
-                    <View style={[styles.transBg]}>
-                      <FlatList
-                        data={todaysClasses}
-                        keyExtractor={(courseClass: IClass) => courseClass.uid}
-                        renderItem={renderItem}
-                        ItemSeparatorComponent={() => (
-                          <CardSeparator viewStyle={[styles.transBg]} />
-                        )}
-                        contentContainerStyle={[
-                          styles.contentContainer,
-                          styles.transBg,
-                        ]}
-                      />
-                    </View>
-                  ) : (
-                    <View
-                      style={[
-                        styles.transBg,
+                  <View style={[styles.transBg]}>
+                    <FlatList
+                      data={todaysClasses}
+                      keyExtractor={(courseClass: IClass) => courseClass.uid}
+                      renderItem={renderItem}
+                      ItemSeparatorComponent={() => (
+                        <CardSeparator viewStyle={[styles.transBg]} />
+                      )}
+                      contentContainerStyle={[
                         styles.contentContainer,
-                        styles.justifyCenter,
-                        styles.itemsCenter,
-                        { height: 100 },
+                        styles.transBg,
+                        {
+                          minHeight: 500,
+                        },
                       ]}
-                    >
-                      <Text style={[styles.semiBold]}>
-                        No classes for today
-                      </Text>
-                    </View>
-                  )
+                      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>}
+                      ListEmptyComponent={() => (
+                        <View
+                          style={[
+                            styles.transBg,
+                            styles.contentContainer,
+                            styles.justifyCenter,
+                            styles.itemsCenter,
+                            { height: 100 },
+                          ]}
+                        >
+                          <Text style={[styles.semiBold]}>
+                            No classes for today
+                          </Text>
+                        </View>
+                      )}
+                    />
+                  </View>
                 ) : (
                   <View
                     style={[

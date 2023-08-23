@@ -475,9 +475,11 @@ export default function AttendanceScreen({ navigation }: any) {
                 style={[
                   {
                     backgroundColor: theme == "dark" ? Colors.deSaturatedPurple : Colors.mainPurple,
-                    padding: 10,
                     borderRadius: 100,
+                    padding: 14
                   },
+                  styles.justifyCenter,
+                  styles.itemsCenter
                 ]}
                 onPress={generateExcelSheet}
               >
